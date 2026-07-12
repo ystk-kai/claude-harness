@@ -37,6 +37,7 @@ compatibility: Requires git and network access to clone/update the reference rep
 - 蒸留版 frontmatter の `distilled_commit` が、どのコミット時点の原典に基づくかを示す
 - `scripts/check-freshness.sh` が origin を fetch し、BEHIND (clone が upstream より古い) / STALE (蒸留版が clone より古い) と差分コミットを表示する。`--offline` で fetch を省略
 - STALE のときは [DISTILLING.md](DISTILLING.md) の手順で蒸留版を更新する (SHA だけの無言 bump をしない)
+- 一連の更新 (チェック → 原典 clone の `git pull` → STALE の再蒸留) は `/claude-harness-refs-update` で起動できる (`--check` でチェックのみ)
 - 監査・レビューの基準として使うときは、使った版の commit SHA を成果物に記録する。ブランチ名は版の識別子にしない
 
 ## 判断の優先順位
