@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 480" font-family='-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif'>
+  <style>
+    .flow { stroke-dasharray: 7 7; animation: dash 1.4s linear infinite; }
+    .flow-opt { stroke-dasharray: 4 10; animation: dash 2.2s linear infinite; }
+    .flow-back { stroke-dasharray: 5 9; animation: dash 2.8s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -28; } }
+    .future { animation: pulse 3.2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.95; } }
+    .install-node { animation: glow 3.2s ease-in-out infinite; }
+    @keyframes glow { 0%, 100% { filter: none; } 50% { filter: drop-shadow(0 0 7px #1f6feb); } }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+  <defs>
+    <marker id="aBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#58a6ff"/>
+    </marker>
+    <marker id="aGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3fb950"/>
+    </marker>
+    <marker id="aAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d29922"/>
+    </marker>
+    <marker id="aGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b949e"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="920" height="480" rx="12" fill="#0d1117" stroke="#30363d"/>
+  <text x="460" y="38" text-anchor="middle" fill="#e6edf3" font-size="15" font-weight="600">git リポジトリで管理し、install.sh で各環境の ~/.claude に展開する</text>
+
+  <!-- left: repo -->
+  <rect x="36" y="64" width="290" height="320" rx="10" fill="#161b22" stroke="#30363d"/>
+  <text x="56" y="92" fill="#e6edf3" font-size="14" font-weight="600">リポジトリ (git)</text>
+
+  <rect x="56" y="106" width="250" height="42" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="68" y="124" class="mono" fill="#79c0ff" font-size="12">skills/&lt;name&gt;/</text>
+  <text x="68" y="139" fill="#8b949e" font-size="10">SKILL.md + references/ + scripts/</text>
+
+  <rect x="56" y="156" width="250" height="42" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="68" y="174" class="mono" fill="#79c0ff" font-size="12">skills/&lt;name&gt;/</text>
+  <text x="68" y="189" fill="#8b949e" font-size="10">SKILL.md + references/ + scripts/</text>
+
+  <g class="future">
+    <rect x="56" y="206" width="250" height="42" rx="6" fill="none" stroke="#3fb950" stroke-dasharray="4 4"/>
+    <text x="68" y="224" class="mono" fill="#3fb950" font-size="12">skills/&lt;new&gt;/</text>
+    <text x="68" y="239" fill="#3fb950" font-size="10">追加はディレクトリを置くだけ</text>
+  </g>
+
+  <rect x="56" y="266" width="250" height="42" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="68" y="284" class="mono" fill="#d2a8ff" font-size="12">claude-md/&lt;name&gt;.md</text>
+  <text x="68" y="299" fill="#8b949e" font-size="10">常時ルール化したいスキルのみ</text>
+
+  <rect x="56" y="316" width="250" height="42" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="68" y="334" class="mono" fill="#e3b341" font-size="12">references/*.md (frontmatter)</text>
+  <text x="68" y="349" fill="#8b949e" font-size="10">source: 原典リポジトリの URL</text>
+
+  <!-- center: install.sh -->
+  <g class="install-node">
+    <rect x="390" y="200" width="140" height="46" rx="10" fill="#1f6feb"/>
+    <text x="460" y="228" text-anchor="middle" class="mono" fill="#ffffff" font-size="14" font-weight="600">install.sh</text>
+  </g>
+  <text x="460" y="266" text-anchor="middle" fill="#8b949e" font-size="11">冪等 (何度実行しても同じ状態)</text>
+
+  <path d="M 326 223 L 384 223" fill="none" stroke="#8b949e" stroke-width="1.6" class="flow" marker-end="url(#aGray)"/>
+
+  <!-- right: ~/.claude -->
+  <rect x="594" y="64" width="290" height="320" rx="10" fill="#161b22" stroke="#30363d"/>
+  <text x="614" y="92" fill="#e6edf3" font-size="14" font-weight="600" class="mono">~/.claude/</text>
+
+  <rect x="614" y="110" width="250" height="44" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="626" y="128" class="mono" fill="#79c0ff" font-size="12">skills/&lt;name&gt;</text>
+  <text x="626" y="144" fill="#8b949e" font-size="10">リポジトリへの symlink</text>
+
+  <rect x="614" y="196" width="250" height="44" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="626" y="214" class="mono" fill="#7ee787" font-size="12">CLAUDE.md</text>
+  <text x="626" y="230" fill="#8b949e" font-size="10">managed:&lt;name&gt; ブロックを挿入・置換</text>
+
+  <rect x="614" y="282" width="250" height="44" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="626" y="300" class="mono" fill="#e3b341" font-size="12">references/</text>
+  <text x="626" y="316" fill="#8b949e" font-size="10">原典 clone (履歴付き・blob は必要時取得)</text>
+
+  <path d="M 530 210 C 566 196, 574 152, 608 134" fill="none" stroke="#58a6ff" stroke-width="1.6" class="flow" marker-end="url(#aBlue)"/>
+  <path d="M 530 223 L 608 220" fill="none" stroke="#3fb950" stroke-width="1.6" class="flow" marker-end="url(#aGreen)"/>
+  <path d="M 530 236 C 566 250, 574 288, 608 302" fill="none" stroke="#d29922" stroke-width="1.6" class="flow-opt" marker-end="url(#aAmber)"/>
+  <text x="500" y="318" fill="#d29922" font-size="10" class="mono">--with-references</text>
+
+  <!-- back: git pull -->
+  <path d="M 700 396 C 560 442, 360 442, 222 398" fill="none" stroke="#8b949e" stroke-width="1.4" class="flow-back" marker-end="url(#aGray)"/>
+  <text x="460" y="462" text-anchor="middle" fill="#8b949e" font-size="12">スキル本体は symlink — 変更の配布は git pull だけで全環境に反映</text>
+</svg>
