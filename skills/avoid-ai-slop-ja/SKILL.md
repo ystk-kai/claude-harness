@@ -5,7 +5,7 @@ description: Review and rewrite Japanese (and JP-EN mixed) prose to remove "AI s
 
 # Avoid AI slop (Japanese prose)
 
-AI-slop prose is surface-polished but hollow and uniform. Detectors are unreliable (human raters do no better than chance), so this skill is a manual review/rewrite method, not a detector. The knowledge base is self-contained in `references/`. Method adapted from `iKora128/stop-ai-slop-jp`.
+AI-slop prose is surface-polished but hollow and uniform. Detectors are unreliable (human raters do no better than chance), so this skill is a manual review/rewrite method, not a detector. The knowledge base is self-contained in `references/`. Method adapted from `iKora128/stop-ai-slop-jp`. For visual artifacts (web UI, slides, diagrams, images), use the sibling skill `avoid-ai-slop-design`; this skill covers the prose.
 
 The cardinal rule: **edge (variation, bluntness, a stance) is a means to break uniformity, not a goal.** Don't trade AI-uniform for an "anti-AI template". And always filter techniques by document type (a security briefing is not a personal blog).
 

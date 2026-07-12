@@ -10,6 +10,7 @@ Claude Code の個人グローバルハーネス (skills と CLAUDE.md の常時
 |---|---|
 | `harness-design` | LLM ハーネス・プロンプト設計の参照資料集。スキル内の蒸留版と原典 clone (`~/.claude/references/`) の 2 層で読む |
 | `avoid-ai-slop-ja` | 日本語文章から AI 臭 (slop) を除くレビュー・リライトの手法 |
+| `avoid-ai-slop-design` | Web UI・スライド・図解・生成画像から AI 臭を除く検出カタログと処方 (計測研究・学術ソースの出典付き) |
 
 ## 仕組み
 
