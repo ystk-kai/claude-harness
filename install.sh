@@ -22,12 +22,14 @@ printf '%s\n\n' "$content" > "$TARGET"
 cat "$SNIPPET" >> "$TARGET"
 
 if [ "${1:-}" = "--with-references" ]; then
+  . "$REPO_DIR/skills/$SKILL_NAME/scripts/frontmatter.sh"
   mkdir -p "$CLAUDE_DIR/references"
-  grep -oE 'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+' "$REPO_DIR/skills/$SKILL_NAME/SKILL.md" \
-    | sort -u | while read -r url; do
-      dir="$CLAUDE_DIR/references/$(basename "$url")"
-      [ -d "$dir" ] || git clone --depth 1 "$url" "$dir"
-    done
+  for doc in "$REPO_DIR/skills/$SKILL_NAME/references/"*.md; do
+    url="$(fm_value "$doc" source)"
+    [ -n "$url" ] || continue
+    dir="$CLAUDE_DIR/references/$(repo_dir_name "$url")"
+    [ -d "$dir" ] || git clone --filter=blob:none "$url" "$dir"
+  done
 fi
 
 echo "applied: skill symlink + CLAUDE.md managed block ($TARGET)"
