@@ -1,8 +1,8 @@
 # claude-harness
 
-Claude Code の個人グローバルハーネス (skills と CLAUDE.md の常時ルール) を 1 つの git リポジトリで管理し、`install.sh` でどの環境の `~/.claude` にも同じ状態を展開する。
+Claude Code の個人グローバルハーネス (skills / CLAUDE.md 常時ルール) を一元管理し、どの環境にも同じ状態で展開するリポジトリ。
 
-![claude-harness の全体像](assets/architecture.svg)
+<img src="assets/architecture.svg" alt="claude-harness の全体像" width="100%">
 
 ## 収録スキル
 
