@@ -24,13 +24,22 @@ compatibility: Requires git and network access to clone/update the reference rep
 原典 clone がないときは、このリポジトリの `install.sh --with-references` で一括取得する (入手方法は README)。
 各リポジトリの出所 URL は、蒸留版 frontmatter の `source` を唯一の正とする。
 
-| 原典 | 蒸留版 | 使いどころ |
-|---|---|---|
-| `claude-code-best-practice/` | [references/claude-code-best-practice.md](references/claude-code-best-practice.md) | Claude Code のハーネス (CLAUDE.md, skills, subagents, hooks) を設計・監査するとき。「最も軽い機構を選ぶ」原則 |
-| `awesome-harness-engineering/` | [references/awesome-harness-engineering.md](references/awesome-harness-engineering.md) | ハーネス設計の選択肢を広く調べるとき、他ツール事例を探すとき |
-| `12-factor-agents/` | [references/12-factor-agents.md](references/12-factor-agents.md) | エージェントのアーキテクチャ判断 (状態管理、制御フロー、human-in-the-loop 等) の原則確認 |
-| `Prompt-Engineering-Guide/` | [references/Prompt-Engineering-Guide.md](references/Prompt-Engineering-Guide.md) | プロンプト自体の設計・改善・テクニック選定 (few-shot, CoT 等) |
-| `awesome-design-md/` | [references/awesome-design-md.md](references/awesome-design-md.md) | UI 生成時にデザイン言語の雛形 DESIGN.md を選ぶとき (ハーネス設計とは別用途) |
+資料は性格が異なる。同列の一覧に見えても正典性 (どこまで断定の根拠にできるか) と読み方は違うので、下のカテゴリと Read 条件で選ぶ。
+
+- **コア原則** — エージェント設計の一般原則。アーキテクチャ判断の典拠にできる。
+- **コア技法** — プロンプト技法。プロンプト設計・改善の典拠にできる。
+- **Claude Code 固有** — CC のハーネス/skill の一次資料〜実践知。CC 固有の判断はここを最優先し、一般原則より優先する。
+- **探索索引** — 大半が外部リンク集。「知識源」でなく「どこを見るかの地図」。ここ自体を断定の典拠にせず、指す一次資料に当たる。
+- **隣接領域** — ハーネス設計とは別用途 (UI 生成)。ハーネス判断の典拠にしない。
+
+| カテゴリ | 原典 | 蒸留版 | 使いどころ |
+|---|---|---|---|
+| コア原則 | `12-factor-agents/` | [references/12-factor-agents.md](references/12-factor-agents.md) | エージェントのアーキテクチャ判断 (状態管理、制御フロー、human-in-the-loop 等) の原則確認 |
+| コア技法 | `Prompt-Engineering-Guide/` | [references/Prompt-Engineering-Guide.md](references/Prompt-Engineering-Guide.md) | プロンプト自体の設計・改善・テクニック選定 (few-shot, CoT 等) |
+| Claude Code 固有 | `claude-code-best-practice/` | [references/claude-code-best-practice.md](references/claude-code-best-practice.md) | Claude Code のハーネス (CLAUDE.md, skills, subagents, hooks) を設計・監査するとき。「最も軽い機構を選ぶ」原則 |
+| Claude Code 固有 | `skills/` (anthropics/skills) | [references/skills.md](references/skills.md) | skill 定義 (SKILL.md) を設計・作成・レビューするとき。公式の仕様・雛形・skill-creator・模範実装の一次資料 |
+| 探索索引 | `awesome-harness-engineering/` | [references/awesome-harness-engineering.md](references/awesome-harness-engineering.md) | ハーネス設計の選択肢を広く調べるとき、他ツール事例を探すとき。指す一次資料に当たる |
+| 隣接領域 | `awesome-design-md/` | [references/awesome-design-md.md](references/awesome-design-md.md) | UI 生成時にデザイン言語の雛形 DESIGN.md を選ぶとき (ハーネス設計とは別用途) |
 
 ## 鮮度と更新
 
@@ -43,4 +52,5 @@ compatibility: Requires git and network access to clone/update the reference rep
 ## 判断の優先順位
 
 - 複数リポジトリで見解が割れたら、Claude Code 固有の話は `claude-code-best-practice` を優先し、一般原則は `12-factor-agents` を優先する
+- ただし skill 定義 (SKILL.md の仕様・雛形・設計パターン) は公式一次資料の `skills/` (anthropics/skills) を優先し、`claude-code-best-practice` の skill tips は二次情報として補完に使う
 - バージョン依存の記述 (特定モデル・特定 CLI 版に固定された記述) は参考値として扱い、断定しない
