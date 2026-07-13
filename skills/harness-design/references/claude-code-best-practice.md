@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 0734fcf22c8c97bc0b04e37302e768d7af826382
-distilled_at: 2026-07-12
+distilled_commit: b0e01c1d91ec3a31a6de7f86809a4c99c32f7fd3
+distilled_at: 2026-07-13
 ---
 
 # claude-code-best-practice 蒸留版
