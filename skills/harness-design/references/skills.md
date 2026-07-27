@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/skills
-distilled_commit: fa0fa64bdc967915dc8399e803be67759e1e62b8
-distilled_at: 2026-07-22
+distilled_commit: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
+distilled_at: 2026-07-27
 ---
 
 # anthropics/skills 蒸留版
@@ -50,7 +50,10 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
 
 7. **多ドメイン skill は variant 別に分割**。SKILL.md にワークフローと選択ロジックを置き、
    `references/aws.md` `gcp.md` `azure.md` のように分ける。Claude は関連 reference だけ読む。
-   → `skills/skill-creator/SKILL.md` の "Domain organization"
+   これを最大規模で実装しているのが `claude-api` (SKILL.md 546 行 + 言語別ディレクトリ 8 種 +
+   言語非依存の `shared/` 25 ファイル)。ディレクトリ名は `references/` でなく `shared/` +
+   `{lang}/` で、命名は固定規約ではなく分割軸に合わせてよいことを示す。
+   → `skills/skill-creator/SKILL.md` の "Domain organization"、`skills/claude-api/`
 
 8. **記述スタイル: 命令形 + why を説明する**。ALWAYS/NEVER の全大文字や過度に硬い構造は yellow flag。
    「なぜ重要か」を説明して LLM の theory of mind に委ねるほうが強い。出力フォーマットはテンプレートで
@@ -109,7 +112,7 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
 | guidance 型 (SKILL.md 1 枚) の模範 | `skills/{frontend-design,brand-guidelines}/` | scripts なし・本文のみで方針を伝える設計 |
 | Creative & Design 実例 | `skills/{algorithmic-art,canvas-design,theme-factory,web-artifacts-builder}/` | 生成アート・ポスター・テーマ適用・複雑 artifact のパターン |
 | Enterprise & Communication 実例 | `skills/{internal-comms,doc-coauthoring,slack-gif-creator}/` | 社内文書・共同執筆・Slack GIF。examples/ 同梱例あり |
-| pushy な description の手本 | `skills/claude-api/SKILL.md` | TRIGGER/SKIP 構造で発火条件と除外条件を明記した description 実例 |
+| pushy な description の手本 / 大規模 variant 分割の模範 | `skills/claude-api/` | SKILL.md frontmatter が TRIGGER/SKIP 構造で発火条件と除外条件を明記。本体は `{lang}/` 8 言語 + `shared/` 25 ファイルに分割し、SKILL.md 本文は選択ロジックと "→ Read `<path>`" 誘導に徹する |
 
 ## 蒸留の範囲外
 
@@ -118,7 +121,9 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
   (name/description 必須、license/compatibility 任意) だけを確認した。
 - **各模範 skill の本文の中身 (ノウハウそのもの)** — pdf の pypdf レシピ、docx の OOXML 操作、mcp-builder の
   MCP 設計指針など。skill 設計の "型" を知るのが本蒸留の目的なので、各ドメインの実装知は該当
-  `skills/<name>/SKILL.md` と同梱 reference を直接読む。
+  `skills/<name>/SKILL.md` と同梱 reference を直接読む。特に `claude-api` のモデル ID・価格・
+  Managed Agents API 仕様は上流で頻繁に更新されるため、本蒸留を経由せず必ず原典を読む
+  (本蒸留が claude-api から取るのは description の書きぶりと分割構造だけ)。
 - **eval スクリプトの実装詳細** — `scripts/*.py` の CLI 引数や内部ロジックは写していない。実行時は
   skill-creator SKILL.md の該当節のコマンド例と `references/schemas.md` を引く。
 - **skill-creator の環境別分岐** (Claude.ai / Cowork の subagent 有無・browser 有無による手順差) —
