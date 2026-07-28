@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: c09235cdc86b67c9a2a89f92a1f5c7445dfb42c4
-distilled_at: 2026-07-27
+distilled_commit: 2d3c0a16d96eef551bcb1b5d6e47094e4f302926
+distilled_at: 2026-07-28
 ---
 
 # claude-code-best-practice 蒸留版
@@ -89,13 +89,15 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 
 13. **frontmatter の正確なリファレンスは best-practice/ にある**。skills 17・commands 17・subagents 16
     フィールドの型・意味の表 (バージョン付き)。設計時に記憶で書かずここを引く。公式ビルトイン一覧
-    (bundled skills 13、slash commands 88、agent types 5) も同ファイル群にある。フィールド・コマンド
+    (bundled skills 13、slash commands 87、agent types 5) も同ファイル群にある。フィールド・コマンド
     一覧・settings キーは新バージョンで増減し続ける (例: v2.1.218 で skill/command に `background`
-    追加、`/subtask` の追加と `/fork` からの分割、`/doctor` への `/checkup` エイリアス、
-    `fastMode`・`vimInsertModeRemaps`・`CLAUDE_CODE_PROCESS_WRAPPER` の新キー) うえ、原典レポート側の
-    drift check も揺れる (`/powerup`・`/remote-env` は v2.1.218 時点で一度表から削除され、v2.1.220 で
-    復帰) ため、個数や有無は記憶で断定せず各表のバージョンバッジで確認する。
-    → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`
+    追加と `/subtask` の `/fork` からの分割、v2.1.205 で `/doctor` が built-in command から bundled
+    skill へ再分類、v2.1.219 で `opus` エイリアスの実体が Claude Opus 5 に、
+    `CLAUDE_CODE_CONNECT_TIMEOUT_MS` は v2.1.186 で削除され no-op) うえ、原典レポート側の drift check
+    には遅れと揺れがある (`/doctor` の command 表からの削除は再分類の 15 版後で、その時 88 → 87 に減った。
+    settings 表は 5 版遅れて v2.1.220 に追従。`/powerup`・`/remote-env` は v2.1.218 時点で一度表から
+    削除され v2.1.220 で復帰) ため、個数や有無は記憶で断定せず各表のバージョンバッジで確認する。
+    → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
 
 14. **MCP は少数精鋭**。「15 個入れて日常使いは 4 個」が典型。secrets は `${VAR}` 展開で環境変数に。
     権限は `mcp__<server>__<tool>` 構文。スコープは Subagent (`mcpServers:` frontmatter) > Project
@@ -103,8 +105,9 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
     → `best-practice/claude-mcp.md`
 
 15. **主要ワークフローは Research → Plan → Execute → Review → Ship に収斂**。Superpowers / Spec Kit /
-    BMAD など 10+ のコミュニティワークフローの比較表が README にあり、agents/commands/skills の
-    構成数まで整理されている。
+    BMAD など 12 本のコミュニティワークフローの比較表が README にあり、agents/commands/skills の
+    構成数と各ステップ (黄タグ = 親ステップ内で反復するサブループ) まで整理されている。★ 数とステップ列は
+    日次で更新されるので数値は都度引く。
     → README「DEVELOPMENT WORKFLOWS」、`development-workflows/rpi/rpi-workflow.md`
 
 16. **skill/command の fork 実行は 3 フィールドで制御する**。`context: fork` で隔離サブエージェント
@@ -120,10 +123,10 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 |---|---|---|
 | 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、83 tips、ワークフロー比較、購読先 |
 | agents/commands/skills の使い分け | `reports/claude-agent-command-skill.md` | 3 機構の比較表・使い分け基準・最軽量優先の解決順・frontmatter 比較 |
-| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 13 個の一覧 |
+| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 13 個 (`doctor` を含む。`disableBundledSkills` の唯一の例外) |
 | subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 |
-| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 88 個 (`/subtask`・`/powerup`・`/remote-env` 含む) |
-| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model・env vars・完全例 (約 1300 行) |
+| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 87 個 (`/subtask`・`/powerup`・`/remote-env` 含む。`/doctor` は bundled skill 側に移動) |
+| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (約 1300 行、v2.1.220 追従で 80+ settings / 200+ env vars) |
 | CLAUDE.md の書き方・ロード規則 | `best-practice/claude-memory.md` | ancestor/descendant/sibling のロード挙動、モノレポでの配置指針 |
 | MCP 設定と選定 | `best-practice/claude-mcp.md` | 日常用 MCP 5 選、.mcp.json 例、承認 settings、権限構文、3 スコープ |
 | CLI フラグ・環境変数 | `best-practice/claude-cli-startup-flags.md` | `claude` の起動フラグ・サブコマンド・env vars の分類表 |
@@ -154,18 +157,20 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 
 - **settings.json の全キーと permissions 構文の詳細** — 本文 1300 行の網羅表は写していない。設計・監査で
   キー名や構文を確定させるときは `best-practice/claude-settings.md` を直接引く。
-- **公式 slash command 88 個・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と
+- **公式 slash command 87 個・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と
   `best-practice/claude-cli-startup-flags.md` を引く。
 - **83 個の tips 全文** — カテゴリ (Prompting/Planning/Context/Session/CLAUDE.md/Agents/Commands/Skills/
   Hooks/Workflows/Git/Debugging) ごとの一覧は `README.md` の TIPS AND TRICKS 節。各 tip に一次ソース
   (tweet/動画) リンク付き。
-- **コミュニティワークフロー 10+ の詳細比較・skill/agent コレクション集** — `README.md` の
-  DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS / AGENT COLLECTIONS 表。
+- **コミュニティワークフロー 12 本の詳細比較・skill/agent コレクション集** — `README.md` の
+  DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS (10 本) / AGENT COLLECTIONS (2 本) 表。★ 数・skill/agent
+  個数・ステップ列は scheduled refresh で日次更新されるため、蒸留版には数値を写していない。
 - **Claude API 寄りの詳細** (Programmatic Tool Calling、SDK 設定、rate limits の数値) —
   `reports/claude-advanced-tool-use.md`, `claude-agent-sdk-vs-cli-system-prompts.md`,
   `claude-usage-and-rate-limits.md`。
 - **hooks の実装詳細** — このリポジトリでは別リポジトリ (shanraisshan/claude-code-hooks) が正。
   ローカルの実働サンプルは `.claude/hooks/` にある。
 - **プレゼン資料・動画書き起こし・チュートリアル本文** — `presentation/`, `videos/`, `tutorial/`。
-- 注意: 特定バージョン (v2.1.x) や beta 機能に固定された記述が多い。バージョン依存の断定は避け、
-  frontmatter 表のバッジ (対応バージョン) と CHANGELOG で確認する。
+- 注意: 特定バージョン (v2.1.x) や beta 機能に固定された記述が多い。beta バッジは GA 化で外れる
+  (Auto Mode は 2026-07-28 に公式 docs 確認のうえ beta バッジ削除) ため、バージョン依存・beta 前提の断定は
+  避け、frontmatter 表のバッジ (対応バージョン) と `changelog/` 配下の drift check ログで確認する。
