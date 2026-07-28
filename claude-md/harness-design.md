@@ -1,5 +1,8 @@
 <!-- BEGIN managed:harness-design -->
-## ハーネス設計の参照資料
+## 設計時の参照資料
 
-ハーネス (CLAUDE.md / AGENTS.md / skills / subagents / hooks / slash commands) やプロンプトの設計・作成・レビュー・監査を行うときは、必ず `harness-design` スキルを起点にする。スキル内の蒸留版 (`references/*.md`) → `~/.claude/references/` の原典 clone の順で読み、両者が食い違う場合は原典を正とする。記憶や Web 検索だけで判断しない。
+記憶や Web 検索だけで判断せず、まず該当スキルの蒸留版 (`references/*.md`) → `~/.claude/references/` の原典 clone の順で読む。両者が食い違う場合は原典を正とする。
+
+- ハーネス (CLAUDE.md / AGENTS.md / skills / subagents / hooks / slash commands) やプロンプト、エージェントのオーケストレーション構成の設計・作成・レビュー・監査 → `harness-design`
+- UI・LP のデザイン言語、DESIGN.md 雛形、デザイントークン → `ui-design-refs`
 <!-- END managed:harness-design -->

@@ -20,9 +20,10 @@
 
 ## 新規リポジトリの追加
 
-1. この構成規約で `references/<cloneディレクトリ名>.md` を書く (ファイル名は `basename <source URL> .git` と一致させる)
-2. `install.sh --with-references` を実行する (frontmatter の `source` から URL を拾って clone する)
-3. SKILL.md の参照リポジトリ表に行を追加する
+1. どのスキルの資料かを決める (ハーネス設計なら `harness-design`、UI デザインなら `ui-design-refs`)
+2. その構成規約で `skills/<skill>/references/<cloneディレクトリ名>.md` を書く (ファイル名は `basename <source URL> .git` と一致させる。`check-freshness.sh` と `install.sh` はどちらもスキル横断で `skills/*/references/*.md` を走査するので、置き場所さえ合っていれば自動で対象になる)
+3. `install.sh --with-references` を実行する (frontmatter の `source` から URL を拾って clone し、`.claude/skills` を worktree から外す)
+4. そのスキルの SKILL.md の参照リポジトリ表に行を追加する
 
 ## 再蒸留プロンプト雛形
 

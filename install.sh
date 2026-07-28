@@ -44,6 +44,11 @@ if [ "${1:-}" = "--with-references" ]; then
     [ -n "$url" ] || continue
     dir="$CLAUDE_DIR/references/$(repo_dir_name "$url")"
     [ -d "$dir" ] || git clone --filter=blob:none "$url" "$dir"
+    # 原典が同梱する .claude/skills は Claude Code のディレクトリスコープ skill として
+    # 自動登録される (原典を読むだけで第三者の指示が発火し得る)。worktree から外す。
+    # .claude/{agents,commands,hooks,settings.json,rules} は入れ子では自動ロードされず
+    # 参照価値があるので残す。中身は git -C <clone> show HEAD:<path> で読める。
+    git -C "$dir" sparse-checkout set --no-cone '/*' '!/.claude/skills' >/dev/null
   done
 fi
 

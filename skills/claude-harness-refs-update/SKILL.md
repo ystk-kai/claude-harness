@@ -1,14 +1,14 @@
 ---
 name: claude-harness-refs-update
-description: harness-design の参照資料 (蒸留版 references/*.md と原典 clone ~/.claude/references/ の 2 層) の鮮度チェックと更新を実行する。check-freshness → BEHIND を git pull → STALE を DISTILLING.md の手順で再蒸留。明示起動専用 (/claude-harness-refs-update で呼ぶ)。
+description: claude-harness の参照資料 (蒸留版 skills/*/references/*.md と原典 clone ~/.claude/references/ の 2 層) の鮮度チェックと更新を実行する。check-freshness → BEHIND を git pull → STALE を DISTILLING.md の手順で再蒸留。明示起動専用 (/claude-harness-refs-update で呼ぶ)。
 disable-model-invocation: true
 argument-hint: "[repo-name ...] | --check"
-compatibility: Requires git and network access. Operates on harness-design's references/*.md and the clones at ~/.claude/references/ (external to this skill dir); reuses harness-design's scripts/check-freshness.sh and DISTILLING.md.
+compatibility: Requires git and network access. Operates on every skill's references/*.md in this repo (harness-design, ui-design-refs, ...) and the clones at ~/.claude/references/ (external to this skill dir); reuses harness-design's scripts/check-freshness.sh and DISTILLING.md.
 ---
 
 # claude-harness-refs-update: 参照資料の鮮度チェックと更新
 
-`harness-design` の参照資料は 2 層 — 蒸留版 (`skills/harness-design/references/*.md`) と原典 clone (`~/.claude/references/<repo>/`)。このスキルは鮮度チェックから再蒸留までを 1 コマンドで回す。**ロジックは harness-design 側に既にある** (`scripts/check-freshness.sh` が検出、`DISTILLING.md` が更新レシピと再蒸留プロンプト雛形を持つ)。このスキルはそれらを呼ぶ薄いオーケストレーション層であり、判定や蒸留の規約を再実装しない。
+claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md`。`harness-design` と `ui-design-refs` が持つ) と原典 clone (`~/.claude/references/<repo>/`)。このスキルは鮮度チェックから再蒸留までを 1 コマンドで回す。**ロジックは harness-design 側に既にある** (`scripts/check-freshness.sh` が検出、`DISTILLING.md` が更新レシピと再蒸留プロンプト雛形を持つ)。このスキルはそれらを呼ぶ薄いオーケストレーション層であり、判定や蒸留の規約を再実装しない。
 
 引数: repo 名 (例 `12-factor-agents`) を渡すとその repo だけを対象にする。`--check` で鮮度チェックのみ (更新に進まない)。無引数なら全 repo を対象に更新まで進む。
 
@@ -16,7 +16,8 @@ compatibility: Requires git and network access. Operates on harness-design's ref
 
 0. **前提を解決する。**
    - 当日日付を控える: `date +%F`。`distilled_at` に使う。**サブエージェントは当日日付を知らないので、後で必ずプロンプトに埋める。**
-   - harness-design の実体パスを解決する: `HD="$(readlink -f "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/harness-design")"`。以降 `$HD/scripts/check-freshness.sh` / `$HD/DISTILLING.md` / `$HD/references/<repo>.md` を使う (symlink 越しでなく実体パスに書くため `readlink -f`)。
+   - harness-design の実体パスを解決する: `HD="$(readlink -f "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/harness-design")"`。以降 `$HD/scripts/check-freshness.sh` / `$HD/DISTILLING.md` を使う (symlink 越しでなく実体パスに書くため `readlink -f`)。
+   - claude-harness リポジトリのルートを解決する: `ROOT="$(dirname "$(dirname "$HD")")"`。蒸留版は `harness-design` だけでなく `ui-design-refs` 等の各スキル配下にあるので、出力先は `$ROOT/skills/<skill>/references/<repo>.md` になる (どのスキルかは手順1の STALE 行に併記される)。
    - 原典ルート: `REFS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/references"`。clone は `$REFS/<repo>`。
 
 1. **鮮度チェック** — `bash "$HD/scripts/check-freshness.sh"` を実行 (fetch あり = 最新 upstream を反映)。行頭タグ `OK` / `BEHIND` / `STALE` / `MISS` / `ERR` / `SKIP` / `NOTE` を読む。引数に repo 名があれば、その repo の行だけを対象にする (スクリプトに絞り込み機能はないので出力からフィルタ)。引数が `--check` なら結果を提示してここで終了。全 `OK` なら「更新不要」と伝えて終了。
@@ -27,7 +28,7 @@ compatibility: Requires git and network access. Operates on harness-design's ref
 
 4. **STALE を再蒸留** — STALE の各リポジトリを `general-purpose` サブエージェントに**並列委譲**する (`Agent` tool。蒸留版を Write するので Explore 不可)。各プロンプトは `$HD/DISTILLING.md` の「再蒸留プロンプト雛形」に次を埋めて作る:
    - 原典 clone パス `$REFS/<repo>` と owner/repo
-   - 出力ファイル `$HD/references/<repo>.md` (手順0で解決した実体パス)
+   - 出力ファイル `$ROOT/<STALE 行に併記された蒸留版パス>` (例 `skills/ui-design-refs/references/hallmark.md`)。どのスキルの蒸留版かを取り違えないため、パスは推測せず STALE 行の記載を使う
    - 重点領域 — 既存蒸留版の索引が扱っている範囲を引き継ぐ
    - 差分 — `git -C "$REFS/<repo>" log --oneline <distilled_commit>..HEAD` の内容 (何が変わったか。蒸留版に影響する変更だけ本文へ反映する判断材料)
    - **当日日付** (手順0の `date +%F`) を `distilled_at` として明示
@@ -43,7 +44,7 @@ compatibility: Requires git and network access. Operates on harness-design's ref
 
 - サブエージェントは当日日付を知らない → 手順0の `date +%F` を必ずプロンプトに埋める (`distilled_at` の正確性)。
 - BEHIND を pull してから STALE を再評価する。順序を逆にすると古い HEAD で蒸留してしまう。
-- 出力先は symlink 越しでなく `readlink -f` で解決した実体パスを使う。
+- 出力先は symlink 越しでなく `readlink -f` で解決した実体パスを使う。蒸留版が属するスキルは repo ごとに違う (`harness-design` / `ui-design-refs`) ので、STALE 行のパスをそのまま使い、`harness-design` 決め打ちにしない。
 - `check-freshness.sh` に repo 絞り込みはない → 特定 repo 指定時は全走査の出力からフィルタする。
 - 再蒸留は必ず `DISTILLING.md` の構成規約をプロンプトに渡す (250 行以内 / 索引駆動 / 推測で書かない)。規約をサブエージェントの記憶任せにしない。
 - 新規リポジトリの追加は別作業 (`DISTILLING.md`「新規リポジトリの追加」)。このスキルは既存蒸留版の更新に使う。

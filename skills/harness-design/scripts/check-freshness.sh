@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 蒸留版 (references/*.md) の鮮度を原典 clone と突き合わせて報告する。
+# 全スキルの蒸留版 (skills/*/references/*.md) の鮮度を原典 clone と突き合わせて報告する。
 #   BEHIND: clone が upstream より遅れている → git pull --ff-only で更新
 #   STALE : 蒸留版の distilled_commit が clone の HEAD より古い → DISTILLING.md の手順で更新
 # 既定で origin を fetch する (shallow clone は履歴ごと取得)。--offline で fetch を省略。
@@ -7,7 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+SKILLS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 REFS_ROOT="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/references"
 . "$SCRIPT_DIR/frontmatter.sh"
 
@@ -15,12 +15,15 @@ offline=0
 if [ "${1:-}" = "--offline" ]; then offline=1; fi
 status=0
 
-for doc in "$SKILL_DIR"/references/*.md; do
-  [ -e "$doc" ] || { echo "references/ に蒸留版がない"; exit 1; }
+for doc in "$SKILLS_ROOT"/*/references/*.md; do
+  [ -e "$doc" ] || { echo "どのスキルにも references/*.md (蒸留版) がない"; exit 1; }
+  rel="${doc#"$SKILLS_ROOT"/}"
   source_url="$(fm_value "$doc" source)"
   pinned="$(fm_value "$doc" distilled_commit)"
+  # 原典 clone を持たないスキル固有の references (蒸留版ではない) は対象外。無言で飛ばす
+  if [ -z "$source_url" ] && [ -z "$pinned" ]; then continue; fi
   if [ -z "$source_url" ] || [ -z "$pinned" ]; then
-    echo "SKIP   $(basename "$doc"): frontmatter に source / distilled_commit がない"
+    echo "SKIP   $rel: 蒸留版なら frontmatter に source と distilled_commit の両方が要る (片方しかない)"
     status=1; continue
   fi
   name="$(repo_dir_name "$source_url")"
@@ -62,7 +65,7 @@ for doc in "$SKILL_DIR"/references/*.md; do
     echo "OK     $name @ ${head_sha:0:12}"
   else
     behind="$(git -C "$clone" rev-list --count "$pinned_full..HEAD" 2>/dev/null || echo '?')"
-    echo "STALE  $name: 蒸留時 ${pinned_full:0:12} → 現在 ${head_sha:0:12} ($behind commits)"
+    echo "STALE  $name: 蒸留時 ${pinned_full:0:12} → 現在 ${head_sha:0:12} ($behind commits) — 蒸留版: skills/$rel"
     git -C "$clone" log --oneline "$pinned_full..HEAD" 2>/dev/null | sed 's/^/         /' || true
     status=1
   fi
