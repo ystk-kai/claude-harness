@@ -20,7 +20,7 @@
 
 ## 新規リポジトリの追加
 
-1. どのスキルの資料かを決める (ハーネス設計なら `harness-design`、UI デザインなら `ui-design-refs`)
+1. どのスキルの資料かを決める (ハーネス設計なら `harness-design`、UI デザインなら `ui-design`)
 2. その構成規約で `skills/<skill>/references/<cloneディレクトリ名>.md` を書く (ファイル名は `basename <source URL> .git` と一致させる。`check-freshness.sh` と `install.sh` はどちらもスキル横断で `skills/*/references/*.md` を走査するので、置き場所さえ合っていれば自動で対象になる)
 3. `install.sh --with-references` を実行する (frontmatter の `source` から URL を拾って clone し、`.claude/skills` を worktree から外す)
 4. そのスキルの SKILL.md の参照リポジトリ表に行を追加する
@@ -31,12 +31,12 @@
 
 ```
 <原典ルート>/<repo> にある git clone (<owner>/<repo>) を読み、蒸留版リファレンスを 1 ファイル書いてください。
-出力ファイル: skills/harness-design/references/<repo>.md
+出力ファイル: skills/<skill>/references/<repo>.md
 
 手順:
 1. git -C <clone> rev-parse HEAD で SHA を取得する
 2. README と目次で構造を把握し、重点ファイルを実際に Read して要点を確認する (推測で書かない)
-3. skills/harness-design/DISTILLING.md の構成規約に従って書く
+3. skills/claude-harness-refs-update/DISTILLING.md の構成規約に従って書く
    (frontmatter 3 キー / Contents / まず押さえる / 索引 / 蒸留の範囲外 / 250 行以内)
 
 重点領域: <このリポジトリで何を索引したいか>

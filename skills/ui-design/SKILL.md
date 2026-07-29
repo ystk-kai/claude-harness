@@ -1,10 +1,10 @@
 ---
-name: ui-design-refs
+name: ui-design
 description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。Triggers: DESIGN.md, デザイントークン, design tokens, デザインシステム, テーマ, UI 生成, LP 作成, 配色, タイポグラフィ, AI っぽいデザイン, slop
 compatibility: Requires git and network access to clone/update the reference repos at ~/.claude/references/ (external to the skill directory; run install.sh --with-references)
 ---
 
-# ui-design-refs: UI デザイン参照資料集の使い方
+# ui-design: UI デザイン参照資料集の使い方
 
 UI の見た目を決める判断は、Web 検索より先にこの資料集を参照する。構成は `harness-design` と同じ 2 層:
 **蒸留版** (`references/*.md`、このスキル内。確度の高い要点と索引) と **原典** (原典ルート配下の clone。全文)。
@@ -45,10 +45,11 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 ## 鮮度と更新
 
 - 蒸留版 frontmatter の `distilled_commit` が、どのコミット時点の原典に基づくかを示す
-- 鮮度チェックとその更新手順は `harness-design` 側と共通。`skills/harness-design/scripts/check-freshness.sh` が
-  このリポジトリの全スキルの `references/*.md` を走査するので、このスキルの蒸留版も同じコマンドで検出される
-- 一連の更新 (チェック → `git pull` → STALE の再蒸留) は `/claude-harness-refs-update` で起動できる
-- 蒸留版の構成規約は [../harness-design/DISTILLING.md](../harness-design/DISTILLING.md) を唯一のレシピとする
+- 鮮度チェックと更新の機構は `claude-harness-refs-update` スキルが一元所有する。
+  `skills/claude-harness-refs-update/scripts/check-freshness.sh` が全スキルの `references/*.md` を
+  走査するので、このスキルの蒸留版も同じコマンドで検出される
+- 一連の更新 (チェック → `git pull` → STALE の再蒸留) は `/claude-harness-refs-update` で起動する
+- 蒸留版の構成規約は [../claude-harness-refs-update/DISTILLING.md](../claude-harness-refs-update/DISTILLING.md) を唯一のレシピとする
 
 ## 原典 clone の衛生
 

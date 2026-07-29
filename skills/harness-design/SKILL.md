@@ -45,14 +45,14 @@ compatibility: Requires git and network access to clone/update the reference rep
 | 探索索引 | `awesome-harness-engineering/` | [references/awesome-harness-engineering.md](references/awesome-harness-engineering.md) | ハーネス設計の選択肢を広く調べるとき、他ツール事例を探すとき。指す一次資料に当たる |
 
 UI 生成のデザイン参照 (DESIGN.md 雛形・デザイントークン・アンチスロップ規律) はこのスキルの対象外。
-`ui-design-refs` スキルを使う。
+`ui-design` スキルを使う。
 
 ## 鮮度と更新
 
 - 蒸留版 frontmatter の `distilled_commit` が、どのコミット時点の原典に基づくかを示す
-- `scripts/check-freshness.sh` が origin を fetch し、BEHIND (clone が upstream より古い) / STALE (蒸留版が clone より古い) と差分コミットを表示する。`--offline` で fetch を省略。**このリポジトリの全スキルの `references/*.md` を走査する** (`ui-design-refs` のデザイン系蒸留版も対象)
-- STALE のときは [DISTILLING.md](DISTILLING.md) の手順で蒸留版を更新する (SHA だけの無言 bump をしない)
-- 一連の更新 (チェック → 原典 clone の `git pull` → STALE の再蒸留) は `/claude-harness-refs-update` で起動できる (`--check` でチェックのみ)
+- 鮮度チェックと再蒸留の機構は `claude-harness-refs-update` スキルが一元所有する。このスキルは蒸留版を持つだけで、判定ロジックも更新レシピも持たない
+- チェックのみなら `/claude-harness-refs-update --check` (直接叩くなら `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。origin を fetch し、BEHIND = clone が upstream より古い / STALE = 蒸留版が clone より古い を差分コミット付きで表示。`--offline` で fetch 省略)
+- 一連の更新 (チェック → 原典 clone の `git pull` → STALE の再蒸留) は `/claude-harness-refs-update`。構成規約は [../claude-harness-refs-update/DISTILLING.md](../claude-harness-refs-update/DISTILLING.md) が唯一のレシピ (SHA だけの無言 bump をしない)
 - 監査・レビューの基準として使うときは、使った版の commit SHA を成果物に記録する。ブランチ名は版の識別子にしない
 
 ## 判断の優先順位

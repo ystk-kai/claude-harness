@@ -36,7 +36,7 @@ done
 
 # --with-references: 各スキルの references/*.md frontmatter (source) から原典 clone を取得
 if [ "${1:-}" = "--with-references" ]; then
-  . "$REPO_DIR/skills/harness-design/scripts/frontmatter.sh"
+  . "$REPO_DIR/skills/claude-harness-refs-update/scripts/frontmatter.sh"
   mkdir -p "$CLAUDE_DIR/references"
   for doc in "$REPO_DIR"/skills/*/references/*.md; do
     [ -e "$doc" ] || continue
