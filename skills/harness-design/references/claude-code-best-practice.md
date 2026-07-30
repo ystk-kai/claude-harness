@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 2d3c0a16d96eef551bcb1b5d6e47094e4f302926
-distilled_at: 2026-07-28
+distilled_commit: e30c04a1b7a76448559452b40103a8d05a89cbeb
+distilled_at: 2026-07-30
 ---
 
 # claude-code-best-practice 蒸留版
@@ -89,14 +89,18 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 
 13. **frontmatter の正確なリファレンスは best-practice/ にある**。skills 17・commands 17・subagents 16
     フィールドの型・意味の表 (バージョン付き)。設計時に記憶で書かずここを引く。公式ビルトイン一覧
-    (bundled skills 13、slash commands 87、agent types 5) も同ファイル群にある。フィールド・コマンド
+    (bundled skills 15、slash commands 87、agent types 5) も同ファイル群にある。フィールド・コマンド
     一覧・settings キーは新バージョンで増減し続ける (例: v2.1.218 で skill/command に `background`
     追加と `/subtask` の `/fork` からの分割、v2.1.205 で `/doctor` が built-in command から bundled
     skill へ再分類、v2.1.219 で `opus` エイリアスの実体が Claude Opus 5 に、
     `CLAUDE_CODE_CONNECT_TIMEOUT_MS` は v2.1.186 で削除され no-op) うえ、原典レポート側の drift check
     には遅れと揺れがある (`/doctor` の command 表からの削除は再分類の 15 版後で、その時 88 → 87 に減った。
     settings 表は 5 版遅れて v2.1.220 に追従。`/powerup`・`/remote-env` は v2.1.218 時点で一度表から
-    削除され v2.1.220 で復帰) ため、個数や有無は記憶で断定せず各表のバージョンバッジで確認する。
+    削除され v2.1.220 で復帰。bundled skill 表は 2026-07-29 に 13 → 15 へ増え `review`・`security-review`
+    が入ったが、両者の「Skill として呼べる」表記は v2.1.108 起点であり追加は大きく遅れている。しかも
+    `/review`・`/security-review` は command 表 87 個の側にも残っていて両表で二重計上され、翌日の
+    drift check は公式 commands reference に `[Skill]` マーカーがないことを理由に削除候補として ON HOLD
+    にしている) ため、個数や有無は記憶で断定せず各表のバージョンバッジで確認する。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
 
 14. **MCP は少数精鋭**。「15 個入れて日常使いは 4 個」が典型。secrets は `${VAR}` 展開で環境変数に。
@@ -123,9 +127,9 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 |---|---|---|
 | 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、83 tips、ワークフロー比較、購読先 |
 | agents/commands/skills の使い分け | `reports/claude-agent-command-skill.md` | 3 機構の比較表・使い分け基準・最軽量優先の解決順・frontmatter 比較 |
-| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 13 個 (`doctor` を含む。`disableBundledSkills` の唯一の例外) |
+| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。`review` = PR の高速 1 パスレビュー、`security-review` = 現在の diff の脆弱性レビュー (`--fix` / `--comment`) が 2026-07-29 に追加、ただし command 表にも重複) |
 | subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 |
-| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 87 個 (`/subtask`・`/powerup`・`/remote-env` 含む。`/doctor` は bundled skill 側に移動) |
+| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 87 個 (`/subtask`・`/powerup`・`/remote-env` 含む。`/doctor` は bundled skill 側に移動、`/review`・`/security-review` は両表に併記) |
 | settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (約 1300 行、v2.1.220 追従で 80+ settings / 200+ env vars) |
 | CLAUDE.md の書き方・ロード規則 | `best-practice/claude-memory.md` | ancestor/descendant/sibling のロード挙動、モノレポでの配置指針 |
 | MCP 設定と選定 | `best-practice/claude-mcp.md` | 日常用 MCP 5 選、.mcp.json 例、承認 settings、権限構文、3 スコープ |
@@ -174,3 +178,7 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 - 注意: 特定バージョン (v2.1.x) や beta 機能に固定された記述が多い。beta バッジは GA 化で外れる
   (Auto Mode は 2026-07-28 に公式 docs 確認のうえ beta バッジ削除) ため、バージョン依存・beta 前提の断定は
   避け、frontmatter 表のバッジ (対応バージョン) と `changelog/` 配下の drift check ログで確認する。
+- 注意: 原典が張る公式 docs の URL も動く。2026-07-30 に README の CONCEPTS 表の Commands 行は
+  `docs/en/slash-commands` から `docs/en/commands` へ修正されたが、同じ README の TIPS 表で commands /
+  slash commands / command を指す 3 リンクは `docs/en/skills` に書き換えられ、1 ファイル内に 2 つの宛先が
+  並存している。docs URL は原典のリンクを写さず、公式 docs 側で当たり先を確認する。
