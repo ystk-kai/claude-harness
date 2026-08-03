@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: e30c04a1b7a76448559452b40103a8d05a89cbeb
-distilled_at: 2026-07-30
+distilled_commit: ec915a42a1b62f2b88eff5dbc940a771ba7f322e
+distilled_at: 2026-08-03
 ---
 
 # claude-code-best-practice 蒸留版
@@ -19,102 +19,122 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 
 1. **最も軽い機構を選ぶ**。同じ意図に複数機構がマッチしたとき、Claude は最軽量のものを優先する:
    skill (inline、コンテキストオーバーヘッドなし) > agent (別コンテキスト、自律タスク向け) >
-   command (自動発火せず、ユーザーが `/` で明示起動したときのみ)。同じタスクを 3 機構で実装した
-   worked example ("What is the current time?") で挙動差が確認できる。
-   → `reports/claude-agent-command-skill.md`
+   command (自動発火せず、ユーザーが `/` で明示起動したときのみ)。使い分けは — Agent: 自律的・複数ステップ、
+   コンテキスト分離、永続メモリ (`memory:`)、skill の preload (`skills:`)、ツール制限や permission mode の
+   変更が必要なとき。Command: ユーザー起点の入口、他の agent/skill をオーケストレーションするとき
+   (内容は起動まで context に載らない)。Skill: 意図ベースで自動発火させたい再利用手順、複数箇所から呼ぶ手順。
+   同じタスク ("What is the current time?") を 3 機構で実装した worked example で挙動差が確認できる。
+   → `reports/claude-agent-command-skill.md` (特に "When to Use Each")
 
-2. **使い分け基準**。Agent: 自律的・複数ステップ、コンテキスト分離が必要、永続メモリ (`memory:`)、
-   skill の preload (`skills:`)、ツール制限・permission mode 変更が必要なとき。Command: ユーザー起点の
-   エントリポイント、他の agent/skill をオーケストレーションするとき (内容は起動まで context に載らない)。
-   Skill: 意図ベースで自動発火させたい再利用手順、複数箇所 (command/agent/Claude 本体) から呼ぶ手順。
-   → `reports/claude-agent-command-skill.md` の "When to Use Each"
-
-3. **Command → Agent → Skill の層状オーケストレーション**。command が入口、agent が別コンテキストで
+2. **Command → Agent → Skill の層状オーケストレーション**。command が入口、agent が別コンテキストで
    自律実行 (preloaded skill 持ち)、skill が inline で出力生成。weather システムとして完動する実装例あり。
-   → `orchestration-workflow/orchestration-workflow.md`, 実体は `.claude/commands|agents|skills/`
+   → `orchestration-workflow/orchestration-workflow.md`、実体は `.claude/commands|agents|skills/`
 
-4. **ハーネスはプロンプトの言い換えではない**。「全部最終的にプロンプトになるから強いプロンプトで代替可能」
+3. **ハーネスはプロンプトの言い換えではない**。「全部最終的にプロンプトになるから強いプロンプトで代替可能」
    という還元論は、context isolation・harness 強制のツール制限・hooks の決定的実行・model routing・並列・
    セッション横断永続化など 10 の能力の前で崩れる。決定論が要る挙動 (attribution、権限、フォーマット) は
    prompt でなく hooks/settings で強制する。
    → `reports/why-harness-is-important.md`
 
-5. **CLAUDE.md は 1 ファイル 200 行以下を目標** (humanlayer は 60 行)。「どの開発者が起動して
+4. **CLAUDE.md は 1 ファイル 200 行以下を目標** (humanlayer は 60 行)。「どの開発者が起動して
    "run the tests" と言っても一発で動く」が品質基準。settings.json で決定的に強制できるもの
    (`attribution.commit` 等) を CLAUDE.md に書かない。長くなったら `.claude/rules/*.md` に分割し、
-   `paths:` frontmatter で対象ファイルに触れたときだけ lazy-load させる。
+   `paths:` frontmatter で対象ファイルに触れたときだけ lazy-load させる。ロード規則はモノレポ設計に直結する:
+   ancestor (上方向) は起動時に全ロード、descendant (下方向) はそのディレクトリのファイルに触れたとき
+   lazy-load、sibling は決してロードされない。よって root に共通規約、コンポーネント配下に固有規約を置く。
+   個人用は CLAUDE.local.md (.gitignore)。
    → README.md「CLAUDE.md + .claude/rules」tips、`best-practice/claude-memory.md`
 
-6. **CLAUDE.md のロード規則 (モノレポ)**。ancestor (上方向) は起動時に全ロード、descendant (下方向) は
-   そのディレクトリのファイルに触れたとき lazy-load、sibling は決してロードされない。よって root に
-   リポジトリ共通規約、コンポーネント配下に固有規約を置く。個人用は CLAUDE.local.md (.gitignore)。
-   → `best-practice/claude-memory.md`
+5. **Skills のロードは CLAUDE.md と別物**。ancestor loading はなく、description だけが常駐。full content は
+   呼び出し時のみロード。ネストされた `packages/*/.claude/skills/` はそのディレクトリで作業したときに自動発見
+   される。例外: subagent の `skills:` preload は full content を起動時注入。バジェットの正は settings 側の
+   2 キー — `skillListingBudgetFraction` (既定 `0.01` = context window の 1%。超過すると使用頻度の低い skill の
+   description が名前だけに collapse され、呼べるが理由が見えなくなる) と `skillListingMaxDescChars`
+   (既定 `1536`、1 skill の `description` + `when_to_use` 合算上限、超過分は truncate)。後者は
+   2026-07-31 まで原典が `maxSkillDescriptionChars` と誤記していた無効キー (silent no-op) なので注意。
+   可視性は `skillOverrides` で `on` / `name-only` / `user-invocable-only` / `off` を skill 単位に指定できる。
+   なお `reports/claude-skills-for-larger-mono-repos.md` は「既定 15,000 文字」「`SLASH_COMMAND_TOOL_CHAR_BUDGET`
+   で拡大」と書くが、settings レポート側では同 env var は slash command tool 出力用と定義されている。
+   数値とキー名は settings レポートを正とする。
+   → `reports/claude-skills-for-larger-mono-repos.md`, `best-practice/claude-settings.md`
 
-7. **Skills のロードは CLAUDE.md と別物**。ancestor loading はなく、description だけが常駐
-   (デフォルト 15,000 文字バジェット、超過は `/context` で警告)。full content は呼び出し時のみロード。
-   ネストされた `packages/*/.claude/skills/` はそのディレクトリで作業したときに自動発見される。
-   例外: subagent の `skills:` preload は full content を起動時注入。
-   → `reports/claude-skills-for-larger-mono-repos.md`
-
-8. **Skill の書き方 (Anthropic 内部の教訓)**。description は要約でなくトリガーとして書く
+6. **Skill の書き方 (Anthropic 内部の教訓)**。description は要約でなくトリガーとして書く
    ("when should I fire?")。明白なことは書かず、デフォルト挙動から押し出す差分だけ書く。手順を
    railroad せず goal と制約を与える。Gotchas セクションが最高シグナル (Claude の失敗点を追記していく)。
    scripts/references/examples を同梱してフォルダとして設計する。危険な skill は
-   `disable-model-invocation: true` で明示起動のみに。
+   `disable-model-invocation: true` で明示起動のみに。良い skill は 9 類型 (Library & API Reference /
+   Product Verification / Data Fetching & Analysis / Business Process Automation / Code Scaffolding ほか)
+   のどれか 1 つに収まる。特に Product Verification skill (signup-flow-driver 等) は 1 週間かけて磨く価値がある。
    → `tips/claude-thariq-tips-17-mar-26.md`、README「Skills」tips
 
-9. **Skills は 9 類型にクラスタする** (Library & API Reference / Product Verification / Data Fetching &
-   Analysis / Business Process Automation / Code Scaffolding ほか)。良い skill は 1 類型に収まる。
-   特に Product Verification skill (signup-flow-driver 等) はエンジニアが 1 週間かけて磨く価値がある。
-   → `tips/claude-thariq-tips-17-mar-26.md`
+7. **スコープ設計原則**。個人状態・プロジェクト横断調整 (tasks, teams, auto-memory, credentials,
+   keybindings) は global (`~/.claude/`) のみ。チーム共有可能な設定 (settings, rules, agents, commands,
+   skills, hooks) は dual-scope で project が優先。settings の優先順位: CLI flags >
+   `.claude/settings.local.json` > `.claude/settings.json` > `~/.claude/settings.local.json` >
+   `~/.claude/settings.json`。`deny` ルールは最優先で上書き不可。**権限昇格につながる設定は
+   project/local から無視される** — untrusted なリポジトリが自分に権限を与えられないようにするため:
+   `permissions.defaultMode` の `"auto"` (v2.1.142 以降、project/local では無視。`~/.claude/settings.json`
+   に書く)、`processWrapper` (managed / user / `--settings` のみ、v2.1.210)、`footerLinksRegexes`
+   (user / `--settings` / managed のみ)、`strictPluginOnlyCustomization` (managed のみ)。
+   → `reports/claude-global-vs-project-settings.md`, `best-practice/claude-settings.md`
 
-10. **スコープ設計原則**。個人状態・プロジェクト横断調整 (tasks, teams, auto-memory, credentials,
-    keybindings) は global (`~/.claude/`) のみ。チーム共有可能な設定 (settings, rules, agents, commands,
-    skills, hooks) は dual-scope で project が優先。settings の優先順位: CLI flags >
-    `.claude/settings.local.json` > `.claude/settings.json` > `~/.claude/settings.local.json` >
-    `~/.claude/settings.json`。`deny` ルールは最優先で上書き不可。
-    → `reports/claude-global-vs-project-settings.md`
+8. **permissions 構文には落とし穴がある**。`Tool(param:value)` (`Agent(model:opus)`,
+   `Agent(isolation:worktree)`, `Bash(run_in_background:true)`) は **deny / ask ルール専用**で allow では
+   使えない — 1 パラメータ値の許可では全体の安全性を担保できないため、allow は各ツール固有の specifier
+   構文を使う。ツールの主コンテンツ欄へのマッチ (`Bash(command:rm *)`) も禁止で起動時 warning が出る。
+   `:*` サフィックス (`Bash(npm:*)`) は非推奨ではないが末尾でしか解釈されない
+   (`Bash(git:* push)` はコロンをリテラル扱い)。permission ダイアログはスペース形式で書く。
+   allow に `mcp__*` のような広いワイルドカードを置かない (原典の例も `mcp__memory__*` に修正された)。
+   skill は `Skill(weather-fetcher)` / `Skill(weather *)` で指定する。
+   → `best-practice/claude-settings.md` の Permissions 節
 
-11. **subagent はコンテキスト管理の道具**。判断基準は「このツール出力を後で使うか、結論だけでよいか」—
+9. **ハーネス側のハード上限を前提に設計する**。並列 subagent は
+   `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (既定 `20`) で制限され、超過分は queue に入る。ネストは
+   `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (v2.1.219 時点の既定 `3`) までで、上限深度の subagent はさらに
+   spawn できない。Stop hook のブロックは `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (既定 `8`) 回で打ち切られ、
+   以降は hook の exit code に関係なくセッションが終了する — 無限にブロックする Stop hook は設計できない。
+   `effortLevel` に `"max"` / `"ultracode"` は書けない (session 限定で `/effort` からのみ。settings.json に
+   書くと拒否される)。永続化できるのは `low` / `medium` / `high` / `xhigh`。
+   → `best-practice/claude-settings.md`
+
+10. **subagent はコンテキスト管理の道具**。判断基準は「このツール出力を後で使うか、結論だけでよいか」—
     結論だけなら subagent に出す (探索の 20 file reads も dead end も子側に残る)。別コンテキストの
     同一モデルが自分の書いたバグを見つける (test time compute)。~40% 消費でモデルの劣化 ("dumb zone")
     が始まるので /clear・/compact・/rewind でセッションを刻む。
     → README「Context」「Agents」tips、`tips/claude-thariq-tips-16-apr-26.md`
 
-12. **Agent memory は CLAUDE.md と補完関係**。`memory:` frontmatter (user/project/local) で agent 専用の
+11. **Agent memory は CLAUDE.md と補完関係**。`memory:` frontmatter (user/project/local) で agent 専用の
     永続知識を持てる。MEMORY.md の先頭 200 行が system prompt に注入され、超過分は topic 別ファイルへ。
     CLAUDE.md (人が書く・全員が読む) / auto-memory (Claude が書く・本人のみ) / agent memory
     (agent が書く・その agent のみ) の 3 系統。
     → `reports/claude-agent-memory.md`
 
-13. **frontmatter の正確なリファレンスは best-practice/ にある**。skills 17・commands 17・subagents 16
-    フィールドの型・意味の表 (バージョン付き)。設計時に記憶で書かずここを引く。公式ビルトイン一覧
-    (bundled skills 15、slash commands 87、agent types 5) も同ファイル群にある。フィールド・コマンド
-    一覧・settings キーは新バージョンで増減し続ける (例: v2.1.218 で skill/command に `background`
-    追加と `/subtask` の `/fork` からの分割、v2.1.205 で `/doctor` が built-in command から bundled
-    skill へ再分類、v2.1.219 で `opus` エイリアスの実体が Claude Opus 5 に、
-    `CLAUDE_CODE_CONNECT_TIMEOUT_MS` は v2.1.186 で削除され no-op) うえ、原典レポート側の drift check
-    には遅れと揺れがある (`/doctor` の command 表からの削除は再分類の 15 版後で、その時 88 → 87 に減った。
-    settings 表は 5 版遅れて v2.1.220 に追従。`/powerup`・`/remote-env` は v2.1.218 時点で一度表から
-    削除され v2.1.220 で復帰。bundled skill 表は 2026-07-29 に 13 → 15 へ増え `review`・`security-review`
-    が入ったが、両者の「Skill として呼べる」表記は v2.1.108 起点であり追加は大きく遅れている。しかも
-    `/review`・`/security-review` は command 表 87 個の側にも残っていて両表で二重計上され、翌日の
-    drift check は公式 commands reference に `[Skill]` マーカーがないことを理由に削除候補として ON HOLD
-    にしている) ため、個数や有無は記憶で断定せず各表のバージョンバッジで確認する。
+12. **frontmatter の正確なリファレンスは best-practice/ にあるが、そのまま信じない**。skills 17・
+    commands 17・subagents 16 フィールドの型・意味の表と、公式ビルトイン一覧 (bundled skills 15、
+    slash commands 87、agent types 5) がある。設計時は記憶で書かずここを引く。ただし個数・有無は版で
+    増減し (v2.1.218 で skill/command に `background` 追加と `/subtask` の `/fork` からの分割、v2.1.205 で
+    `/doctor` が built-in command から bundled skill へ再分類、`CLAUDE_CODE_CONNECT_TIMEOUT_MS` は
+    v2.1.186 で削除され no-op)、原典の日次 drift check には遅れ・揺れ・**自己誤り**がある:
+    (a) `/review`・`/security-review` の分類は 2 日 ON HOLD の後 2026-08-01 に「bundled skills 15 が正しい」と
+    決着したが、両者は slash command 87 の表にも残り二重計上のまま。(b) 2026-07-27 の run が
+    `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR` に誤って `_CODE_` を足して説明も反転させ、`effortLevel` に
+    無効値 `max`/`ultracode` を追加し、4 日後の 2026-07-31 に revert された。(c) subagents 表は `Explore` の
+    model を `haiku` とするが公式は「親の会話から継承」と書き、`model` 欄の例も `claude-opus-4-6` のままで
+    `fable` 未記載 — watch item として毎日再掲されるだけで未修正。断定する前に各表のバージョンバッジと
+    `changelog/` 配下の該当 changelog.md を見る。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
 
-14. **MCP は少数精鋭**。「15 個入れて日常使いは 4 個」が典型。secrets は `${VAR}` 展開で環境変数に。
+13. **MCP は少数精鋭**。「15 個入れて日常使いは 4 個」が典型。secrets は `${VAR}` 展開で環境変数に。
     権限は `mcp__<server>__<tool>` 構文。スコープは Subagent (`mcpServers:` frontmatter) > Project
     (`.mcp.json`) > User (`~/.claude.json`)。
     → `best-practice/claude-mcp.md`
 
-15. **主要ワークフローは Research → Plan → Execute → Review → Ship に収斂**。Superpowers / Spec Kit /
-    BMAD など 12 本のコミュニティワークフローの比較表が README にあり、agents/commands/skills の
-    構成数と各ステップ (黄タグ = 親ステップ内で反復するサブループ) まで整理されている。★ 数とステップ列は
-    日次で更新されるので数値は都度引く。
+14. **主要ワークフローは Research → Plan → Execute → Review → Ship に収斂**。コミュニティワークフローの
+    比較表が README にあり、agents/commands/skills の構成数と各ステップ (黄タグ = 親ステップ内で反復する
+    サブループ) まで整理されている。★ 数もステップ列も日次更新されるので都度引く。
     → README「DEVELOPMENT WORKFLOWS」、`development-workflows/rpi/rpi-workflow.md`
 
-16. **skill/command の fork 実行は 3 フィールドで制御する**。`context: fork` で隔離サブエージェント
+15. **skill/command の fork 実行は 3 フィールドで制御する**。`context: fork` で隔離サブエージェント
     コンテキストに逃がし、`agent:` で subagent type を指定 (既定 `general-purpose`)、`background`
     (boolean、既定 `true`、v2.1.218+) を `false` にすると呼び出したターン内で結果を待つ。後続処理が
     結果に依存するなら `background: false`。この 3 つは skill と command のみで、subagent 側の
@@ -125,18 +145,18 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 
 | トピック | 原典パス | 内容 (一行) |
 |---|---|---|
-| 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、83 tips、ワークフロー比較、購読先 |
+| 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、tips 集、ワークフロー比較、購読先 |
 | agents/commands/skills の使い分け | `reports/claude-agent-command-skill.md` | 3 機構の比較表・使い分け基準・最軽量優先の解決順・frontmatter 比較 |
-| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。`review` = PR の高速 1 パスレビュー、`security-review` = 現在の diff の脆弱性レビュー (`--fix` / `--comment`) が 2026-07-29 に追加、ただし command 表にも重複) |
-| subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 |
-| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 87 個 (`/subtask`・`/powerup`・`/remote-env` 含む。`/doctor` は bundled skill 側に移動、`/review`・`/security-review` は両表に併記) |
-| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (約 1300 行、v2.1.220 追従で 80+ settings / 200+ env vars) |
+| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。`review` = PR の高速 1 パスレビュー、`security-review` = 現在の diff の脆弱性レビュー (`--fix` / `--comment`)。この 2 つは 2026-08-01 に bundled skill として確定したが command 表にも重複) |
+| subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (`Explore` の model 欄・`model` 例の model 名は公式と乖離したまま watch item) |
+| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 87 個 (`/subtask`・`/powerup`・`/remote-env` 含む。`/doctor` は bundled skill 側へ移動、`/review`・`/security-review` は両表に併記) |
+| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (1300 行超、v2.1.220 追従。2026-07-31 に 30 項目超の drift 一括修正が入り、キー名・permission 挙動・env var が大幅に増減した) |
 | CLAUDE.md の書き方・ロード規則 | `best-practice/claude-memory.md` | ancestor/descendant/sibling のロード挙動、モノレポでの配置指針 |
 | MCP 設定と選定 | `best-practice/claude-mcp.md` | 日常用 MCP 5 選、.mcp.json 例、承認 settings、権限構文、3 スコープ |
 | CLI フラグ・環境変数 | `best-practice/claude-cli-startup-flags.md` | `claude` の起動フラグ・サブコマンド・env vars の分類表 |
 | /powerup | `best-practice/claude-power-ups.md` | インタラクティブな機能学習レッスン 10 個の紹介 |
 | global vs project スコープ | `reports/claude-global-vs-project-settings.md` | global-only と dual-scope の切り分け・settings 優先順位・Tasks・Agent Teams |
-| モノレポでの skill 発見 | `reports/claude-skills-for-larger-mono-repos.md` | ネスト discovery・description のみ常駐・文字バジェット・CLAUDE.md との差分表 |
+| モノレポでの skill 発見 | `reports/claude-skills-for-larger-mono-repos.md` | ネスト discovery・description のみ常駐・文字バジェット (数値は settings レポートを正とする)・CLAUDE.md との差分表 |
 | agent の永続メモリ | `reports/claude-agent-memory.md` | `memory:` frontmatter、3 スコープ、200 行注入、他メモリ系との比較 |
 | ハーネス擁護論 | `reports/why-harness-is-important.md` | 「全部プロンプト」還元論への反証 10 項目と正しいメンタルモデル |
 | Agent SDK vs CLI | `reports/claude-agent-sdk-vs-cli-system-prompts.md` | system prompt の差 (CLI は 110+ fragments)、出力の決定性は保証されない |
@@ -156,19 +176,22 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 | 入門チュートリアル | `tutorial/day0/`, `tutorial/day1/` | セットアップと Prompting→Agents→Skills の段階的入門 |
 | 動画・ポッドキャスト要約 | `videos/*.md` | Boris/Thariq/Cat/Dex/Karpathy らの講演・対談の書き起こしノート |
 | このリポジトリ自身のハーネス | `.claude/` | agents/commands/skills/hooks/settings.json の実働サンプル (音声 hooks 含む) |
+| 各レポートの drift 履歴 | `changelog/**/changelog.md` | 日次 drift check の指摘・ON HOLD・誤修正の revert 記録。表の値を疑うときここを見る |
 
 ## 蒸留の範囲外
 
-- **settings.json の全キーと permissions 構文の詳細** — 本文 1300 行の網羅表は写していない。設計・監査で
-  キー名や構文を確定させるときは `best-practice/claude-settings.md` を直接引く。
-- **公式 slash command 87 個・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と
+- **settings.json の全キーと permissions 構文の詳細** — 1300 行超の網羅表は写していない。設計・監査で
+  キー名や構文を確定させるときは `best-practice/claude-settings.md` を直接引く。キー名の誤りは
+  silent no-op になるため (`maxSkillDescriptionChars` の例) 記憶で書かない。
+- **公式 slash command・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と
   `best-practice/claude-cli-startup-flags.md` を引く。
-- **83 個の tips 全文** — カテゴリ (Prompting/Planning/Context/Session/CLAUDE.md/Agents/Commands/Skills/
+- **tips 全文** — カテゴリ (Prompting/Planning/Context/Session/CLAUDE.md/Agents/Commands/Skills/
   Hooks/Workflows/Git/Debugging) ごとの一覧は `README.md` の TIPS AND TRICKS 節。各 tip に一次ソース
   (tweet/動画) リンク付き。
-- **コミュニティワークフロー 12 本の詳細比較・skill/agent コレクション集** — `README.md` の
-  DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS (10 本) / AGENT COLLECTIONS (2 本) 表。★ 数・skill/agent
-  個数・ステップ列は scheduled refresh で日次更新されるため、蒸留版には数値を写していない。
+- **コミュニティワークフローの詳細比較・skill/agent コレクション集** — `README.md` の
+  DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS / AGENT COLLECTIONS 表。scheduled refresh で日次更新され、
+  ★ 数・skill/agent 個数だけでなく**ステップ列そのものも書き換わる** (2026-07-30〜08-03 の間に
+  Superpowers と Spec Kit のステップ列が入れ替わった) ため、蒸留版はこれらの数値もステップ列も持たない。
 - **Claude API 寄りの詳細** (Programmatic Tool Calling、SDK 設定、rate limits の数値) —
   `reports/claude-advanced-tool-use.md`, `claude-agent-sdk-vs-cli-system-prompts.md`,
   `claude-usage-and-rate-limits.md`。
@@ -178,7 +201,8 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 - 注意: 特定バージョン (v2.1.x) や beta 機能に固定された記述が多い。beta バッジは GA 化で外れる
   (Auto Mode は 2026-07-28 に公式 docs 確認のうえ beta バッジ削除) ため、バージョン依存・beta 前提の断定は
   避け、frontmatter 表のバッジ (対応バージョン) と `changelog/` 配下の drift check ログで確認する。
+  Voice Dictation・Artifacts の beta バッジは 1 か月以上 ON HOLD のまま残っている。
 - 注意: 原典が張る公式 docs の URL も動く。2026-07-30 に README の CONCEPTS 表の Commands 行は
   `docs/en/slash-commands` から `docs/en/commands` へ修正されたが、同じ README の TIPS 表で commands /
-  slash commands / command を指す 3 リンクは `docs/en/skills` に書き換えられ、1 ファイル内に 2 つの宛先が
+  slash commands / command を指す 3 リンクは `docs/en/skills` を指したままで、1 ファイル内に 2 つの宛先が
   並存している。docs URL は原典のリンクを写さず、公式 docs 側で当たり先を確認する。

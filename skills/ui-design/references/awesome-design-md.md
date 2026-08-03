@@ -1,7 +1,7 @@
 ---
 source: https://github.com/voltagent/awesome-design-md
-distilled_commit: 664b3e78fd1a298ba11973822da988483256d4b4
-distilled_at: 2026-07-12
+distilled_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
+distilled_at: 2026-08-03
 ---
 
 # awesome-design-md 蒸留版

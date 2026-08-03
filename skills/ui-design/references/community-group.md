@@ -1,7 +1,7 @@
 ---
 source: https://github.com/design-tokens/community-group
-distilled_commit: 191bf0b157cd9d254e992975471a64f90d960a78
-distilled_at: 2026-07-28
+distilled_commit: 16c902d9327c18290e956a21130c445f1b88c40f
+distilled_at: 2026-08-03
 ---
 
 # Design Tokens Community Group (DTCG) 仕様 蒸留版
