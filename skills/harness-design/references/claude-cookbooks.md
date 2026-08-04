@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/claude-cookbooks
-distilled_commit: 85016cacf5b7923aa62aa2b514399325e9d159e9
-distilled_at: 2026-07-28
+distilled_commit: 3291e01531b44bcf730ffe5ed62df60088087316
+distilled_at: 2026-08-04
 ---
 
 # claude-cookbooks 蒸留版
@@ -36,7 +36,9 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 12. **eval の grader は固定する**。採点対象は `<result>` タグの中身だけ (全文を渡すと false positive/negative が増える)、grader モデルは被験モデルに関係なく固定 (混ぜるとモデル間比較が壊れる)。(`evals/agentic_search/reproduce_agentic_search_benchmarks.ipynb`)
 13. **サーバ側 tool の rate limit は例外を上げずに静かに劣化する**。API は 200 を返し、`too_many_requests` は response 内の tool result エラーとして現れる。原因不明の低スコアはトランスクリプト内の `rate_limit_error` を grep する。クライアント retry では直らないので並列度を下げる。(`evals/agentic_search/reproduce_agentic_search_benchmarks.ipynb`)
 14. **~100 個を超える tool は前もって全部渡さない**。`tool_search` で必要な分だけ都度返す (コンテキスト 90% 超削減)、あるいは tool 名一覧を system prompt に置いて `describe_tool` でロードする。ロード前の tool はリクエストの `tools` に入れなくてよい。(`tool_use/tool_search_with_embeddings.ipynb`, `tool_use/tool_search_alternate_approaches.ipynb`)
-15. **repo 自身のハーネスが良い設計例**。`cookbook-audit` スキルは (a) ルーブリック本体を `style_guide.md` に分離して「先に読め」と指示、(b) `validate_notebook.py` で ipynb を markdown 化してから読ませる ("saves context vs raw .ipynb")、(c) 4 次元 x 5 点のスコア形式を固定。決定的スクリプトによる前処理でコンテキストを節約する型。(`.claude/skills/cookbook-audit/SKILL.md`)
+15. **オーケストレーションの選択は「誰が計画を持つか」の 3 択**。single agent = Claude が turn ごとに決め中間結果は自分の context、subagents = リードが turn ごとに委譲し中間結果はリードの context、dynamic workflow = スクリプトが決め中間結果はスクリプト変数。workflow を取る条件は 3 つだけ ("bigger than one context window" / "verification enforced by structure" / "the orchestration itself is worth keeping")、それ以外は single agent で "Most tasks live here"。subagents は「4 件の委譲なら成立するが 400 件では成立しない」("fine for four delegations but not for four hundred") のと、中断すると計画ごと消えてやり直しになるのが限界。ランタイム側の上限は同時 16 agent (CPU コアが少ないと減る) / 1 run 1,000 agent で、超過分はスロットが空くまでキューに入る。(`claude_agent_sdk/08_Dynamic_workflows.ipynb`)
+16. **検証を構造で強制する型 = fan-out + adversarial verification**。extract (1 agent が claim を構造化出力で抽出) → verify (claim 1 件に 1 agent、並列、clean context、`schema` 付きで verdict と根拠の引用行を返す) → skeptic (`confirmed` の判定だけを再検証させ、引用が実際には支持していなければ `contradicted` へ落とす) → report。"Double-check your findings" は指示にすぎず context 圧のもとで飛ぶが、スクリプトの制御フローなら飛ばない。`confirmed` だけを skeptic に回す分岐は素の JavaScript なのでトークン 0。プロンプトの大半がタスクではなく work の *shape* の記述になる ("With workflows, the prompt describes the harness you want")。なお発見物はファイルではなく agent の**返り値**で回収する設計で、`SUMMARY.md` のようなレポート風ファイルを書こうとした agent は内容を return しろと差し戻された (実成果物のファイル書き込みは通常どおり)。(`claude_agent_sdk/08_Dynamic_workflows.ipynb`)
+17. **repo 自身のハーネスが良い設計例**。`cookbook-audit` スキルは (a) ルーブリック本体を `style_guide.md` に分離して「先に読め」と指示、(b) `validate_notebook.py` で ipynb を markdown 化してから読ませる ("saves context vs raw .ipynb")、(c) 4 次元 x 5 点のスコア形式を固定。決定的スクリプトによる前処理でコンテキストを節約する型。(`.claude/skills/cookbook-audit/SKILL.md`)
 
 ## 5 つのワークフローパターン
 
@@ -96,7 +98,8 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 
 | 対象 | 原典パス | 一行説明 |
 |---|---|---|
-| Agent SDK チュートリアル 8 本 | `claude_agent_sdk/README.md` | `query()` / `ClaudeSDKClient` / `ClaudeAgentOptions` から、MCP 連携・サブエージェント・hooks・ホスティングまで段階的に上げる構成 |
+| Agent SDK チュートリアル 9 本 (00〜08) | `claude_agent_sdk/README.md` | `query()` / `ClaudeSDKClient` / `ClaudeAgentOptions` から、MCP 連携・サブエージェント・hooks・OpenAI Agents SDK からの移行・セッションブラウザ・脆弱性検出・ホスティング・dynamic workflow まで段階的に上げる構成 |
+| dynamic workflow の起動と読み方 | `claude_agent_sdk/08_Dynamic_workflows.ipynb` | SDK からの起動は 2 点だけ: `allowed_tools` に `Workflow` を入れる + プロンプトで平文で "use a workflow to…" と頼む。スクリプトは `export const meta = {name, description, phases}` と `agent(prompt, options)` (clean context。`label` / `phase` / `schema` / `model` を指定可) / `parallel([...])` (全完了を待つバリア) / `pipeline(items, stage1, ...)` (item ごとに独立してステージを流す) / `phase("...")` で組む。ランタイムはスクリプトを `~/.claude/projects/` のセッションディレクトリにファイルとして残し、`.claude/workflows/` に置けば名前で再実行できる。spawn された subagent は `acceptEdits` で走り allowlist を継承。スクリプト自身は fs / shell に触れず、触れるのは spawn された agent だけ。ステージごとにモデルを振り分けられ (機械的な抽出は安いモデル、判断は最強モデル)、`CLAUDE_CODE_SUBAGENT_MODEL` で一括上書きも可能。進行は `TaskProgressMessage` / `TaskNotificationMessage` で流れ、background 実行のため `ResultMessage` は起動ターンと完了ターンで 2 回来る |
 | フル装備の `.claude/` 実例 | `claude_agent_sdk/chief_of_staff_agent/.claude/` | `agents/*.md` (frontmatter に `name` / `description` / `tools`)、`commands/`、`hooks/*.py`、`output-styles/`、`settings.local.json` が一式揃った参照配置 |
 | 書き込み系の安全 hook | `claude_agent_sdk/03_The_site_reliability_agent.ipynb` | PreToolUse hook で書き込み操作 (プールサイズ範囲・設定の妥当性) を検証してから通す。read-only → read-write への拡張手順 |
 | MCP でのツール供給 | `claude_agent_sdk/02_The_observability_agent.ipynb` | git / GitHub MCP サーバでツールを外部化する。SRE 版は JSON-RPC サブプロセスの自作 MCP サーバ |
@@ -119,6 +122,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 - **リトライ上限 (factor 9)**: `evaluator_optimizer.loop()` は `while True` で反復上限もエスカレーションも無い。原則側は「連続エラー ~3 回で人間へ / 決定的介入へ」。参照実装をコピーするならループ上限を足す。なお `patterns/agents/async_multi_agent_orchestration.ipynb` の `run_agent()` は `max_turns=20` を持っており、こちらは原則寄り。
 - **プリフェッチ (factor 13) vs PTC**: 原則は「呼ぶと分かっているツールは決定的に事前実行して結果を context に入れる」。cookbook のコンテキスト対策の主軸は逆向きで、PTC で **結果を context に入れない**。大きな tool 結果が前提のときは PTC 側が優先される。
 - **制御フローの所有 (factor 6/8) vs マネージド化**: 原則は launch/pause/resume を自前 API で持つこと。`managed_agents/` は同じ要求をホスト側の `requires_action` ゲートと `session.status_idled` webhook に寄せる。自前実装とマネージドのどちらを取るかの分岐点として読む。
+- **計画のコード化 (factor 8) vs スクリプトを書くのはモデル**: dynamic workflow は計画をモデルの context から JavaScript のコードへ出すので factor 8 (own your control flow) に最も近い形だが、そのコードを実行時に書くのはモデル自身。決定的なのは生成後の実行だけで、生成そのものは非決定的。スクリプトを保存して `.claude/workflows/` から名前で再実行する運用とセットにして初めて決定性が戻る。リトライ面では stage 失敗時 (例: agent が構造化出力のリトライを使い切る) に `[Failed]` 通知が出て Claude が workflow を再起動し、完了済み agent はキャッシュ結果を返すので失敗ステージだけ再実行される (コストは上乗せ)。上限がランタイム側に入っている点は `evaluator_optimizer.loop()` の無制限ループより原則寄りだが、人間へのエスカレーション経路は用意されていない。(`claude_agent_sdk/08_Dynamic_workflows.ipynb`)
 - **フレームワーク依存への警戒 (README of 12-factor) vs SDK 推し**: `claude_agent_sdk/README.md` は Claude Code を "the closest thing to a 'bare metal' harness" と位置づけて SDK 採用を勧める。原則側の「フレームワークは 70-80% で頭打ち」という警告と緊張関係にある。ただし cookbook の `patterns/agents/` 自体は SDK を一切使わない素の実装なので、repo 内に両方の選択肢が並んでいる。
 - **tool = 構造化出力 (factor 4) の徹底**: `patterns/agents/` は tool use API すら使わず XML + 正規表現で通す。原則の「tool call は JSON 出力 + 決定的コード、それ以上ではない」を最も素朴な形で示した実例。
 
@@ -126,7 +130,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 
 - **API 一般の話題は別スキル (`claude-api`) の担当**。この蒸留版では扱わない。当たる場所: prompt caching・JSON mode・moderation・batch 等は `misc/`、RAG と contextual embeddings は `capabilities/retrieval_augmented_generation/` と `capabilities/contextual-embeddings/`、分類・要約・text-to-sql は `capabilities/` 配下、vision / multimodal は `multimodal/`、fine-tuning は `finetuning/`、extended thinking は `extended_thinking/`、外部ベンダ連携は `third_party/` (Pinecone / VoyageAI / MongoDB / LlamaIndex / Wolfram / Deepgram / ElevenLabs / Wikipedia)。
 - **Skills 機能の API 面** (beta header `skills-2025-10-02`、`container` パラメータ、Files API での成果物ダウンロード、組み込み `xlsx` / `pptx` / `pdf` / `docx`): `skills/README.md` と `skills/CLAUDE.md` に詳しい。ここではハーネス設計に効く「SKILL.md + scripts + REFERENCE.md の構成」だけを索引した。
-- **各 notebook のコードセル全文**: 本蒸留は README・markdown セル・`patterns/agents/` の実装コード・`prompts/`・`.claude/` を読んだ範囲で書いた。`managed_agents/` と `claude_agent_sdk/` の個々の notebook は README の記述と目次までで、セル単位の実装は未確認。API 形状を正確に知りたいときは該当 notebook を直接読む。
+- **各 notebook のコードセル全文**: 本蒸留は README・markdown セル・`patterns/agents/` の実装コード・`prompts/`・`.claude/` を読んだ範囲で書いた。`managed_agents/` と `claude_agent_sdk/` の個々の notebook は README の記述と目次までで、セル単位の実装は未確認 (例外は `claude_agent_sdk/08_Dynamic_workflows.ipynb`。markdown セル全部とヘルパー / プロンプトのコードセルを読んだ)。API 形状を正確に知りたいときは該当 notebook を直接読む。
 - **ホスティング・インフラ**: `claude_agent_sdk/hosting/` (docker / kubernetes / modal)、`managed_agents/self_hosted_sandboxes/`、`managed_agents/cma-mcp/`。
 - **統合デモ**: `managed_agents/slack/`, `managed_agents/linear/`, `managed_agents/sentry/`, `managed_agents/roadtrip_planner/`、`claude_agent_sdk/session_browser_demo/`、`claude_agent_sdk/vulnerability_detection_agent/`。
 - **フロントエンド美観のプロンプティング**: `coding/prompting_for_frontend_aesthetics.ipynb` (DESIGN.md 系の判断には別リファレンスを使う)。

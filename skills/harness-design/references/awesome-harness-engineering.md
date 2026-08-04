@@ -1,7 +1,7 @@
 ---
 source: https://github.com/ai-boost/awesome-harness-engineering
-distilled_commit: ea5e58b2e875b1e86aae19fc4c8103e6f52977b2
-distilled_at: 2026-08-03
+distilled_commit: 3052e2a000fac7d8cd802330f040cabfe27ad03d
+distilled_at: 2026-08-04
 ---
 
 # awesome-harness-engineering 蒸留版
@@ -21,7 +21,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 
 ## まず押さえる
 
-1. **リポジトリの正体**: 実体は `README.md` (611 行の注釈付きリンク集) + `templates/` の 4 テンプレート + `verify_urls.py` (URL 到達性検証スクリプト)。それ以外の情報はすべて外部リンク。本文を読みたいものはローカルには無く、URL 先を見る必要がある。
+1. **リポジトリの正体**: 実体は `README.md` (612 行の注釈付きリンク集) + `templates/` の 4 テンプレート + `verify_urls.py` (URL 到達性検証スクリプト)。それ以外の情報はすべて外部リンク。本文を読みたいものはローカルには無く、URL 先を見る必要がある。
 2. **定義** (`README.md` 冒頭): "Harness engineering is the discipline of designing the scaffolding — context delivery, tool interfaces, planning artifacts, verification loops, memory systems, and sandboxes — that surrounds an AI agent and determines whether it succeeds or fails on real tasks"。焦点はモデルではなくハーネス。
 3. **中心原則**: "Every component here exists because the model can't do it alone — and the best harnesses are designed knowing those components will become unnecessary as models improve"。`templates/HARNESS_CHECKLIST.md` の「When this harness component should be removed」表 (Component / Exists because / Can be removed when) がこの原則を運用に落としている。
 4. **分類原則** (`AGENTS.md`): セクションは vendor 別ではなく「解決する問題」別に編成する。各エントリは `- [Title](URL) — 1–2 sentence note` 形式で、note は「なぜ読む価値があるか」を opinionated に書くのが規約。
@@ -32,7 +32,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 9. **「ハーネスだけで性能が動く」実証系**: LangChain "Improving Deep Agents with Harness Engineering" (https://blog.langchain.com/improving-deep-agents-with-harness-engineering/) はモデル交換なしのハーネス変更のみで Terminal Bench 2.0 のランクを 30 位から top 5 に改善した事例。LangChain "Tuning the harness, not the model" (Nemotron 3 Ultra playbook, https://blog.langchain.com/tuning-the-harness-not-the-model-a-nemotron-3-ultra-playbook, 2026 年 7 月) は harness-only tuning で Nemotron 3 Ultra を Deep Agents 上で Opus 4.8 の 1 point 差まで、約 1/10 のコスト ($4.48 vs $43.48) で到達させ、「evals はハーネス作業の訓練データ」「モデルの生の能力でなく fit が品質を決める」を実証。deepset "Harness Engineering" (https://www.deepset.ai/blog/harness-engineering) も failure 分類 (context / constraint / verification / planning) を各ハーネス部品に対応付ける同趣旨の synthesis。
 10. **収載基準** (`CONTRIBUTING.md`): (1) specific harness problem に対応する、(2) 読む価値の理由 note が必須、(3) vendor-agnostic by principle (特定モデル依存でもパターンが一般化すれば可)。除外: 一般 AI/ML 論文・ハーネス無関係のモデルベンチマーク・マーケ記事・「モデルの使い方」チュートリアル。
 11. **ハーネスと sandbox の内外関係**: "The Agent Harness Belongs Outside the Sandbox" (README `Security, Sandbox & Permissions`, https://www.mendral.com/blog/agent-harness-belongs-outside-sandbox) は agent loop を sandbox の外に置く設計論。credential を untrusted container に入れず、sandbox を suspendable な cattle として扱う。「harness inside」と「harness outside」は実装差でなく別のセキュリティ・信頼性モデルだという主張で、containment 設計 (Anthropic "how we contain Claude" 等) に一段の選択軸を足す。同セクションには OS 側に isolation primitive が無い環境への移植を扱う一次資料 (OpenAI "Building a safe, effective sandbox to enable Codex on Windows", https://openai.com/index/building-codex-windows-sandbox/) も並ぶ。
-12. **鮮度と信頼性の注意**: エントリ数が多く (README 全体で `- [Title](URL)` 形式のエントリが 438)、2026 年の新しめの記事・arXiv・小規模リポジトリが大量に混在する。本蒸留は README の注記に基づき、外部 URL の生死や記載内容の真偽は未検証。重要判断では URL 先の一次資料を直接確認すること。リンク検証は原典の `verify_urls.py` で行う建て付け。
+12. **鮮度と信頼性の注意**: エントリ数が多く (README 全体で `- [Title](URL)` 形式のエントリが 439)、2026 年の新しめの記事・arXiv・小規模リポジトリが大量に混在する。本蒸留は README の注記に基づき、外部 URL の生死や記載内容の真偽は未検証。重要判断では URL 先の一次資料を直接確認すること。リンク検証は原典の `verify_urls.py` で行う建て付け。
 
 ## 索引
 
@@ -40,7 +40,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 
 | トピック | 場所 (原典相対パス) | 内容 (一行) |
 |---|---|---|
-| リンク集本体 | `README.md` | 全カテゴリの注釈付き外部リンク集 (611 行)。この蒸留の元 |
+| リンク集本体 | `README.md` | 全カテゴリの注釈付き外部リンク集 (612 行)。この蒸留の元 |
 | repo 運用規約 | `AGENTS.md` (`CLAUDE.md` は symlink) | この repo 自体への agent 指示: entry 形式、問題別分類の原則、収載/除外基準 |
 | 収載基準 | `CONTRIBUTING.md` | 収載 3 条件 (specific problem / worth time / vendor-agnostic) と除外基準 |
 | AGENTS.md テンプレ | `templates/AGENTS.md` | プロジェクト用 agent 指示: 構成・規約・permissions 3 段・verification gates |
@@ -128,6 +128,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Observability | https://github.com/mikehasa/agentacct | local-first の Agent Work Intelligence。Claude Code / Codex / OpenCode の既存セッションログを取り込み、token と推定コストを作業ステップへ confidence 付きで帰属させて private dashboard に出す (cloud sync / API key 不要) |
 | Debugging | https://github.com/AgentOps-AI/agentops | session replay・コスト追跡・failure 検出の agent engineering platform |
 | Debugging | https://github.com/cosmtrek/mindwalk | Claude Code / Codex の JSONL セッションログをコードベースの 3D マップ上で replay。探索の drift と context 圧を可視化し、agent の footprint がタスク範囲と合っていたかを見る |
+| Debugging | https://github.com/QoderAI/better-harness | コーディングエージェントの workflow を 5 次元で評価し、プロジェクトとセッションの証拠を優先順位付き・証拠範囲を限定した findings とスコープを絞った修復アクションに変換。Claude Code / Codex / Cursor / GitHub Copilot 等のホスト内で動く cross-tool 診断層で、最終 diff のレビューではなくハーネス自体の改善を対象にする |
 | HITL | https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/ | interrupt / breakpoint による HITL の体系的解説 |
 | HITL | https://platform.claude.com/docs/en/agent-sdk/user-input | Claude Agent SDK の承認・ユーザー入力処理の実装リファレンス |
 | HITL | https://github.com/SmileLikeYe/agent-chief | local-first の attention orchestration 層。3 段の worthiness engine が「人を割り込ませる / agent に振る / memory に整理する」を判定し、agent 由来の通知の洪水を構造化された HITL 判断に変える |
@@ -153,7 +154,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 
 ## 蒸留の範囲外
 
-- **各エントリの詳細な注記**: README の各エントリには 1–2 文の opinionated note が付いており、本蒸留はその大半 (438 のうち上記以外) を割愛した。特定の問題領域を深掘りするときは `README.md` の該当セクションを直接 Grep/Read する (セクション見出しは `## ` / `### `、エントリは `- [Title](URL) — note` 形式で機械的に抽出できる)。
+- **各エントリの詳細な注記**: README の各エントリには 1–2 文の opinionated note が付いており、本蒸留はその大半 (439 のうち上記以外) を割愛した。特定の問題領域を深掘りするときは `README.md` の該当セクションを直接 Grep/Read する (セクション見出しは `## ` / `### `、エントリは `- [Title](URL) — note` 形式で機械的に抽出できる)。
 - **Generators & Meta-Harnesses と研究系エントリの個別評価**: 自己改善ハーネス (meta-harness / harness-evolver 系) や 2026 年の arXiv 論文群は数が多く玉石混交のため、個別には挙げていない。関心があれば `README.md` の `### Generators & Meta-Harnesses` と各カテゴリ末尾の arXiv エントリを見る。
 - **templates/ の全文**: 各テンプレートは短い (40–80 行) ので、使うときは原典の `templates/*.md` をそのままコピーして使う。コメントが本体なので、`AGENTS.md` (repo 運用規約) の指示どおりコメント構造を保つ。
 - **URL の生死確認**: 本蒸留では実施していない。必要なら原典で `python verify_urls.py` を実行する (要 `aiohttp`)。

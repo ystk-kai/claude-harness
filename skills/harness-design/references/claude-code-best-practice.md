@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: ec915a42a1b62f2b88eff5dbc940a771ba7f322e
-distilled_at: 2026-08-03
+distilled_commit: 63927033d56c0612e55cf3b347f9d5c22f89f6c6
+distilled_at: 2026-08-04
 ---
 
 # claude-code-best-practice 蒸留版
@@ -75,17 +75,23 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
    project/local から無視される** — untrusted なリポジトリが自分に権限を与えられないようにするため:
    `permissions.defaultMode` の `"auto"` (v2.1.142 以降、project/local では無視。`~/.claude/settings.json`
    に書く)、`processWrapper` (managed / user / `--settings` のみ、v2.1.210)、`footerLinksRegexes`
-   (user / `--settings` / managed のみ)、`strictPluginOnlyCustomization` (managed のみ)。
+   (user / `--settings` / managed のみ)、`pluginConfigs` (v2.1.207 以降 project/local を読まない)、
+   `sshConfigs` (managed / user のみ)、`strictPluginOnlyCustomization` (managed のみ)。
    → `reports/claude-global-vs-project-settings.md`, `best-practice/claude-settings.md`
 
 8. **permissions 構文には落とし穴がある**。`Tool(param:value)` (`Agent(model:opus)`,
    `Agent(isolation:worktree)`, `Bash(run_in_background:true)`) は **deny / ask ルール専用**で allow では
    使えない — 1 パラメータ値の許可では全体の安全性を担保できないため、allow は各ツール固有の specifier
    構文を使う。ツールの主コンテンツ欄へのマッチ (`Bash(command:rm *)`) も禁止で起動時 warning が出る。
+   `Write(path)` / `NotebookEdit(path)` / `Glob(path)` は allow に書くと parse は通るが**一切参照されない** —
+   allow 評価は `Edit(path)` と `Read(path)` しか見ない (v2.1.210)。起動時 warning が出るだけの実質 no-op なので
+   書き込み許可は `Edit` 側で表現する (deny / ask では期待通り機能する)。
    `:*` サフィックス (`Bash(npm:*)`) は非推奨ではないが末尾でしか解釈されない
    (`Bash(git:* push)` はコロンをリテラル扱い)。permission ダイアログはスペース形式で書く。
    allow に `mcp__*` のような広いワイルドカードを置かない (原典の例も `mcp__memory__*` に修正された)。
-   skill は `Skill(weather-fetcher)` / `Skill(weather *)` で指定する。
+   skill の `Skill(weather-fetcher)` / `Skill(weather *)` と `MCP(server:tool)` 短縮形は 2026-08-02 に
+   「公式 permissions docs に無い = 未検証」と注記された。確実なのは `mcp__server__tool` 形式のみで、
+   `Task(agent-name)` は `Agent` の legacy alias。
    → `best-practice/claude-settings.md` の Permissions 節
 
 9. **ハーネス側のハード上限を前提に設計する**。並列 subagent は
@@ -150,7 +156,7 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 | skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 17 フィールド (`background` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。`review` = PR の高速 1 パスレビュー、`security-review` = 現在の diff の脆弱性レビュー (`--fix` / `--comment`)。この 2 つは 2026-08-01 に bundled skill として確定したが command 表にも重複) |
 | subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (`Explore` の model 欄・`model` 例の model 名は公式と乖離したまま watch item) |
 | command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 17 フィールド (`background` 含む) と built-in slash command 87 個 (`/subtask`・`/powerup`・`/remote-env` 含む。`/doctor` は bundled skill 側へ移動、`/review`・`/security-review` は両表に併記) |
-| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (1300 行超、v2.1.220 追従。2026-07-31 に 30 項目超の drift 一括修正が入り、キー名・permission 挙動・env var が大幅に増減した) |
+| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (1300 行超、v2.1.220 追従。2026-07-31 に 30 項目超、2026-08-02 に 23 項目の drift 修正が入り、キー名・permission 挙動・スコープ制限・env var が大幅に増減した) |
 | CLAUDE.md の書き方・ロード規則 | `best-practice/claude-memory.md` | ancestor/descendant/sibling のロード挙動、モノレポでの配置指針 |
 | MCP 設定と選定 | `best-practice/claude-mcp.md` | 日常用 MCP 5 選、.mcp.json 例、承認 settings、権限構文、3 スコープ |
 | CLI フラグ・環境変数 | `best-practice/claude-cli-startup-flags.md` | `claude` の起動フラグ・サブコマンド・env vars の分類表 |
@@ -182,7 +188,9 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 
 - **settings.json の全キーと permissions 構文の詳細** — 1300 行超の網羅表は写していない。設計・監査で
   キー名や構文を確定させるときは `best-practice/claude-settings.md` を直接引く。キー名の誤りは
-  silent no-op になるため (`maxSkillDescriptionChars` の例) 記憶で書かない。
+  silent no-op になるため (`maxSkillDescriptionChars` の例) 記憶で書かない。原典は公式 docs で裏が取れない
+  キー・構文に `*(not in official ... — unverified)*` を inline 注記する運用なので (2026-08-02 監査時点では
+  `thinkingBudgetTokens`・`Skill(...)`・`MCP(server:tool)`)、この注記付きの値は設計の前提にしない。
 - **公式 slash command・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と
   `best-practice/claude-cli-startup-flags.md` を引く。
 - **tips 全文** — カテゴリ (Prompting/Planning/Context/Session/CLAUDE.md/Agents/Commands/Skills/
