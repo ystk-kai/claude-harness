@@ -8,7 +8,7 @@ Claude Code の個人グローバル設定 — スキルと CLAUDE.md の常時�
 
 | スキル | 用途 | 起動 |
 |---|---|---|
-| `harness-design` | LLM ハーネス・プロンプト設計の参照資料集 (原典 8 本)。蒸留版 → 原典 clone の 2 層で読む | 自動 |
+| `harness-design` | LLM ハーネス・プロンプト設計の参照資料集 (原典 8 本)。蒸留版 → 原典 clone の 2 層で読む。追従しない資料から採った手法は `PATTERNS.md` | 自動 |
 | `ui-design` | UI 生成のデザイン参照資料集 (原典 3 本: DESIGN.md 雛形 / アンチスロップ規律 / デザイントークン仕様)。同じ 2 層 | 自動 |
 | `avoid-ai-slop-ja` | 日本語文章から AI 臭 (slop) を除くレビュー・リライトの手法 | 自動 |
 | `avoid-ai-slop-design` | Web UI・スライド・図解・生成画像の AI 臭検出カタログと処方 (計測研究・学術ソースの出典付き) | 自動 |
@@ -45,7 +45,7 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 
 管理対象は 3 種類。
 
-- `skills/<name>/` — スキル本体 (SKILL.md + 必要に応じて references/・scripts/)
+- `skills/<name>/` — スキル本体 (SKILL.md + 必要に応じて references/・scripts/、スキル固有の補助文書。実例: `harness-design/PATTERNS.md`、`claude-harness-refs-update/DISTILLING.md`)
 - `claude-md/<name>.md` — グローバル CLAUDE.md に常時挿入するルール (必要なスキルのみ)
 - `install.sh` — 冪等な展開スクリプト。何度実行しても同じ状態に収束する
 
@@ -75,6 +75,12 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 
 参照リポジトリを増やすときは、蒸留版を `skills/<skill>/references/<clone ディレクトリ名>.md` として 1 ファイル作り、そのスキルの SKILL.md の表に行を足す。`check-freshness.sh` と `install.sh` はどちらも `skills/*/references/*.md` をスキル横断で走査するので、置き場所が合っていれば自動で対象になる。詳しい規約は [DISTILLING.md](skills/claude-harness-refs-update/DISTILLING.md)。
 
+### 追従しない資料から手法だけ採る
+
+継続追従するほどではない資料 (探索索引の先・記事・製品リポジトリ) にも、単発で使える手法はある。この場合は蒸留版も原典 clone も作らず、[skills/harness-design/PATTERNS.md](skills/harness-design/PATTERNS.md) に 1 項目 = 1 手法 + 出所 1 行で足す。資料本体は追わない。
+
+採録ゲート 5 条件 (既存蒸留版と非重複 / 実読確認 / 転用可能 / 出所明記 / 蒸留版を作るほどではない) と退出規約 (公式資料や蒸留版に同等以上の記述が現れたら削除して蒸留版へ寄せる) は同ファイルが自己所有する。frontmatter に `source` を持たないため `check-freshness.sh` と `install.sh` の走査対象外で、鮮度管理の対象にもならない。
+
 ## スキルを増やす・外す
 
 増やすとき:
@@ -92,3 +98,4 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 - 外部 clone (生データ) は共有コーパスとして `~/.claude/references/` に外出しする。スキル配布時に第三者リポジトリを同梱せずに済み、CLAUDE.md ルールや他スキルからも共有できる
 - スキル外パスへの依存は SKILL.md の `compatibility` フィールド (標準仕様の宣言用フィールド) で明示する
 - 自作の蒸留資料は標準どおり `skills/<skill>/references/` に置き、SKILL.md から 1 階層でリンクする。通常の参照は蒸留版で完結させ、原典の全文走査による入力トークンの肥大化を避ける
+- 原典と 1:1 対応しない自作文書 (`PATTERNS.md` 等) は `references/` に入れずスキル直下に置く。`harness-design/references/` を蒸留版だけの場所に保ち、「frontmatter の `source` が repo リストの唯一の正」という規約を崩さないため。走査スクリプトは `source` 無しのファイルを無言で飛ばすので技術的には同居できるが、置くと人間側の読み分けが曖昧になる
