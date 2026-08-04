@@ -52,6 +52,11 @@
 
 解除条件を書くことが要点。書かないと、ユーザーの何気ない一言が解除と解釈される余地が残る。
 
+**先に上位の機構を検討する**: 同じ drift に対して、指示ではなく**スクリプトの制御フローで強制する**方が強い
+(`references/claude-cookbooks.md` の「まず押さえる」16 — "Double-check your findings" は指示にすぎず
+context 圧のもとで飛ぶが、制御フローなら飛ばない)。コードで表現できる場面ではそちらを使う。
+この項目が効くのは、プロンプトや常時ルールしか手段が無い層 (skill 本文・CLAUDE.md・ホスト側の rule ファイル) に限る。
+
 出所: `DietrichGebert/ponytail` の `skills/ponytail/SKILL.md` "Persistence" 節
 
 ### 3. 度合い (強度) の指定は、同一入力に対する複数出力の例で定義する
