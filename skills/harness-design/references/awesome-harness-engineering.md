@@ -105,7 +105,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Skills & MCP | https://modelcontextprotocol.io/introduction | MCP 公式イントロダクション |
 | Skills & MCP | https://github.com/modelcontextprotocol/servers | 公式リファレンス MCP サーバ実装集 |
 | Skills & MCP | https://www.anthropic.com/engineering/code-execution-with-mcp | MCP をコード実行と組み合わせて効率化する Anthropic の実践記事 |
-| Skills & MCP | https://github.com/DietrichGebert/ponytail | built-in を優先し新規依存を避け最小コードだけ書く「lazy senior dev」として振る舞わせる skill。実 Claude Code セッションで約 54% 行数削減・約 20% コスト削減 (safety guard は維持)。capability 追加ではなく over-engineering を抑える側のハーネス介入 |
+| Skills & MCP | https://github.com/DietrichGebert/ponytail | built-in を優先し新規依存を避け最小コードだけ書く「lazy senior dev」として振る舞わせる skill。capability 追加ではなく over-engineering を**抑える**側のハーネス介入という点が読みどころ。**upstream note の「約 54% 行数削減・約 20% コスト削減」は単発プロンプト測定値で、ponytail 自身が過大と撤回済み** (原典 `benchmarks/README.md` の honesty note で確認)。実セッション再測では over-build の余地がある機能で 60-94% 削減・既に最小のコードでは wash・safety 100% 維持。第三者ベンチは大規模タスクでのツール呼び出し増によるコスト増と、24 タスク中 5 件で入力検証が落ちる例を報告。数値を引くならこの撤回後の値を使う |
 | Permissions | https://www.anthropic.com/engineering/beyond-permission-prompts | 自然言語 permission ではなく構造化 authorization を組み込む設計 |
 | Permissions | https://genai.owasp.org/llmrisk/llm062025-excessive-agency/ | OWASP による excessive agency リスクの定義 |
 | Permissions | https://platform.claude.com/docs/en/agent-sdk/permissions | Claude Agent SDK の permission アーキテクチャ公式リファレンス |
