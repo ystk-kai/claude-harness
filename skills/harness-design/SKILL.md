@@ -15,6 +15,7 @@ compatibility: Requires git and network access to clone/update the reference rep
 1. まず該当リポジトリの蒸留版 (`references/<repo>.md`) を読む
 2. 深掘りは蒸留版の索引が指す原典ファイルだけを Read する
 3. 蒸留版に載っていない話題のみ原典を直接探す: README/目次で当たりを付け、`rg`/Grep で絞り込む (有用な発見は蒸留版への追記を検討する)
+4. どの蒸留版にも無い手法は [PATTERNS.md](PATTERNS.md) を見る (下記)
 
 いずれの場合も、リポジトリ全体や README 全文をコンテキストに載せず、必要なファイルの必要な範囲だけ Read する。
 
@@ -43,6 +44,17 @@ compatibility: Requires git and network access to clone/update the reference rep
 | Claude Code 固有 | `skills/` (anthropics/skills) | [references/skills.md](references/skills.md) | skill 定義 (SKILL.md) を設計・作成・レビューするとき。公式の仕様・雛形・skill-creator・模範実装の一次資料 |
 | Claude Code 固有 | `claude-code-hooks/` | [references/claude-code-hooks.md](references/claude-code-hooks.md) | hooks を設計するとき。全 hook のカタログ・handler 4 型・ブロック手段の非対称性・settings 登録形の実例 |
 | 探索索引 | `awesome-harness-engineering/` | [references/awesome-harness-engineering.md](references/awesome-harness-engineering.md) | ハーネス設計の選択肢を広く調べるとき、他ツール事例を探すとき。指す一次資料に当たる |
+
+## 採録した手法 (原典 clone を持たない資料から)
+
+継続参照するほどではない資料 (探索索引の先、記事、製品リポジトリ) にも、単発で使える手法はある。
+それを [PATTERNS.md](PATTERNS.md) に 1 項目 = 1 手法 + 出所 1 行で置く。資料本体は追わない。
+
+- **読むとき**: 蒸留版のどれにも無い論点を扱うときに開く。二次情報なので、公式一次資料と食い違ったら公式が正
+- **書くとき**: PATTERNS.md の**採録ゲート 5 条件**に通す。要は「既存の蒸留版と被らない・実際に読んで確認した・
+  他のハーネスに転用できる・出所が書ける・資料全体を追う価値まではない」。被るなら採録せず既存を読む。
+  資料全体に価値があるなら PATTERNS.md ではなく蒸留版を作る (DISTILLING.md の「新規リポジトリの追加」)
+- ゲートと退出規約は PATTERNS.md が自分で所有する。このファイルは判定ロジックを持たない
 
 UI 生成のデザイン参照 (DESIGN.md 雛形・デザイントークン・アンチスロップ規律) はこのスキルの対象外。
 `ui-design` スキルを使う。
