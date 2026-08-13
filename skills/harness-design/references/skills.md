@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/skills
-distilled_commit: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
-distilled_at: 2026-07-27
+distilled_commit: f17010c9bb483898c1d9c9f42dde2b3a98889434
+distilled_at: 2026-08-10
 ---
 
 # anthropics/skills 蒸留版
@@ -50,7 +50,7 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
 
 7. **多ドメイン skill は variant 別に分割**。SKILL.md にワークフローと選択ロジックを置き、
    `references/aws.md` `gcp.md` `azure.md` のように分ける。Claude は関連 reference だけ読む。
-   これを最大規模で実装しているのが `claude-api` (SKILL.md 546 行 + 言語別ディレクトリ 8 種 +
+   これを最大規模で実装しているのが `claude-api` (SKILL.md 548 行 + 言語別ディレクトリ 8 種 +
    言語非依存の `shared/` 25 ファイル)。ディレクトリ名は `references/` でなく `shared/` +
    `{lang}/` で、命名は固定規約ではなく分割軸に合わせてよいことを示す。
    → `skills/skill-creator/SKILL.md` の "Domain organization"、`skills/claude-api/`
@@ -92,6 +92,16 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
     上書き) を構造化した pushy かつ曖昧さ排除の description の手本。設計時にこの書きぶりを参照する。
     → `skills/claude-api/SKILL.md` の frontmatter
 
+16. **リポジトリ同梱 skill の配置規約 (Managed Agents 側の発見ルール)**。`github_repository` を mount した
+    セッションでは、リポジトリ **ルートの `.claude/skills/<skill-name>/`** が 1 階層だけ走査され、各 skill の
+    name/description/sandbox パスがエージェントに提示される (SKILL.md 形式は upload する custom skill と同一)。
+    発見されないのは: 直置きの `.claude/skills/SKILL.md`、より深い入れ子 (`.claude/skills/tools/code-review/`)、
+    `.claude` 外の `skills/`、サブパッケージ内の `.claude/skills`。走査は **セッション開始時に 1 回だけ**
+    (途中の push は反映されない)、cloud sandbox 限定。加えて「リポジトリ内 skill はエージェント命令そのもの =
+    信頼境界の内側」という警告があり、commit 権のある者 (外部 PR merge 含む) が審査なしに命令を注入できる。
+    skill を repo に置く設計をするときはこの階層規約と監査要件を前提にする。
+    → `skills/claude-api/shared/managed-agents-tools.md` の "Skills from a GitHub repository"
+
 ## 索引
 
 | トピック | 原典パス | 内容 (一行) |
@@ -112,6 +122,7 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
 | guidance 型 (SKILL.md 1 枚) の模範 | `skills/{frontend-design,brand-guidelines}/` | scripts なし・本文のみで方針を伝える設計 |
 | Creative & Design 実例 | `skills/{algorithmic-art,canvas-design,theme-factory,web-artifacts-builder}/` | 生成アート・ポスター・テーマ適用・複雑 artifact のパターン |
 | Enterprise & Communication 実例 | `skills/{internal-comms,doc-coauthoring,slack-gif-creator}/` | 社内文書・共同執筆・Slack GIF。examples/ 同梱例あり |
+| repo 同梱 skill の配置・発見規約 | `skills/claude-api/shared/managed-agents-tools.md` | ルート `.claude/skills/<name>/` を 1 階層走査 (セッション開始時 1 回・cloud sandbox 限定)、発見されない配置の列挙、信頼境界の警告 |
 | pushy な description の手本 / 大規模 variant 分割の模範 | `skills/claude-api/` | SKILL.md frontmatter が TRIGGER/SKIP 構造で発火条件と除外条件を明記。本体は `{lang}/` 8 言語 + `shared/` 25 ファイルに分割し、SKILL.md 本文は選択ロジックと "→ Read `<path>`" 誘導に徹する |
 
 ## 蒸留の範囲外
@@ -123,7 +134,8 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
   MCP 設計指針など。skill 設計の "型" を知るのが本蒸留の目的なので、各ドメインの実装知は該当
   `skills/<name>/SKILL.md` と同梱 reference を直接読む。特に `claude-api` のモデル ID・価格・
   Managed Agents API 仕様は上流で頻繁に更新されるため、本蒸留を経由せず必ず原典を読む
-  (本蒸留が claude-api から取るのは description の書きぶりと分割構造だけ)。
+  (本蒸留が claude-api から取るのは description の書きぶり・分割構造・repo 同梱 skill の配置規約だけ)。
+  session budget / inference_geo / advisor / multiagent roster といった API 表面は skill 設計と無関係なので扱わない。
 - **eval スクリプトの実装詳細** — `scripts/*.py` の CLI 引数や内部ロジックは写していない。実行時は
   skill-creator SKILL.md の該当節のコマンド例と `references/schemas.md` を引く。
 - **skill-creator の環境別分岐** (Claude.ai / Cowork の subagent 有無・browser 有無による手順差) —
