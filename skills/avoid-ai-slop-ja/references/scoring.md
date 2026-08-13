@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # Scoring — 5 axes (diagnostic, not a gate)
 
 Rate each axis 1–10. Total below **35/50 → rewrite**. At 35+ you may still ship, but **fix any critical syntax slop** (false agency, propositional-heading pile-up, empty false contrast) regardless of score. Use the score to find *where* to work, not to pass/fail mechanically.

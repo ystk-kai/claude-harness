@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # スライド・図解の tell — 検出と処方
 
 スライド・図解の tell は生成ツールのテンプレート機構 (python-pptx 等によるコード生成にはテンプレート・画像ライブラリ・レイアウトアルゴリズムがない) に根差すため、画像系の tell より寿命が長い。

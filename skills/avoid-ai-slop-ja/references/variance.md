@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # Variance (ムラ) — keep 5 kinds on purpose
 
 AI slop is uniform. The fix is deliberate unevenness — but **only within the document type's budget** (see document-types.md). Variation is a tool to break the metronome, never decoration for its own sake.

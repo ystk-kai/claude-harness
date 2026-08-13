@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 90
+---
 # AI 画像・イラストの tell — 陳腐化と持続の区別つき
 
 モデル改善で消える tell と構造的に残る tell を区別する。2023 年頃の目視 tell (指の本数など) だけで判定すると false negative を量産する。英語圏のガイドは「見た目」から「来歴 (provenance)」へ軸足を移している。

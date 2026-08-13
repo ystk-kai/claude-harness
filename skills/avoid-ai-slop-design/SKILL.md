@@ -31,3 +31,7 @@ The cardinal rule (shared with `avoid-ai-slop-ja`): **breaking uniformity is a m
 - [ ] Diagrams: one relationship type chosen (parallel / causal / sequence / comparison); every arrow and label verified; built as editable vector, not a single raster
 - [ ] Images: default AI look actively steered away (art-direction prompt + references); no Japanese text baked in; light/shadow/reflection consistent
 - [ ] Symbol fixes accompanied by structure fixes — if only the colors changed, it is still slop
+
+## 鮮度
+
+この知識ベースは出所リポジトリの clone を持たない自作の調査資料なので、SHA ではなく日付で棚卸しする。各 `references/*.md` の frontmatter が `tracking: review` + `reviewed_at` + `review_interval_days` を持ち (`images.md` / `web-ui.md` は 90 日 — 生成モデルの世代と配色トレンドに依存するため、他は 180 日)、`/claude-harness-refs-update` が期限切れを `REVIEW` として報告する。とくに `images.md` の「陳腐化」ラベル付き tell は世代交代で無効化されるので、棚卸しのたびに持続性ラベルを見直す。

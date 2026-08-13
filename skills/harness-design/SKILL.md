@@ -63,7 +63,7 @@ UI 生成のデザイン参照 (DESIGN.md 雛形・デザイントークン・�
 
 - 蒸留版 frontmatter の `distilled_commit` が、どのコミット時点の原典に基づくかを示す
 - 鮮度チェックと再蒸留の機構は `claude-harness-refs-update` スキルが一元所有する。このスキルは蒸留版を持つだけで、判定ロジックも更新レシピも持たない
-- チェックのみなら `/claude-harness-refs-update --check` (直接叩くなら `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。origin を fetch し、BEHIND = clone が upstream より古い / STALE = 蒸留版が clone より古い を差分コミット付きで表示。`--offline` で fetch 省略)
+- チェックのみなら `/claude-harness-refs-update --check` (直接叩くなら `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。origin を fetch し、1 ファイル 1 行で BEHIND = clone が upstream より古い / STALE = 蒸留版が clone より古い を差分コミット付きで表示。要対応があれば exit 1。`--offline` で fetch 省略)
 - 一連の更新 (チェック → 原典 clone の `git pull` → STALE の再蒸留) は `/claude-harness-refs-update`。構成規約は [../claude-harness-refs-update/DISTILLING.md](../claude-harness-refs-update/DISTILLING.md) が唯一のレシピ (SHA だけの無言 bump をしない)
 - 監査・レビューの基準として使うときは、使った版の commit SHA を成果物に記録する。ブランチ名は版の識別子にしない
 

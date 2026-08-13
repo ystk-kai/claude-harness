@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # Banlist — three tiers
 
 Scan for these. Tier decides how hard to act.

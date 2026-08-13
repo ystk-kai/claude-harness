@@ -8,6 +8,8 @@ fm_value() { # $1=file $2=key → frontmatter 内の値 (なければ空)
     index($0, key ": ") == 1 {
       v = substr($0, length(key) + 3)
       gsub(/[[:space:]\r]+$/, "", v)
+      # YAML で普通に付く引用符を剥がす ("2026-01-01" が生の値として漏れるのを防ぐ)
+      if (v ~ /^".*"$/ || v ~ /^'"'"'.*'"'"'$/) v = substr(v, 2, length(v) - 2)
       print v
       exit
     }

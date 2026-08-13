@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # 処方箋 — slop を避けて「意図のあるデザイン」にする
 
 3 系統の調査 (計測研究・デザイナーの一次記事・学術ソース) で一致した実践。フェーズ順に適用する。個別の tell への対応は web-ui.md / slides-diagrams.md / images.md を参照。

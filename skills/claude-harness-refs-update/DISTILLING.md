@@ -2,7 +2,24 @@
 
 `references/*.md` (蒸留版) を作る・更新するときの規約と手順。蒸留版の品質と構造の一貫性は、この文書を唯一のレシピとして維持する。
 
-## 構成規約
+## frontmatter の形式 (`references/*.md` 共通)
+
+`skills/*/references/*.md` は 3 形式のいずれかを取る。`check-freshness.sh` はこの分類で処理を分け、
+**どれにも当てはまらないものは `ERR`** にする。frontmatter が無いだけで無言に対象外にはならない
+(「意図的な非追従」と「壊れた蒸留版」を区別できなくなるため)。
+
+| 形式 | キー | 用途 | 判定 |
+|---|---|---|---|
+| 1. 蒸留版 | `source` + `distilled_commit` + `distilled_at` | 原典 clone を SHA で追従する | clone の HEAD と `distilled_commit` を比較 |
+| 2. 知識ベース | `tracking: review` + `reviewed_at` + `review_interval_days` | 出所 clone を持たない自作の調査資料 (例: `avoid-ai-slop-*`) | `reviewed_at` からの経過日数が interval を超えたら `REVIEW` |
+| 3. 対象外 | `tracking: none` | 鮮度管理しないと明示するもの | 何も報告しない |
+
+形式 2 の `review_interval_days` は腐る速さで決める。モデル世代や流行に依存する記述 (生成画像の tell、
+配色トレンド) は 90 日、機構に根ざした記述 (テンプレート由来のパターン、文章構文) は 180 日を目安にする。
+棚卸しで内容を見直したら `reviewed_at` を当日に更新する — 中身を見ずに日付だけ進めるのは
+形式 1 の「SHA だけの無言 bump」と同じ禁止事項。
+
+## 構成規約 (形式 1 の蒸留版)
 
 - frontmatter は 3 キー: `source` (出所 URL。repo リストの唯一の正)・`distilled_commit` (蒸留時点の完全 SHA)・`distilled_at` (YYYY-MM-DD)
 - 本文構成: `## Contents` (100 行超のファイルでは必須) → `## まず押さえる` (確度の高い要点 5〜15 項目、各項目に原典相対パス併記) → 索引テーブル (トピック → 原典パス → 一行説明) → `## 蒸留の範囲外` (含めなかった領域と原典での当たり方)

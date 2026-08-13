@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # Syntax patterns — detect & fix
 
 These catch "generated-ness" deeper than vocabulary. Make each a review question.

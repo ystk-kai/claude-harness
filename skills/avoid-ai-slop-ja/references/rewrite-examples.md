@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # Rewrite examples — bad / fixed / over-fixed
 
 Each shows the slop, a fix, and an over-correction to avoid. The over-fix matters: anti-slop has its own failure mode.

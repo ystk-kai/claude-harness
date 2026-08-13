@@ -39,3 +39,7 @@ If you can't answer these, vocabulary/symbol fixes won't help — restore the au
 - [ ] Sentence length and endings vary; not every paragraph lands the same way.
 - [ ] Every key claim is anchored to a name / number / example; a stance is taken with a stated basis (≠ unfounded assertion).
 - [ ] 5-axis self-score ≥ 35/50 and no critical syntax slop remains.
+
+## 鮮度
+
+この知識ベースは出所リポジトリの clone を持たない自作の調査資料なので、SHA ではなく日付で棚卸しする。各 `references/*.md` の frontmatter が `tracking: review` + `reviewed_at` + `review_interval_days` (180 日) を持ち、`/claude-harness-refs-update` が期限切れを `REVIEW` として報告する。棚卸しでは出典 URL の生存と、記述が前提にしている流行・モデル世代の変化を確認する。

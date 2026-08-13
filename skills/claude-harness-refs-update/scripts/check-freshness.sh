@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
-# 全スキルの蒸留版 (skills/*/references/*.md) の鮮度を原典 clone と突き合わせて報告する。
-#   BEHIND: clone が upstream より遅れている → git pull --ff-only で更新
-#   STALE : 蒸留版の distilled_commit が clone の HEAD より古い → DISTILLING.md の手順で更新
+# 全スキルの references/*.md の鮮度を報告する。1 ファイル 1 行で、タグは「次にやること」を示す。
+#   BEHIND: clone が upstream より遅れ → git pull --ff-only してから再実行 (STALE はその後に再判定)
+#   STALE : 蒸留版が clone の HEAD より古い → DISTILLING.md の手順で再蒸留
+#   REVIEW: 出所を追従しない知識ベースの棚卸し期限切れ → 内容を見直して reviewed_at を更新
+#   OK    : 追従先と一致している / 棚卸し期限内
+#   MISS  : clone がない・壊れている / ERR: frontmatter か SHA が解決できない
+#   NOTE  : 判定を諦めた。「最新」ではないので exit 1 側に数える (未検証を緑に紛れ込ませない)
+# frontmatter の 3 形式 (正は DISTILLING.md「frontmatter の形式」):
+#   1. source + distilled_commit                             … 原典 clone を SHA で追従する蒸留版
+#   2. tracking: review + reviewed_at + review_interval_days  … 出所を追従しない知識ベース
+#   3. tracking: none                                        … 対象外 (明示)
+# どれにも当てはまらないものは ERR。frontmatter が無いだけで無言に対象外にはしない。
 # 既定で origin を fetch する (shallow clone は履歴ごと取得)。--offline で fetch を省略。
 # 終了コード: 0=全て最新, 1=要対応あり
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
@@ -14,16 +23,69 @@ REFS_ROOT="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/references"
 offline=0
 if [ "${1:-}" = "--offline" ]; then offline=1; fi
 status=0
+found=0
+now_epoch="$(date +%s)"
+
+# YYYY-MM-DD → epoch 秒。GNU date と BSD date の両方を試し、どちらも駄目なら空を返す
+epoch_of_day() {
+  date -d "$1" +%s 2>/dev/null || date -j -f %Y-%m-%d "$1" +%s 2>/dev/null || true
+}
 
 for doc in "$SKILLS_ROOT"/*/references/*.md; do
-  [ -e "$doc" ] || { echo "どのスキルにも references/*.md (蒸留版) がない"; exit 1; }
+  [ -e "$doc" ] || continue
+  found=1
   rel="${doc#"$SKILLS_ROOT"/}"
+  tracking="$(fm_value "$doc" tracking)"
+
+  # 形式 3: 明示的に対象外
+  if [ "$tracking" = "none" ]; then continue; fi
+
+  # 形式 2: 日付で棚卸しする知識ベース (出所 clone を持たない)
+  if [ "$tracking" = "review" ]; then
+    reviewed_at="$(fm_value "$doc" reviewed_at)"
+    interval="$(fm_value "$doc" review_interval_days)"
+    if [ -z "$reviewed_at" ] || [ -z "$interval" ]; then
+      echo "ERR    $rel: tracking: review には reviewed_at (YYYY-MM-DD) と review_interval_days が要る"
+      status=1; continue
+    fi
+    # 算術に入る前に検証する。非整数を $(( )) に渡すと set -u 下で走査全体が落ち、
+    # 以降のファイルが一切報告されなくなる (1 ファイルの誤記で鮮度チェックが盲目化する)
+    case "$interval" in
+      ''|0|*[!0-9]*)
+        echo "ERR    $rel: review_interval_days ($interval) が正の整数でない"
+        status=1; continue ;;
+    esac
+    case "$reviewed_at" in
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+      *) echo "ERR    $rel: reviewed_at ($reviewed_at) が YYYY-MM-DD 形式でない"
+         status=1; continue ;;
+    esac
+    reviewed_epoch="$(epoch_of_day "$reviewed_at")"
+    if [ -z "$reviewed_epoch" ]; then
+      # 検証できなかっただけで「最新」ではない。status を上げて exit 0 に紛れ込ませない
+      echo "NOTE   $rel: reviewed_at ($reviewed_at) を date で解釈できない (存在しない日付か date の非対応) — 棚卸し判定を省略"
+      status=1; continue
+    fi
+    elapsed=$(( (now_epoch - reviewed_epoch) / 86400 ))
+    if [ "$elapsed" -lt 0 ]; then
+      # 未来日付は「stale でない」ので OK に落ちてしまう。打ち間違いか時計ずれを最新扱いで隠さない
+      echo "ERR    $rel: reviewed_at ($reviewed_at) が未来の日付 (打ち間違いか時計ずれ)"
+      status=1; continue
+    fi
+    if [ "$elapsed" -gt "$interval" ]; then
+      echo "REVIEW $rel: 前回の棚卸しから $elapsed 日 (期限 $interval 日) — 内容を見直して reviewed_at を更新"
+      status=1
+    else
+      echo "OK     $rel @ reviewed $reviewed_at (残り $(( interval - elapsed )) 日)"
+    fi
+    continue
+  fi
+
+  # 形式 1: 原典 clone を SHA で追従する蒸留版
   source_url="$(fm_value "$doc" source)"
   pinned="$(fm_value "$doc" distilled_commit)"
-  # 原典 clone を持たないスキル固有の references (蒸留版ではない) は対象外。無言で飛ばす
-  if [ -z "$source_url" ] && [ -z "$pinned" ]; then continue; fi
   if [ -z "$source_url" ] || [ -z "$pinned" ]; then
-    echo "SKIP   $rel: 蒸留版なら frontmatter に source と distilled_commit の両方が要る (片方しかない)"
+    echo "ERR    $rel: frontmatter が 3 形式のどれでもない (source+distilled_commit / tracking: review / tracking: none) — DISTILLING.md 参照"
     status=1; continue
   fi
   name="$(repo_dir_name "$source_url")"
@@ -55,19 +117,30 @@ for doc in "$SKILLS_ROOT"/*/references/*.md; do
   fi
 
   upstream="$(git -C "$clone" rev-parse --verify --quiet origin/HEAD 2>/dev/null || true)"
+  behind=""
   if [ -n "$upstream" ] && [ "$upstream" != "$head_sha" ]; then
     behind="$(git -C "$clone" rev-list --count HEAD..origin/HEAD 2>/dev/null || echo '?')"
-    echo "BEHIND $name: clone が upstream より $behind commits 遅れ — git -C \"$clone\" pull --ff-only"
-    status=1
   fi
 
-  if [ "$pinned_full" = "$head_sha" ]; then
+  # タグは「次の一手」を示す。BEHIND と STALE が同時に立つときは pull が先なので BEHIND を出す
+  # (pull で HEAD が動くと STALE の差分そのものが変わるため、古い HEAD で蒸留させない)
+  if [ -n "$behind" ]; then
+    also=""
+    [ "$pinned_full" = "$head_sha" ] || also=" / 蒸留版も遅れ — pull 後に再実行して STALE を再判定"
+    echo "BEHIND $name: clone が upstream より $behind commits 遅れ — git -C \"$clone\" pull --ff-only$also"
+    status=1
+  elif [ "$pinned_full" = "$head_sha" ]; then
     echo "OK     $name @ ${head_sha:0:12}"
   else
-    behind="$(git -C "$clone" rev-list --count "$pinned_full..HEAD" 2>/dev/null || echo '?')"
-    echo "STALE  $name: 蒸留時 ${pinned_full:0:12} → 現在 ${head_sha:0:12} ($behind commits) — 蒸留版: skills/$rel"
+    n="$(git -C "$clone" rev-list --count "$pinned_full..HEAD" 2>/dev/null || echo '?')"
+    echo "STALE  $name: 蒸留時 ${pinned_full:0:12} → 現在 ${head_sha:0:12} ($n commits) — 蒸留版: skills/$rel"
     git -C "$clone" log --oneline "$pinned_full..HEAD" 2>/dev/null | sed 's/^/         /' || true
     status=1
   fi
 done
+
+if [ "$found" -eq 0 ]; then
+  echo "ERR    どのスキルにも references/*.md がない ($SKILLS_ROOT/*/references/*.md)"
+  exit 1
+fi
 exit $status

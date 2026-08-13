@@ -1,3 +1,8 @@
+---
+tracking: review
+reviewed_at: 2026-07-12
+review_interval_days: 180
+---
 # Document types — what to adopt vs. exclude
 
 The anti-slop techniques are universal in spirit but **not uniform in application**. "Edge" (毒・皮肉・自虐・誤字・カジュアル一人称・中間温度) suits personal writing and is wrong for formal docs. Always adopt: 具体性・削減・ヘッジ削減・false-agency 回避・構文チェック・リズムのムラ. The table sets the *bluntness/voice budget*.
