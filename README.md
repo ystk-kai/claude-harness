@@ -35,31 +35,45 @@ git clone https://github.com/ystk-kai/claude-harness.git ~/claude-harness
 https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 ~/claude-harness/install.sh --with-references を実行してください。
 完了後に次の 3 点を検証して結果を報告してください:
-1. ~/.claude/skills/ に skills/ 配下の 5 スキルへの symlink があること
-2. ~/.claude/CLAUDE.md に managed:harness-design ブロックが挿入されていること
+1. ~/claude-harness/skills/ の各ディレクトリに対応する symlink が ~/.claude/skills/ にあること
+2. ~/.claude/CLAUDE.md に claude-md/ の各ファイルに対応する managed ブロックがあること
 3. bash ~/claude-harness/skills/claude-harness-refs-update/scripts/check-freshness.sh --offline
-   が全リポジトリ OK を返すこと
+   が exit 0 を返すこと (exit 1 なら行頭タグごとに何が要対応か報告する)
 ```
 
 ## 仕組み
 
-管理対象は 3 種類。
+管理対象は 3 種類 + 任意の 1 種。
 
 - `skills/<name>/` — スキル本体 (SKILL.md + 必要に応じて references/・scripts/、スキル固有の補助文書。実例: `harness-design/PATTERNS.md`、`claude-harness-refs-update/DISTILLING.md`)
-- `claude-md/<name>.md` — グローバル CLAUDE.md に常時挿入するルール (必要なスキルのみ)
+- `claude-md/<name>.md` — グローバル CLAUDE.md に常時挿入するルール
+- `settings/global.json` (任意) — `~/.claude/settings.json` にキー単位でマージする設定。**この repo は payload を同梱しない** (有効プラグインや marketplace の一覧は個人環境の情報なので公開しない)。必要な環境でローカルに置くと機構が働く
 - `install.sh` — 冪等な展開スクリプト。何度実行しても同じ状態に収束する
 
-`install.sh` は 3 つのことをする。
+`install.sh` は 4 つのことをする (3 は `settings/global.json` を置いた環境だけ)。
 
 1. **skills を symlink する** — `skills/*/` を `~/.claude/skills/<name>` へ張る。symlink でない実体が既にある場合は上書きせず、警告してスキップする (手動で退避してから再実行)
 2. **CLAUDE.md にルールを差し込む** — `claude-md/*.md` を `<!-- BEGIN managed:<name> -->` 〜 `<!-- END managed:<name> -->` で囲んで `~/.claude/CLAUDE.md` へ。既存の同名ブロックは位置を問わず取り除き、ファイル末尾に貼り直す。手書き部分は触らない
-3. **原典を clone する (`--with-references` 指定時のみ)** — 各スキルの `references/*.md` の frontmatter にある `source` URL を `~/.claude/references/<repo>/` へ `git clone --filter=blob:none` で取得する。blob は必要時取得だが履歴は完全なので、鮮度チェックの差分表示がそのまま動く
+3. **settings.json にキーをマージする** — `settings/global.json` に書いたキーだけを `~/.claude/settings.json` へ入れる。`extraKnownMarketplaces` と `enabledPlugins` はキー単位のマージ (既存の他キーは残る)、`hooks` はこの repo の `hooks/` を指す handler だけを剥がしてから貼り直す (再実行しても重複しない。現在この repo は hook を収録していないので、過去に入れた分の掃除だけが働く)。`{{REPO_DIR}}` は絶対パスへ置換される。内容が変わるときだけ書き、直前の内容を `settings.json.pre-claude-harness.bak` に残す (ユーザー自身の `.bak` を潰さないため専用の接尾辞を使う)。`jq` が無い環境ではこの手順だけスキップする。壊れた JSON やトップレベルが object でない `settings.json` は、生の jq エラーになる前に中断する
+4. **原典を clone する (`--with-references` 指定時のみ)** — 各スキルの `references/*.md` の frontmatter にある `source` URL を `~/.claude/references/<repo>/` へ `git clone --filter=blob:none` で取得する。blob は必要時取得だが履歴は完全なので、鮮度チェックの差分表示がそのまま動く
 
 `--with-references` は第 1 引数のときだけ効く (`install.sh --foo --with-references` は無視される)。clone 済みのディレクトリは再取得しない — 原典の更新は `/claude-harness-refs-update` の仕事。
 
 `--with-references` の実行ごとに、clone 済みのものも含めて `.claude/skills` を worktree から外す (sparse-checkout)。原典を置いただけで第三者のスキルがディレクトリスコープで自動登録されるのを防ぐため。中身が必要なら `git -C <clone> show HEAD:.claude/skills/...` で読める。`.claude/{agents,commands,hooks,settings.json,rules}` は入れ子では自動ロードされないので残してあり、実例として読める。
 
 スキル本体は symlink なので、内容の変更は `git pull` だけで全環境に反映される。`install.sh` の再実行が要るのは、スキルを追加・改名したときと `claude-md/` を変えたときだけ。
+
+### 管理しないもの
+
+`~/.claude` を丸ごと再現するツールではない。意図的に対象外にしているもの:
+
+- **`permissions` と sandbox 系の settings** — 環境ごとに違ってよく、repo が上書きすると権限昇格の事故につながる。`permissions.defaultMode` のような user スコープ限定キーはとくに手で管理する
+- **`effortLevel` / `theme` / `tui` などの個人設定** — マシンごとに変えたいもの
+- **`~/.claude/agents/` `~/.claude/memory/` `~/.claude/tasks/`** — 個人状態、またはプロジェクト横断の調整に使うもの
+- **この repo が置いていないスキル** — `~/.claude/skills/` に実体で置いたスキルや、plugin marketplace 由来のスキルは触らない
+- **有効プラグインと marketplace の一覧** — 個人環境の情報なので公開 repo に載せない。`settings/global.json` をローカルに置けば機構は使えるが、この repo は同梱しない
+
+つまり新しいマシンで復元されるのは `skills/` と `claude-md/` だけ。それ以外は手で揃える。
 
 ## 参照資料の 2 層構成
 
@@ -69,9 +83,17 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 - **原典** — `~/.claude/references/<repo>/`。全文。蒸留版と食い違ったら原典が正
 - **更新機構** — `skills/claude-harness-refs-update/` が一元所有する。`scripts/check-freshness.sh` が検出、`DISTILLING.md` が構成規約と再蒸留の手順、`scripts/frontmatter.sh` は `install.sh` と共用のパーサ
 
-鮮度チェックは `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。origin を fetch して BEHIND (clone が upstream より古い) と STALE (蒸留版が clone より古い) を差分コミット付きで報告し、要対応があれば exit 1 を返す。`--offline` で fetch を省略できる。
+鮮度チェックは `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。1 ファイル 1 行で、行頭タグが次にやることを示す — `BEHIND` (clone を pull)、`STALE` (蒸留版を再蒸留)、`REVIEW` (出所 clone を持たない知識ベースの棚卸し期限切れ)、`OK`、`MISS` / `ERR` / `NOTE`。要対応があれば exit 1。`--offline` で fetch を省略できる。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る。
 
-チェックから更新まで一括で回すなら `/claude-harness-refs-update` — 鮮度チェック → BEHIND の `git pull` → STALE の再蒸留を順に実行する。`--check` でチェックのみ、repo 名を渡すとその repo だけを対象にする。更新の入口はこのコマンド 1 つに集約してある。
+`skills/*/references/*.md` の frontmatter は 3 形式のいずれかを取り、**どれでもないものは `ERR`** になる。frontmatter が無いだけで無言に対象外にはしない — 「意図的な非追従」と「壊れた蒸留版」が区別できなくなるため。
+
+| 形式 | キー | 用途 |
+|---|---|---|
+| 蒸留版 | `source` + `distilled_commit` + `distilled_at` | 原典 clone を SHA で追従する |
+| 知識ベース | `tracking: review` + `reviewed_at` + `review_interval_days` | 出所 clone を持たない自作の調査資料 (`avoid-ai-slop-*` の references) |
+| 対象外 | `tracking: none` | 鮮度管理しないと明示するもの |
+
+チェックから更新まで一括で回すなら `/claude-harness-refs-update` — 鮮度チェック → BEHIND の `git pull` → STALE の再蒸留 → REVIEW の棚卸しを順に実行する。`--check` でチェックのみ、repo 名を渡すとその repo だけを対象にする。更新の入口はこのコマンド 1 つに集約してある。
 
 参照リポジトリを増やすときは、蒸留版を `skills/<skill>/references/<clone ディレクトリ名>.md` として 1 ファイル作り、そのスキルの SKILL.md の表に行を足す。`check-freshness.sh` と `install.sh` はどちらも `skills/*/references/*.md` をスキル横断で走査するので、置き場所が合っていれば自動で対象になる。詳しい規約は [DISTILLING.md](skills/claude-harness-refs-update/DISTILLING.md)。
 
@@ -79,7 +101,7 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 
 継続追従するほどではない資料 (探索索引の先・記事・製品リポジトリ) にも、単発で使える手法はある。この場合は蒸留版も原典 clone も作らず、[skills/harness-design/PATTERNS.md](skills/harness-design/PATTERNS.md) に 1 項目 = 1 手法 + 出所 1 行で足す。資料本体は追わない。
 
-採録ゲート 5 条件 (既存蒸留版と非重複 / 実読確認 / 転用可能 / 出所明記 / 蒸留版を作るほどではない) と退出規約 (公式資料や蒸留版に同等以上の記述が現れたら削除して蒸留版へ寄せる) は同ファイルが自己所有する。frontmatter に `source` を持たないため `check-freshness.sh` と `install.sh` の走査対象外で、鮮度管理の対象にもならない。
+採録ゲート 5 条件 (既存蒸留版と非重複 / 実読確認 / 転用可能 / 出所明記 / 蒸留版を作るほどではない) と退出規約 (公式資料や蒸留版に同等以上の記述が現れたら削除して蒸留版へ寄せる) は同ファイルが自己所有する。`references/` の外に置いてあるため `check-freshness.sh` と `install.sh` の走査対象外で、鮮度管理の対象にもならない。
 
 ## スキルを増やす・外す
 
