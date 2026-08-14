@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 6624aaf5ef45b8c347c26688deaeb44d96b85616
-distilled_at: 2026-08-12
+distilled_commit: c9c7f6a24790cd75b15f453fbbd464f180663fc9
+distilled_at: 2026-08-14
 ---
 
 # claude-code-best-practice 蒸留版
@@ -142,15 +142,15 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
     `/code-review` の alias になったが、bundled skills 表 row 14 は「PR の高速 1 パスレビュー」という
     旧挙動の説明のまま。`review` / `security-review` を bundled skill として数えるかは 2026-07-30 以来
     ON HOLD → 2026-08-01 に「15 が正しい」といったん決着 → 翌日 raw marker count で覆り、
-    2026-08-12 (v2.1.228) 時点も未決着で表は 15 個のまま。公式 docs 側の整理は「`security-review` は
-    `/init` と同じ built-in command reachable via the Skill tool で bundled skill ではない」
-    「commands reference の **[Skill]** マーカー付きは 13 行で `review` も `security-review` も含まれない」。
+    2026-08-13 (v2.1.229) に `security-review` 側だけ「commands reference が挙げる 14 個の bundled skill
+    に含まれる」と 2 エージェントの独立確認で決着した (row 15 は正、削除不要)。残る未決着は row 14 の
+    `review` のみで、削除すれば 15 → 14 だが自動 run では消せず表は 15 個のまま。
     (b) 2026-07-27 の run が `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR` に誤って
     `_CODE_` を足して説明も反転させ、`effortLevel` に無効値 `max`/`ultracode` を追加し、4 日後の
     2026-07-31 に revert された。(c) subagents 表は `Explore` の model を `haiku` とするが公式は
     「親の会話から継承」と書き、`model` 欄の例も `claude-opus-4-6` のままで `fable` 未記載。v2.1.224 で
     公式に載った catch-all の `claude` agent (model 継承・全ツール、dispatch された background セッションの
-    既定) も 2026-08-07 から 2026-08-12 (v2.1.228) まで毎日 ON HOLD の再掲で表は 5 個のまま — いずれも
+    既定) も 2026-08-07 から 2026-08-13 (v2.1.229) まで毎日 ON HOLD の再掲で表は 5 個のまま — いずれも
     watch item として挙がるだけで未修正。日次 run で動くのは実質バッジ行 1 行と changelog 追記だけで、
     本文は据え置かれる。断定する前に各表のバージョンバッジと `changelog/` 配下の該当 changelog.md を見る。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
@@ -178,7 +178,7 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 |---|---|---|
 | 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、tips 集、ワークフロー比較、購読先 |
 | agents/commands/skills の使い分け | `reports/claude-agent-command-skill.md` | 3 機構の比較表・使い分け基準・最軽量優先の解決順・frontmatter 比較 |
-| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 20 フィールド (`background` と Agent Skills spec の `metadata`/`license`/`compatibility` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。`security-review` = 現在の diff の脆弱性レビュー (`--fix` / `--comment`)。`review` は `/code-review` の alias 化後も旧説明のまま残り、`review`/`security-review` を bundled と数えるかは未決着で command 表にも重複) |
+| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 20 フィールド (`background` と Agent Skills spec の `metadata`/`license`/`compatibility` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。`security-review` = 現在の diff の脆弱性レビュー (`--fix` / `--comment`)。`review` は `/code-review` の alias 化後も旧説明のまま残り bundled と数えるかが未決着 — `security-review` 側は 2026-08-13 に bundled 確定。両者は command 表にも重複) |
 | subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (`Explore` の model 欄・`model` 例の model 名・公式に増えた `claude` agent はいずれも未反映の watch item) |
 | command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 20 フィールド (skill と同じ 3 フィールドが追加) と built-in slash command 89 個 (`/import` (codex/gemini 設定の取り込み)・`/list-agents`・`/autocompact` が追加、`/ultraplan` は機能ごと削除。`/doctor` は bundled skill 側へ移動、`/review`・`/security-review` は両表に併記) |
 | settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (1400 行、v2.1.224 追従で「127+ settings / 311 env vars」。2026-07-31・08-02・08-07 と大きな drift 修正が続き、キー名・permission 挙動・スコープ制限・env var が毎回増減する) |
@@ -228,7 +228,7 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
   Skills のステップ列が入れ替わった) ため、蒸留版はこれらの数値もステップ列も持たない。個数は ★ の
   ドリフトとは別に事実訂正でも動く (2026-08-11 に Compound Engineering の agents が 39 → 0 へ訂正)。
   逆に、上流 README と食い違う個数を「directory-count baseline」として意図的に据え置く運用もあり
-  (OpenSpec の skills は 12 個の確認が 14 run 続いても表は 0)、表の個数は上流の実態と一致しない。
+  (OpenSpec の skills は 12 個の確認が 15 run 続いても表は 0)、表の個数は上流の実態と一致しない。
 - **Claude API 寄りの詳細** (Programmatic Tool Calling、SDK 設定、rate limits の数値) —
   `reports/claude-advanced-tool-use.md`, `claude-agent-sdk-vs-cli-system-prompts.md`,
   `claude-usage-and-rate-limits.md`。
@@ -244,5 +244,5 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
   slash commands / command を指す 3 リンクは `docs/en/skills` を指したままで、1 ファイル内に 2 つの宛先が
   並存している。docs URL は原典のリンクを写さず、公式 docs 側で当たり先を確認する。**機能名も同様** —
   README の "No Flicker Mode" は公式 docs のページタイトル "Fullscreen rendering" と一致せず、
-  2026-08-11 に検出されて 2026-08-12 も ON HOLD (コミュニティ呼称が優勢なため判断保留)。原典の呼称で
+  2026-08-11 に検出されて 2026-08-13 時点も ON HOLD (コミュニティ呼称が優勢なため判断保留)。原典の呼称で
   公式 docs を検索しても当たらないことがあるので、機能名は公式 docs 側の表記で引き直す。

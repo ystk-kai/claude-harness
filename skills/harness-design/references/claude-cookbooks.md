@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/claude-cookbooks
-distilled_commit: f65eb122a51e9710d4db3f4893016879c65c77d6
-distilled_at: 2026-08-10
+distilled_commit: 93ea00c906248f67074a32d69cc3b560af020bf0
+distilled_at: 2026-08-14
 ---
 
 # claude-cookbooks 蒸留版
@@ -16,6 +16,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 - 5 つのワークフローパターン
 - マルチエージェント実装の要点 (async orchestration / research prompts)
 - コンテキスト設計とエージェント eval
+- コスト最適化レバーの優先順位
 - ハーネス実装例の索引
 - 12-factor-agents との食い違い
 - 蒸留の範囲外
@@ -40,7 +41,8 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 16. **予算は「プロンプトに書く」と「プラットフォームが強制する」の 2 層がある**。項目 7 のツール呼び出し予算は指示にすぎないが、`sessions.create` の `budget` (`{"type": "limit", "max_list_cost": {"currency": "USD", "amount": "10"}}`) はセッション内の全スレッド (サブエージェント含む) の list price 合計に対する強制上限。`amount` は minor unit の整数文字列で float 丸めが入らない。上限到達は失敗ではなく **pause** (`stop_reason` = `budget_reached`) で、ファイル・tool state・会話はそのまま残り、`sessions.update` で cap を上げると中断したターンから自力で再開する。強制はモデルリクエストの合間なので実測コストは cap を 1 リクエスト分だけ超えうる。cap は作成時にしか付けられず、`budget=None` で外すと二度と付け直せない一方通行 (省略は「維持」、`None` は「削除」)。消費済み額以下への引き下げは 400。ストリームを張らない運用では `session.budget_reached` webhook で拾う。(`managed_agents/CMA_cap_session_spend.ipynb`, `managed_agents/CMA_operate_in_production.ipynb`)
 17. **スキルはリポジトリから自動発見できる**。GitHub repo を mount したセッションは開始時に repo ルートの `.claude/skills/` を 1 回スキャンし、各スキルの name / description / サンドボックス内パスをエージェントの system prompt に注入する。エージェント側に `skills` フィールドは要らない。モデルは description が要求に一致した時点で `read` tool で `SKILL.md` を開き、そこから指示された参照ファイルやスクリプトへ進む (read-then-follow)。境界: レイアウトは厳格で repo ルート直下の `.claude/skills/<name>/SKILL.md` だけ (1 段深い / `.claude` 無しは無視)、frontmatter が無くてもディレクトリ名 + 空 description で載る、description は 1 行に潰され 2,000 文字で truncate、announce は先頭 64 ディレクトリまで、スキャンは 1 回きり (mid-session の push は次セッションから)。ネストした `packages/foo/.claude/skills/` は、その配下を `read` tool で読んだ時点で遅延発見される (`bash` の `cat` では発火しない)。(`managed_agents/CMA_use_skills_from_a_repo.ipynb`)
 18. **検証を構造で強制する型 = fan-out + adversarial verification**。extract (1 agent が claim を構造化出力で抽出) → verify (claim 1 件に 1 agent、並列、clean context、`schema` 付きで verdict と根拠の引用行を返す) → skeptic (`confirmed` の判定だけを再検証させ、引用が実際には支持していなければ `contradicted` へ落とす) → report。"Double-check your findings" は指示にすぎず context 圧のもとで飛ぶが、スクリプトの制御フローなら飛ばない。`confirmed` だけを skeptic に回す分岐は素の JavaScript なのでトークン 0。プロンプトの大半がタスクではなく work の *shape* の記述になる ("With workflows, the prompt describes the harness you want")。なお発見物はファイルではなく agent の**返り値**で回収する設計で、`SUMMARY.md` のようなレポート風ファイルを書こうとした agent は内容を return しろと差し戻された (実成果物のファイル書き込みは通常どおり)。(`claude_agent_sdk/08_Dynamic_workflows.ipynb`)
-19. **repo 自身のハーネスが良い設計例**。`cookbook-audit` スキルは (a) ルーブリック本体を `style_guide.md` に分離して「先に読め」と指示、(b) `validate_notebook.py` で ipynb を markdown 化してから読ませる ("saves context vs raw .ipynb")、(c) 4 次元 x 5 点のスコア形式を固定。決定的スクリプトによる前処理でコンテキストを節約する型。(`.claude/skills/cookbook-audit/SKILL.md`)
+19. **コスト最適化のレバーは「知能の天井を下げない順」に引く**。順序は (1) prompt caching → (2) 入力トークン管理 → (3) エージェントループ効率 → (4) 出力トークン管理 → (5) Batch API → (6) モデル選択と `effort`。モデル切り替えを最後に置くのは "the easiest lever to pull but directly constrains the intelligence of your product" だから。ゲートは常に eval で、読む指標は per-token 価格ではなく **pass rate と cost per task** の 2 つ ("a model with a higher sticker price can be the cheaper option if it finishes the job in fewer turns")。品質バーを先に決め、コストをその制約下の最小化対象として扱う。(`cost_optimization/cost_optimization.ipynb`)
+20. **repo 自身のハーネスが良い設計例**。`cookbook-audit` スキルは (a) ルーブリック本体を `style_guide.md` に分離して「先に読め」と指示、(b) `validate_notebook.py` で ipynb を markdown 化してから読ませる ("saves context vs raw .ipynb")、(c) 4 次元 x 5 点のスコア形式を固定。決定的スクリプトによる前処理でコンテキストを節約する型。(`.claude/skills/cookbook-audit/SKILL.md`)
 
 ## 5 つのワークフローパターン
 
@@ -94,7 +96,27 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 | agentic search のハーネス再現 | `evals/agentic_search/reproduce_agentic_search_benchmarks.ipynb` | 公開スコアを公開 API で再現するための設定 (PTC・effort・task_budget・compaction instructions・`pause_turn` 往復・retry) と F1 grader |
 | tool 定義そのものの eval | `tool_evaluation/tool_evaluation.ipynb`, `tool_evaluation/evaluation.xml` | 同一 eval タスクを複数エージェントが独立に実行して tool 定義の質を測る |
 | 使用量・コストの可観測性 | `observability/usage_cost_api.ipynb` | Usage & Cost Admin API でトークン/コストをモデル・ワークスペース・API キー別に取得。キャッシュ効率やチャージバック用 |
+| コスト最適化の eval 駆動手順 | `cost_optimization/cost_optimization.ipynb` | pass rate と cost per task の 2 軸で品質バーを固定し、レバーを 1 つずつ当てて Pareto フロンティアを描く。レバー個別の効き所は下の「コスト最適化レバーの優先順位」 |
+| ↳ eval 運用の実務値 | `cost_optimization/cost_optimization.ipynb` | 本番判断には約 50 ケース x 設定ごと 5 トライアル以上。隣接設定が run 間で順位を入れ替えなくなるまで誤差幅を詰める。1 トライアルの結果で判断しない |
 | 異種モデルの orchestrator-worker | `multimodal/using_sub_agents.ipynb` | 上位モデルが各サブエージェント用のプロンプトを実行時に書き、廉価モデルが抽出を担う構成 |
+
+## コスト最適化レバーの優先順位
+
+`cost_optimization/cost_optimization.ipynb` は Applied AI チームがビルダーに回すチェックリストを、保険金査定エージェント
+(Opus `effort=high` / 12 tools / 10 件の eval セット) で 1 レバーずつ実測した 1 本。ベースライン 10/10 正解・$0.29/task に対し、
+最終的な Pareto 最適は **`sonnet · medium` + system ブロックへの明示 breakpoint** で 13 倍安。
+読みどころは順序そのものより **試したレバーの大半が効かなかった**事実で、効くかどうかはエージェントの形
+(ターン数・スキーマの重さ・数値処理の有無・入力が前段結果に依存するか) で決まる。
+
+| レバー | 実装の要点 | 効かない / 避ける条件 |
+|---|---|---|
+| prompt caching | auto は `cache_control={"type": "ephemeral"}` をリクエストに置くと最後の cacheable ブロック直後に breakpoint が 1 つ置かれ会話とともに前進。明示は最大 4 個で層ごとに TTL を変えられる。write は 5 分 TTL で 1.25x / 1 時間で 2x、read は 0.1x | キャッシュ破壊の 3 大要因: breakpoint より上の動的コンテンツ (timestamp / request ID)、会話途中のモデル切り替え (キャッシュはモデル単位)、毎ターンの compaction。lookup は breakpoint から約 20 ブロックしか遡らないので、append の多い loop は明示 breakpoint が要る |
+| 入力トークン管理 | progressive disclosure。参照文書を `read_manual` 等の tool の裏へ、system prompt の tool 再掲を削る、`defer_loading: True` + `tool_search_tool_regex_20251119`、画像を 1280x720 まで事前縮小 (1 画像 ~1,200 tokens に収まる)、大きな表は Files API + code execution へ、`count_tokens` を ingestion gate に | 毎回文書の大半を読むならキャッシュ済み system prompt のままが安い。スキーマが 10K token 未満なら tool search は純オーバーヘッド。計算する数値が無ければ code execution はトークンを足すだけ |
+| エージェントループ効率 | server 側は `clear_tool_uses_20250919` (`trigger` = `input_tokens` 150K, `keep.tool_uses`) / `clear_thinking` / `compact_20260112`。client 側は **jagged compaction** = 嵩む結果を溜めて自然な境界で一括 prune し、prune 間は message 配列を byte 同一に保つ。自己完結なサブタスクは subagent へ切り出して結果 1 行だけ返す | edit は必ずその地点以降の cache を無効化するので trigger は高めに置いて発火を稀にする。6 ターン程度の loop では trigger に届かず無意味 |
+| 出力トークン管理 | `max_tokens` は backstop であって tuning knob ではない (モデルは値を見ず、超えたら `stop_reason="max_tokens"` で途中で切れる)。短くしたいなら出力の形を例つきでプロンプトに書く。早期離脱は sentinel (`<CANNOT_REVIEW>`) を `stop_sequences` に登録して説明文の生成を止める | — |
+| Batch API | 全トークン 50% off / 24 時間以内の非同期処理。caching も併用できる | 単発リクエストなので tool loop は畳めない。適用するには loop の入力を全部先読みして 1 リクエストに inline する**アーキテクチャ変更**が要る。batch 内の cache hit は並行実行のため best effort。24 時間は expiry であって SLA ではない |
+| モデルと `effort` | `effort` を low まで下げて eval が通るならモデル階層を 1 つ落とし `effort` を high に戻して再掃引。Haiku 4.5 は `effort` を取らない。advisor tool (`advisor_20260301`, beta `advisor-tool-2026-03-01`) で安いドライバに上位モデルの相談役を付ける | advisor は「いつ相談するか」を安い signal (payout 閾値 / fraud score 帯) で gate できないと成立しない — 難しいケースの識別自体がドライバに欠けている判断力だから |
+| タスク分解 (subagent routing) | Haiku 5 体が事実収集 → Sonnet 1 回が rule card に照らして判断。実測で最安 (Opus ベースライン比 約 90% 減) | 1 件落として不採用。原因は例外条項の欠落で、"Flattening a manual into a rule list is where decomposition gives up accuracy." 判断側が中間コンテキストを必要とするなら分解しない |
 
 ## ハーネス実装例の索引
 
@@ -126,7 +148,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 原則と実装が一致しない箇所は、そこが判断ポイント。
 
 - **リトライ上限 (factor 9)**: `evaluator_optimizer.loop()` は `while True` で反復上限もエスカレーションも無い。原則側は「連続エラー ~3 回で人間へ / 決定的介入へ」。参照実装をコピーするならループ上限を足す。なお `patterns/agents/async_multi_agent_orchestration.ipynb` の `run_agent()` は `max_turns=20` を持っており、こちらは原則寄り。
-- **プリフェッチ (factor 13) vs PTC**: 原則は「呼ぶと分かっているツールは決定的に事前実行して結果を context に入れる」。cookbook のコンテキスト対策の主軸は逆向きで、PTC で **結果を context に入れない**。大きな tool 結果が前提のときは PTC 側が優先される。
+- **プリフェッチ (factor 13) vs PTC**: 原則は「呼ぶと分かっているツールは決定的に事前実行して結果を context に入れる」。cookbook のコンテキスト対策の主軸は逆向きで、PTC で **結果を context に入れない**。大きな tool 結果が前提のときは PTC 側が優先される。ただし `cost_optimization/cost_optimization.ipynb` の Batch 節はプリフェッチそのもの — loop が取りうる全レコードを先読みして 1 リクエストに inline し、tool の順序制御を system prompt の読解順に置き換える。対話フロンティアの約半額になるが、次の取得が前段結果に依存するタスクは畳めず、実測では pass rate も 1 件落ちた。分岐点は「入力が前段結果に依存するか」。
 - **制御フローの所有 (factor 6/8) vs マネージド化**: 原則は launch/pause/resume を自前 API で持つこと。`managed_agents/` は同じ要求をホスト側の `requires_action` ゲートと `session.status_idled` / `session.budget_reached` webhook に寄せる。停止条件 (予算・人間の承認) をプロンプトやアプリコードではなくプラットフォーム側の強制機構に置く設計で、自前実装とマネージドのどちらを取るかの分岐点として読む。
 - **計画のコード化 (factor 8) vs スクリプトを書くのはモデル**: dynamic workflow は計画をモデルの context から JavaScript のコードへ出すので factor 8 (own your control flow) に最も近い形だが、そのコードを実行時に書くのはモデル自身。決定的なのは生成後の実行だけで、生成そのものは非決定的。スクリプトを保存して `.claude/workflows/` から名前で再実行する運用とセットにして初めて決定性が戻る。リトライ面では stage 失敗時 (例: agent が構造化出力のリトライを使い切る) に `[Failed]` 通知が出て Claude が workflow を再起動し、完了済み agent はキャッシュ結果を返すので失敗ステージだけ再実行される (コストは上乗せ)。上限がランタイム側に入っている点は `evaluator_optimizer.loop()` の無制限ループより原則寄りだが、人間へのエスカレーション経路は用意されていない。(`claude_agent_sdk/08_Dynamic_workflows.ipynb`)
 - **フレームワーク依存への警戒 (README of 12-factor) vs SDK 推し**: `claude_agent_sdk/README.md` は Claude Code を "the closest thing to a 'bare metal' harness" と位置づけて SDK 採用を勧める。原則側の「フレームワークは 70-80% で頭打ち」という警告と緊張関係にある。ただし cookbook の `patterns/agents/` 自体は SDK を一切使わない素の実装なので、repo 内に両方の選択肢が並んでいる。
@@ -134,9 +156,11 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 
 ## 蒸留の範囲外
 
-- **API 一般の話題は別スキル (`claude-api`) の担当**。この蒸留版では扱わない。当たる場所: prompt caching・JSON mode・moderation・batch 等は `misc/`、RAG と contextual embeddings は `capabilities/retrieval_augmented_generation/` と `capabilities/contextual-embeddings/`、分類・要約・text-to-sql は `capabilities/` 配下、vision / multimodal は `multimodal/`、fine-tuning は `finetuning/`、extended thinking は `extended_thinking/`、外部ベンダ連携は `third_party/` (Pinecone / VoyageAI / MongoDB / LlamaIndex / Wolfram / Deepgram / ElevenLabs / Wikipedia)。
+- **API 一般の話題は別スキル (`claude-api`) の担当**。この蒸留版では扱わない。上の「コスト最適化レバー」もアーキテクチャ判断の粒度までで、価格表・パラメータの詳細仕様は追わない (notebook 内の `PRICING` は執筆時点のリスト価格のハードコードで、原典自身が陳腐化を明記している)。当たる場所: prompt caching・JSON mode・moderation・batch 等は `misc/`、RAG と contextual embeddings は `capabilities/retrieval_augmented_generation/` と `capabilities/contextual-embeddings/`、分類・要約・text-to-sql は `capabilities/` 配下、vision / multimodal は `multimodal/`、fine-tuning は `finetuning/`、extended thinking は `extended_thinking/`、外部ベンダ連携は `third_party/` (Pinecone / VoyageAI / MongoDB / LlamaIndex / Wolfram / Deepgram / ElevenLabs / Wikipedia)。
 - **Skills 機能の API 面** (beta header `skills-2025-10-02`、`container` パラメータ、Files API での成果物ダウンロード、組み込み `xlsx` / `pptx` / `pdf` / `docx`): `skills/README.md` と `skills/CLAUDE.md` に詳しい。ここではハーネス設計に効く「SKILL.md + scripts + REFERENCE.md の構成」だけを索引した。
-- **各 notebook のコードセル全文**: 本蒸留は README・markdown セル・`patterns/agents/` の実装コード・`prompts/`・`.claude/` を読んだ範囲で書いた。`managed_agents/` と `claude_agent_sdk/` の個々の notebook は原則として README の記述と目次までで、セル単位の実装は未確認。例外 (markdown セル全部と主要コードセルを読んだもの) は `claude_agent_sdk/08_Dynamic_workflows.ipynb`, `managed_agents/CMA_cap_session_spend.ipynb`, `managed_agents/CMA_consult_an_advisor.ipynb`, `managed_agents/CMA_use_skills_from_a_repo.ipynb`, `managed_agents/CMA_pin_inference_geo.ipynb`。API 形状を正確に知りたいときは該当 notebook を直接読む。
+- **各 notebook のコードセル全文**: 本蒸留は README・markdown セル・`patterns/agents/` の実装コード・`prompts/`・`.claude/` を読んだ範囲で書いた。`managed_agents/` と `claude_agent_sdk/` の個々の notebook は原則として README の記述と目次までで、セル単位の実装は未確認。例外 (markdown セル全部と主要コードセルを読んだもの) は `claude_agent_sdk/08_Dynamic_workflows.ipynb`, `managed_agents/CMA_cap_session_spend.ipynb`, `managed_agents/CMA_consult_an_advisor.ipynb`, `managed_agents/CMA_use_skills_from_a_repo.ipynb`, `managed_agents/CMA_pin_inference_geo.ipynb`, `cost_optimization/cost_optimization.ipynb`。API 形状を正確に知りたいときは該当 notebook を直接読む。
+- **コスト最適化 notebook の合成データと実行結果**: `cost_optimization/assets/` (`policy_manual.md` の約 12K トークン引受マニュアル、`claims_ledger.csv` の 5,000 行台帳、`eval_set.csv` の 10 件ラベル、見積書・写真) はデモ用の合成データなので索引しない。notebook 通しの実行に約 $40 かかる旨と、掲載スコアがハードコードで実行ごとに変動する旨は原典が明記している。Pareto フロンティアの作図・トライアル集計コードも未索引。
+- **レイテンシ最適化・商用価格**: 原典が明示的に対象外としている領域 (レイテンシは follow-up cookbook 予定、committed-use discount 等はアカウントチームの話)。
 - **ホスティング・インフラ**: `claude_agent_sdk/hosting/` (docker / kubernetes / modal)、`managed_agents/self_hosted_sandboxes/`、`managed_agents/cma-mcp/`。
 - **統合デモ**: `managed_agents/slack/`, `managed_agents/linear/`, `managed_agents/sentry/`, `managed_agents/roadtrip_planner/`、`claude_agent_sdk/session_browser_demo/`、`claude_agent_sdk/vulnerability_detection_agent/`。
 - **フロントエンド美観のプロンプティング**: `coding/prompting_for_frontend_aesthetics.ipynb` (DESIGN.md 系の判断には別リファレンスを使う)。
