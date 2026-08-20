@@ -1,14 +1,14 @@
 ---
 name: claude-harness-refs-update
-description: claude-harness の参照資料 (蒸留版 skills/*/references/*.md と原典 clone ~/.claude/references/ の 2 層) の鮮度チェックと更新を実行する。check-freshness → BEHIND を git pull → STALE を DISTILLING.md の手順で再蒸留 → REVIEW (出所 clone を持たない知識ベース) を棚卸し。明示起動専用 (/claude-harness-refs-update で呼ぶ)。
+description: claude-harness の参照資料 (蒸留版 skills/*/references/*.md と原典 clone ~/.claude/references/ の 2 層) の鮮度チェックと更新を実行する。check-freshness → BEHIND を git pull → STALE を DISTILLING.md の手順で再蒸留 → REVIEW (出所 clone を持たない知識ベース) を棚卸し → 実ハーネスへの取り込み候補を照合して ADOPTION.md に記録。明示起動専用 (/claude-harness-refs-update で呼ぶ)。
 disable-model-invocation: true
 argument-hint: "[repo-name ...] | --check"
-compatibility: Requires git and network access. Owns scripts/check-freshness.sh and DISTILLING.md, and operates on every skill's references/*.md in this repo (harness-design, ui-design, ...) plus the clones at ~/.claude/references/ (external to this skill dir).
+compatibility: Requires git and network access. Owns scripts/check-freshness.sh, DISTILLING.md and ADOPTION.md, and operates on every skill's references/*.md in this repo (harness-design, ui-design, ...) plus the clones at ~/.claude/references/ (external to this skill dir).
 ---
 
 # claude-harness-refs-update: 参照資料の鮮度チェックと更新
 
-claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md`。`harness-design` と `ui-design` が持つ) と原典 clone (`~/.claude/references/<repo>/`)。このスキルは鮮度チェックから再蒸留までを 1 コマンドで回す。参照資料の更新機構はこのスキルが一元所有する: `scripts/check-freshness.sh` が検出、[DISTILLING.md](DISTILLING.md) が更新レシピと再蒸留プロンプト雛形、`scripts/frontmatter.sh` が `install.sh` と共用のパーサ。参照スキル側 (`harness-design` / `ui-design`) は蒸留版を持つだけで、判定も規約も持たない。更新の入口はこのスキルだけ (スラッシュコマンドを増やさない)。
+claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md`。`harness-design` と `ui-design` が持つ) と原典 clone (`~/.claude/references/<repo>/`)。このスキルは鮮度チェックから再蒸留までを 1 コマンドで回す。参照資料の更新機構はこのスキルが一元所有する: `scripts/check-freshness.sh` が検出、[DISTILLING.md](DISTILLING.md) が更新レシピと再蒸留プロンプト雛形、`scripts/frontmatter.sh` が `install.sh` と共用のパーサ、[ADOPTION.md](ADOPTION.md) が「原典の変更を自分のハーネスに取り込むか」の判断台帳。参照スキル側 (`harness-design` / `ui-design`) は蒸留版を持つだけで、判定も規約も持たない。更新の入口はこのスキルだけ (スラッシュコマンドを増やさない)。
 
 引数: repo 名 (例 `12-factor-agents`) を渡すとその repo だけを対象にする。`--check` で鮮度チェックのみ (更新に進まない)。無引数なら全 repo を対象に更新まで進む。
 
@@ -34,13 +34,20 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
    - **当日日付** (手順0の `date +%F`) を `distilled_at` として明示
    - 構成規約は `DISTILLING.md` に従うこと (frontmatter 3 キー / `## Contents` / `## まず押さえる` / 索引テーブル / `## 蒸留の範囲外` / 250 行以内 / 実際に Read した事実だけ・推測で書かない)
 
-   各サブエージェントは蒸留版 1 ファイルを Write し、frontmatter の `distilled_commit` を clone の新 HEAD・`distilled_at` を当日に更新、最後に行数・使った SHA・内容の 3 行要約を返す。
+   各サブエージェントは蒸留版 1 ファイルを Write し、frontmatter の `distilled_commit` を clone の新 HEAD・`distilled_at` を当日に更新、最後に **2 本立てで返す** — (a) 行数・使った SHA・内容の 3 行要約、(b) **取り込み候補** (`DISTILLING.md`「取り込み候補の抽出」の 4 点セット。該当なしなら「候補なし」と明示)。雛形にこの返却契約が入っているので、プロンプトから落とさない。
 
-5. **REVIEW を棚卸し** — `REVIEW` は出所 clone を持たない知識ベース (`avoid-ai-slop-*` 等) の期限切れ。SHA 差分がないので機械的な更新はできない。該当ファイルの主張を読み、**出典 URL の生存と撤回、記述が前提にしているモデル世代・流行の変化**を確認して本文を直す。委譲するなら `general-purpose` サブエージェント (WebFetch/WebSearch が要る)。直したら `reviewed_at` を当日に更新する。中身を見ずに日付だけ進めるのは禁止 (SHA の無言 bump と同じ)。見直した結果「変更不要」なら、その判断理由を commit message に書いて日付を進める。
+5. **REVIEW を棚卸し** — `REVIEW` は出所 clone を持たない知識ベース (`avoid-ai-slop-*` 等) の期限切れ。SHA 差分がないので機械的な更新はできない。該当ファイルの主張を読み、**出典 URL の生存と撤回、記述が前提にしているモデル世代・流行の変化**を確認して本文を直す。委譲するなら `general-purpose` サブエージェント (WebFetch/WebSearch が要る)。直したら `reviewed_at` を当日に更新する。中身を見ずに日付だけ進めるのは禁止 (SHA の無言 bump と同じ)。見直した結果「変更不要」なら、その判断理由を commit message に書いて日付を進める。棚卸しで出典の撤回や前提の陳腐化が見つかったら、それも手順6の取り込み候補として扱う (知識ベースは自作なので、影響先は蒸留版ではなく自分のハーネスや文書規約になりやすい)。
 
-6. **集約と確認** — 更新したファイル一覧と各 3 行要約を提示する。`bash "$SELF/scripts/check-freshness.sh" --offline` を再実行し、exit 0 に戻ったことを確認する。ここまでの変更は作業ツリーに残す。
+6. **取り込み候補を照合して台帳に記録** — サブエージェントと手順5が返した取り込み候補を集める。
+   **提示する前に、その候補が実際にこのハーネスに当たっているかを grep で確認する。** 照合先:
+   - `$ROOT` — `skills/*/SKILL.md` の frontmatter (name の予約語・description の字数と書きぶり)、`skills/*/references/`、`claude-md/`、`install.sh`
+   - `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` — `settings.json` / `settings.local.json` / `CLAUDE.md`、および対象プロジェクトの `.claude/`
 
-7. **commit (ユーザーが望むときのみ)** — 変更内容と、各リポジトリの差分 3 行要約を含む commit message 案を提示して承認を得てから commit する。**SHA だけの無言 bump をしない** (内容への影響なしと判断して SHA だけ進める場合も、その理由を message に書く)。承認がなければ diff を残して終了。個人リポジトリなので main への直接 commit でよい。
+   「該当あり」と「該当なし (原典の記述としては正しいが、このハーネスには当たらない)」を分け、後者は深刻度を `FYI` に落とす。**grep せずに「影響あり」と言わない** — 推測での警告は台帳を腐らせる。確認できたものを `BREAKING` → `RECOMMENDED` → `FYI` の順に提示し、[ADOPTION.md](ADOPTION.md) へ追記する (書式は同ファイル冒頭)。台帳には**前回までの未対応項目も残っている**ので、それも併せて提示する。候補ゼロなら「今回は取り込み候補なし」と明示する (黙って省略しない)。
+
+7. **集約と確認** — 更新したファイル一覧と各 3 行要約、取り込み候補の件数 (深刻度別) を提示する。`bash "$SELF/scripts/check-freshness.sh" --offline` を再実行し、exit 0 に戻ったことを確認する。ここまでの変更は作業ツリーに残す。
+
+8. **commit (ユーザーが望むときのみ)** — 変更内容と、各リポジトリの差分 3 行要約を含む commit message 案を提示して承認を得てから commit する。**SHA だけの無言 bump をしない** (内容への影響なしと判断して SHA だけ進める場合も、その理由を message に書く)。`ADOPTION.md` の追記も同じ commit に含める。承認がなければ diff を残して終了。個人リポジトリなので main への直接 commit でよい。
 
 ## Gotchas
 
@@ -50,6 +57,9 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
 - `check-freshness.sh` に repo 絞り込みはない → 特定 repo 指定時は全走査の出力からフィルタする。
 - 再蒸留は必ず `DISTILLING.md` の構成規約をプロンプトに渡す (250 行以内 / 索引駆動 / 推測で書かない)。規約をサブエージェントの記憶任せにしない。
 - `REVIEW` は SHA 差分が無いので「何が変わったか」を機械的に出せない。出典の生存と、記述が前提にしているモデル世代・流行の変化を人手 (または Web 検索できるサブエージェント) で確認する。
+- 蒸留版を最新にしただけで終わらせない。**原典が変わっても自分のハーネスは自動では直らない** → 手順6の取り込み候補まで回す。
+- 取り込み候補は必ず grep で実ハーネスに当てて深刻度を決める。原典の記述が正しくても、このハーネスに当たらなければ `FYI`。推測での「影響あり」は台帳を腐らせる。
+- 二次資料 (`claude-code-best-practice` 等) 由来の候補は、公式 docs との食い違いが原典側の誤検出である場合がある。原典の changelog が自ら INVALID にした項目を取り込み候補に昇格させない。
 - 新規リポジトリの追加は別作業 (`DISTILLING.md`「新規リポジトリの追加」)。このスキルは既存蒸留版の更新に使う。
 
 ## Quick checklist
@@ -60,5 +70,8 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
 - [ ] 各再蒸留が `DISTILLING.md` の規約 (frontmatter 3 キー / 250 行以内 / 推測で書かない) に従った
 - [ ] `distilled_commit` を clone の新 HEAD に、`distilled_at` を当日に更新した
 - [ ] `REVIEW` は出典と前提の生存を確認したうえで `reviewed_at` を進めた (日付だけの bump をしていない)
+- [ ] 各サブエージェントから取り込み候補を受け取った (該当なしの明示も受け取った)
+- [ ] 取り込み候補を実ハーネスに grep で当てて深刻度を確定し、`ADOPTION.md` に追記した
+- [ ] 台帳の未対応項目 (前回以前の分を含む) を提示した
 - [ ] `check-freshness.sh` が exit 0 に戻った
-- [ ] commit する場合、message に差分 3 行要約を含めた (SHA だけの無言 bump をしない)
+- [ ] commit する場合、message に差分 3 行要約を含め、`ADOPTION.md` の追記も同じ commit に入れた (SHA だけの無言 bump をしない)

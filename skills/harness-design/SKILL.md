@@ -1,6 +1,6 @@
 ---
 name: harness-design
-description: LLM ハーネス・プロンプト設計の参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。プロジェクトのハーネス (CLAUDE.md / AGENTS.md / skills / slash commands / subagents / hooks / MCP 設定) を設計・作成・レビュー・監査するとき、プロンプトエンジニアリング (プロンプトの設計・改善・テクニック選定) を行うとき、エージェントのオーケストレーション構成 (chaining / routing / orchestrator-workers / evaluator-optimizer) や信頼性設計を検討するとき、agent loop・context 圧縮・承認ゲートの実装を設計するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。Triggers: harness, ハーネス, CLAUDE.md, AGENTS.md, skill 作成, subagent, hooks, プロンプト改善, prompt engineering, agent design, agent loop, context engineering, best practice
+description: LLM ハーネス・プロンプト設計の参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。プロジェクトのハーネス (CLAUDE.md / AGENTS.md / skills / slash commands / subagents / hooks / MCP 設定) を設計・作成・レビュー・監査するとき、プロンプトエンジニアリング (プロンプトの設計・改善・テクニック選定) を行うとき、エージェントのオーケストレーション構成 (chaining / routing / orchestrator-workers / evaluator-optimizer) や信頼性設計を検討するとき、agent loop・context 圧縮・承認ゲートの実装を設計するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。
 compatibility: Requires git and network access to clone/update the reference repos at ~/.claude/references/ (external to the skill directory; run install.sh --with-references)
 ---
 

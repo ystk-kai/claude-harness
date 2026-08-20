@@ -21,6 +21,25 @@ If you can't answer these, vocabulary/symbol fixes won't help — restore the au
 
 **Quick path (light use):** short pieces or drafts → answer the 3 questions, then scan Tier-1 banlist + false agency + false contrast (catches most slop in minutes). Anything published, formal, or high-stakes → run the full 6-step process below.
 
+## When not to run this
+
+Over-triggering costs more than under-triggering here: an unrequested rewrite of prose the user is
+already happy with reads as noise, and applying 「AI っぽさ」 criteria to the wrong genre makes the
+text worse. Skip when:
+
+- **Code, config, logs, commit messages, CLI/API reference output** — mechanical registers where uniformity is correct. Markdown 整形や章構成それ自体も対象外 (別スキルの領域)
+- **The user asked something else about the same text** — 事実確認・要約・翻訳・長さ調整。文体には触らない
+- **The text is not the deliverable** — 思考メモ、下書きの箇条書き、会話中の即答
+- **Casual conversation and short replies** — 数行のやり取りに 5 軸採点をかけない
+- **Fixed-form documents** — 法務・規制・監査で文言が定められているもの。ムラは違反になる
+- **The user already declined** — 「そのままでいい」「急ぎでいい」と言われた後の同一文書
+
+**Run at most once per artifact per conversation.** 一度通した文章に後続ターンで再採点を重ねない —
+指摘が尽きた後の追加指摘は、根拠のない言い換えに落ちる。ユーザーが改稿を依頼したときは当然もう一度回す。
+
+**A caveat is the tell** — 「これは <genre> 向けの基準だが、たぶん役に立つ」と前置きしたくなった
+時点で、その文書は対象外。
+
 ## Process (run in order)
 
 1. **Decide the document type** — it sets how much variation / bluntness is allowed. See `references/document-types.md`.

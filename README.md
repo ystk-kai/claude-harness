@@ -81,7 +81,7 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 
 - **蒸留版** — `skills/{harness-design,ui-design}/references/*.md`。要点と索引を 250 行以内にまとめたもの。`source` が repo リストの唯一の正、`distilled_commit` が蒸留時点の原典 SHA
 - **原典** — `~/.claude/references/<repo>/`。全文。蒸留版と食い違ったら原典が正
-- **更新機構** — `skills/claude-harness-refs-update/` が一元所有する。`scripts/check-freshness.sh` が検出、`DISTILLING.md` が構成規約と再蒸留の手順、`scripts/frontmatter.sh` は `install.sh` と共用のパーサ
+- **更新機構** — `skills/claude-harness-refs-update/` が一元所有する。`scripts/check-freshness.sh` が検出、`DISTILLING.md` が構成規約と再蒸留の手順、`ADOPTION.md` が「原典の変更を自分のハーネスに取り込むか」の判断台帳、`scripts/frontmatter.sh` は `install.sh` と共用のパーサ
 
 鮮度チェックは `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。1 ファイル 1 行で、行頭タグが次にやることを示す — `BEHIND` (clone を pull)、`STALE` (蒸留版を再蒸留)、`REVIEW` (出所 clone を持たない知識ベースの棚卸し期限切れ)、`OK`、`MISS` / `ERR` / `NOTE`。要対応があれば exit 1。`--offline` で fetch を省略できる。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る。
 
@@ -93,7 +93,9 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 | 知識ベース | `tracking: review` + `reviewed_at` + `review_interval_days` | 出所 clone を持たない自作の調査資料 (`avoid-ai-slop-*` の references) |
 | 対象外 | `tracking: none` | 鮮度管理しないと明示するもの |
 
-チェックから更新まで一括で回すなら `/claude-harness-refs-update` — 鮮度チェック → BEHIND の `git pull` → STALE の再蒸留 → REVIEW の棚卸しを順に実行する。`--check` でチェックのみ、repo 名を渡すとその repo だけを対象にする。更新の入口はこのコマンド 1 つに集約してある。
+チェックから更新まで一括で回すなら `/claude-harness-refs-update` — 鮮度チェック → BEHIND の `git pull` → STALE の再蒸留 → REVIEW の棚卸し → 取り込み候補の照合を順に実行する。`--check` でチェックのみ、repo 名を渡すとその repo だけを対象にする。更新の入口はこのコマンド 1 つに集約してある。
+
+蒸留版の SHA を進めても、このハーネス自身は自動では直らない。その落差を埋めるのが最後の段で、再蒸留した各サブエージェントが `BREAKING` (今の書き方が壊れている) / `RECOMMENDED` / `FYI` の 3 段で取り込み候補を返し、**実ハーネスに grep で当ててから** [ADOPTION.md](skills/claude-harness-refs-update/ADOPTION.md) に記録する。当たらなかったものは `FYI` に落として却下理由付きで残す — 消すと同じ候補が毎回上がってくる。未対応項目は次回の run でも提示される。
 
 参照リポジトリを増やすときは、蒸留版を `skills/<skill>/references/<clone ディレクトリ名>.md` として 1 ファイル作り、そのスキルの SKILL.md の表に行を足す。`check-freshness.sh` と `install.sh` はどちらも `skills/*/references/*.md` をスキル横断で走査するので、置き場所が合っていれば自動で対象になる。詳しい規約は [DISTILLING.md](skills/claude-harness-refs-update/DISTILLING.md)。
 

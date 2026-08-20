@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。Triggers: DESIGN.md, デザイントークン, design tokens, デザインシステム, テーマ, UI 生成, LP 作成, 配色, タイポグラフィ, AI っぽいデザイン, slop
+description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。
 compatibility: Requires git and network access to clone/update the reference repos at ~/.claude/references/ (external to the skill directory; run install.sh --with-references)
 ---
 

@@ -9,6 +9,24 @@ Design slop is the statistical average of the training corpus: safe, symmetric, 
 
 The cardinal rule (shared with `avoid-ai-slop-ja`): **breaking uniformity is a means, not a goal.** Don't swap the AI template for an "anti-AI template" — every visual decision should trace to content, brand, or audience. And fixing 記号 (purple gradients, Inter) without fixing 構造 (meaningless hierarchy, decoration without purpose) leaves the design just as hollow.
 
+## When not to run this
+
+Over-triggering costs more than under-triggering: 動いている UI に理由のない見た目の変更を入れるのは
+退行で、「AI っぽい」判定を誤った文脈に当てると設計意図を壊す。Skip when:
+
+- **Functional-only work** — バグ修正、ロジック変更、テスト、a11y 欠陥の修正。見た目を触らない変更に配色論を持ち込まない
+- **The user asked something else about the same screen** — 挙動・パフォーマンス・文言・実装方針
+- **Throwaway artifacts** — デバッグ用の図、自分用のスケッチ、社内の一時画面
+- **The brand guide or design system already decides it** — 適合が要求なら、それに反する提案はしない (Process 1 と同旨)。トークンで決まっている色・書体を「AI っぽい」理由で変えない
+- **Charts as such** — チャート・凡例・軸の設計は別スキル (`dataviz`) の領域。ここで見るのは周辺のレイアウトとタイポだけ
+- **The user already declined** — 「今の見た目でいい」と言われた後の同一画面
+
+**Run at most once per artifact per conversation.** 一度通した画面に後続ターンで tell 探しを重ねない —
+尽きた後の追加指摘は、根拠のない差分に落ちる。
+
+**A caveat is the tell** — 「これは LP 向けの基準だが、業務 UI にも役立つかも」と前置きしたくなった
+時点で、その指摘は当たっていない (`references/` の抽出元は LP / マーケティングサイト中心)。
+
 ## Process (run in order)
 
 1. **Identify the artifact type and its budget** — web UI / slide deck / diagram / image, plus the governing brand or design system. If a brand guide or design system exists, conformance to it outranks every technique below.
