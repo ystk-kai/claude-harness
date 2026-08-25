@@ -25,18 +25,21 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 原典 clone がないときは、このリポジトリの `install.sh --with-references` で一括取得する。
 各リポジトリの出所 URL は、蒸留版 frontmatter の `source` を唯一の正とする。
 
-3 本は役割が違う。「何を作るか」を決めるのが雛形、「どう書くか」を決めるのが仕様、「どう外すか」を決めるのが規律。
+4 本は役割が違う。「何を作るか」を決めるのが雛形、「どう書くか」を決めるのが形式仕様とトークン仕様、「どう外すか」を決めるのが規律。
 
 | カテゴリ | 原典 | 蒸留版 | 使いどころ |
 |---|---|---|---|
 | 雛形カタログ | `awesome-design-md/` | [references/awesome-design-md.md](references/awesome-design-md.md) | 実在サイトのデザイン言語を抽出した DESIGN.md 集 (74 件)。作りたい雰囲気から系統を選び、プロジェクトルートに置いて生成の制約にする |
 | 生成規律 | `hallmark/` | [references/hallmark.md](references/hallmark.md) | 生成物が既定値 (AI slop) に落ちるのを防ぐルールセット。テーマ選択・構造選択・出力前のゲート検査。既存 UI の audit / redesign / study にも使う |
 | 標準仕様 | `community-group/` (DTCG) | [references/community-group.md](references/community-group.md) | デザイントークンの標準語彙と形式 (`$value` / `$type` / alias / composite type)。トークンファイルや theme 定義を書くときの典拠 |
+| 形式仕様 | `design.md/` (Google Labs) | [references/design.md.md](references/design.md.md) | DESIGN.md 形式そのものの規範 (Apache-2.0)。frontmatter のトークン schema・8 セクションの固定順序・component プロパティ・未知内容の扱い。`PHILOSOPHY.md` が「具体的な参照物は形容詞の列挙に勝る」「否定制約は具体性から自動で付く」を規定。CLI に `lint` (WCAG contrast を含む 11 ルール) / `diff` / `export --format dtcg` / `spec` |
 
 ## 判断の優先順位
 
-- トークンの型・形式・命名の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) はその写像として扱う
+- DESIGN.md の**形式**の可否 (キー名・セクション順・component プロパティ・未知内容の扱い) は **`design.md/` 仕様**を正とする。機械検査は `npx @google/design.md lint <file>` (error があれば exit 1)
+- トークンの**型・形式・命名**の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) と DESIGN.md の frontmatter はその写像として扱う (`design.md` 仕様は DTCG から typed token group と `{path.to.token}` 参照構文だけを採った関係なので、両者は同一ではない。相互変換は `export --format dtcg`)
 - 生成時に「やっていいこと / いけないこと」が割れたら **`hallmark/`** を優先する (生成規律が本業)。DESIGN.md 側の Do's and Don'ts はそのサイト固有の制約として上乗せする
+- DESIGN.md を**書く**とき (既存のものを引くのではなく新規に起こすとき) は `design.md/` の `PHILOSOPHY.md` を先に読む。曖昧な形容詞の列挙に落ちると生成結果が既定値の中心に寄る。長い don't リストは、参照物の記述が曖昧すぎる兆候として扱う
 - 雛形はあくまで出発点。`awesome-design-md/` の DESIGN.md をそのまま使うと元サイトの模倣になるので、ブランド固有の制約 (色数・書体・角丸・密度) を必ず上書きする
 - 抽出元はマーケティングサイト / LP が中心。ダッシュボードや業務 UI にそのまま適用しない
 - **別スキルとの分担**: `avoid-ai-slop-design` は AI 臭の検出カタログと処方 (計測研究・学術ソース付き) を担当する。こちらは原典リポジトリの索引。診断・改善の手順が要るときは `avoid-ai-slop-design`、原典の規則や雛形を引くときはこのスキル
