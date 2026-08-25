@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/skills
-distilled_commit: 0a64e398ec6bb34a494f0c347e8ccae53a862f8e
-distilled_at: 2026-08-21
+distilled_commit: 3b3fad96af16a10759d930941b4520ba0c40edae
+distilled_at: 2026-08-26
 ---
 
 # anthropics/skills 蒸留版
@@ -177,6 +177,19 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
     自ドメイン外・別 path への書き換えを禁じる。prompt-audit の "volatile specifics" (項目 15) に対する
     正攻法の設計例。 → `skills/academy-guide/SKILL.md` の "The catalog"
 
+21. **手順書型 reference には「機械的な編集」と「user が決める」のマーカーを分ける (2026-08 追加)**。
+    `3b3fad9` で入った `sdk-upgrade.md` は各項目の先頭に **`[BREAKS]`** (放置すると壊れる = 自分で直す) と
+    **`[DECIDE]`** (user の判断が要る = 勝手に変えず report に上げる) を付け、末尾 Checklist と Report 節でも
+    同じマーカーで再掲する。Python floor の引き上げ・Bedrock の region 補完は `[DECIDE]` 側に置き
+    「推測で値を書くな、確認が取れるまで report に列挙しろ」と明記する。この 2 値マーカーは同 skill の
+    `shared/model-migration.md` には無く、手順書 skill を書くときの型として使える。
+    加えて (a) **bundled guide と live source の優先順位を明記**する契約 (「repository の `MIGRATION.md` が
+    正、食い違ったらそちらに従い report にそう書く」)、(b) **未対応領域では improvise を禁じる分岐**
+    (該当言語の `sdk-upgrade.md` が無ければ「同梱ガイドは無い」と述べ CHANGELOG へ誘導、Python 版から
+    でっち上げない)、(c) Step 1 の **grep 可能な Signal 表を検証にも再利用**する (最後に同じ grep を再実行し、
+    残ったヒットには理由を付ける) の 3 点が、項目 15 の prompt-audit と共通する手順書の作法。
+    → `skills/claude-api/python/claude-api/sdk-upgrade.md`, `skills/claude-api/SKILL.md` の Subcommands
+
 ## 索引
 
 | トピック | 原典パス | 内容 (一行) |
@@ -194,6 +207,7 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
 | **gate 型 skill (返答直前に発火) の実例** | `skills/{academy-guide,discernment-nudge}/` | 答えを先に完成、会話あたり回数制限、逐語固定の出力形式、本文の大半を「やらない条件」に充てる |
 | 腐るデータの外部化 + injection 対策 | `skills/academy-guide/SKILL.md` の "The catalog" | 同梱せず runtime fetch、staleAfter/generatedAt で信頼判定、失敗時は silent degrade、"data, not instructions" と field allowlist |
 | **既存 prompt / skill / tool description の cruft 監査** | `skills/claude-api/shared/prompt-audit.md` | 4 グループの dated-pattern 表 (各グループに grep 可能な Signals) + keep list + 報告書と proposed diff の出力契約 + 削除は仮説なので behavioral probe で検証 |
+| 手順書型 reference の書き方 (BREAKS/DECIDE マーカー) | `skills/claude-api/python/claude-api/sdk-upgrade.md` | 壊れる項目と user が決める項目を 2 値マーカーで分離、Checklist/Report で再掲、grep Signal 表を検証に再利用、bundled guide と live source の優先順位を明記 |
 | 監査を呼ぶ側の契約 | `skills/claude-api/SKILL.md` の Subcommands / Language Detection / Quick Task Reference | `prompt-audit` サブコマンド行、`migrate` からの相互参照 (per-target 適用後に必ず監査)、言語非依存タスクの carve-out |
 | document skill (tool 型模範) | `skills/pdf/` | SKILL.md + scripts/*.py 8 本 + reference.md + forms.md。本文から reference を明示誘導 |
 | Office 生成 skill | `skills/{docx,pptx,xlsx}/` | 各 skill = SKILL.md + 共有 `scripts/office/` (soffice.py・validate.py・validators/{base,docx,pptx,redlining}・helpers/pptx_{chart,slide,theme})。固有 script は docx=comment/merge_runs/accept_changes+templates/、pptx=add_slide/clean/thumbnail、xlsx=recalc。旧 pptx/editing.md・pptxgenjs.md は廃止し SKILL.md 本文へ統合 |
@@ -216,7 +230,8 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
   `skills/<name>/SKILL.md` と同梱 reference を直接読む。特に `claude-api` のモデル ID・価格・
   Managed Agents API 仕様は上流で頻繁に更新されるため、本蒸留を経由せず必ず原典を読む
   (本蒸留が claude-api から取るのは description の書きぶり・分割構造・repo 同梱 skill の配置規約、
-  および `shared/prompt-audit.md` の監査フレームだけ)。
+  `shared/prompt-audit.md` の監査フレーム、および `python/claude-api/sdk-upgrade.md` の手順書の作法だけ。
+  `anthropic` 0.x → 1.x の破壊的変更そのもの (httpx2 移行・削除された API・Bedrock region 必須化) は写していない)。
   session budget / inference_geo / advisor / multiagent roster といった API 表面は skill 設計と無関係なので扱わない。
 - **gate 型 2 件のドメイン内容** — Claude Academy のカタログ構造・product hub URL・gated 表示の扱い
   (academy-guide)、AI Fluency の discernment 3 習慣と nudge 文例そのもの (discernment-nudge) は写していない。

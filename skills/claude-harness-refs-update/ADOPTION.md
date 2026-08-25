@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-08-26
+
+### awesome-harness-engineering / claude-code-best-practice / skills 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | hook | 自然言語の禁止事項は built-in control に写像しない限り guardrail にならない (公開 `CLAUDE.md` 481 件で裏打ちがあるのは約 4%)。`~/.claude/CLAUDE.md` の「codex 呼び出し時の prompt 安全化」(`$` / バッククォート / `"` のエスケープ) は散文だけで強制がなく、`PreToolUse(Bash)` に載っているのは commit/PR 文言を見る `commit-guard.sh` のみ (grep 済)。実際に `Permission denied` / `command not found` で失敗した実績がある領域なので、`codex-companion.mjs task` を叩く Bash 呼び出しで未エスケープの `$` / バッククォート / `"` を検出して block する hook に写す価値が高い。コミットメッセージ規約は既に `commit-guard.sh` で強制済みなので該当しない | ahe: `82736a9`, README `Permissions & Authorization` の <https://arxiv.org/abs/2608.23550> |
+| 未対応 | FYI | skill | 手順書型 skill では「機械的に自分で直す項目」と「user が決める項目」を行頭マーカーで分離し、末尾の Checklist / Report 節でも同じマーカーで再掲する型 (`[BREAKS]` / `[DECIDE]`)。値が確定できないものは推測で書かず report に列挙させる。この repo では `claude-harness-refs-update` が同じ分離を構造として持ち (再蒸留 = 機械的 / 取り込み候補 = user 判断、深刻度 3 値も本台帳にある) ので新規対応は不要。他の手順書 skill を足すときの型として使う | skills: `3b3fad9`, `skills/claude-api/python/claude-api/sdk-upgrade.md` |
+| 未対応 | FYI | 運用 | 二次資料の 1 run 判定を確定と見なさない、の実例が増えた。`fork` agent type は 2026-08-20 に「公式 docs に無い = 誤検出」で INVALID にされた後、2026-08-24 に公式 docs (v2.1.241) で確認され再オープン。前回蒸留の「INVALID で決着」は撤回した。`/list-agents` も v2.1.239 で挙動が反転し、除外されていた agent-team のチームメイトが列挙対象に入った。どちらも `claude-harness` 内に参照はない (grep 済) ので実害なし | ccbp: `changelog/subagents/changelog.md` の 2026-08-24 entry, `05dd0ee` |
+
+---
+
 ## 2026-08-21
 
 ### skills / claude-code-best-practice / claude-cookbooks 再蒸留から
