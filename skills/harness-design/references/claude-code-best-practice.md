@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 05dd0ee2cbefd1547c16374b9a8f118869ca1cb8
-distilled_at: 2026-08-26
+distilled_commit: 02cdbc6bc42adcebc72e0affb8293972c72799c0
+distilled_at: 2026-08-27
 ---
 
 # claude-code-best-practice 蒸留版
@@ -79,8 +79,7 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
    `sandbox.credentials` の `mask`。user / managed / `--settings` のみ)。**非対称**なのが要点で、逆に制限を
    強める値は下位スコープからも効く — `disableClaudeAiConnectors: true` は managed の `false` に対しても
    任意スコープから、`remoteControlAtStartup: false` は project/local からでも managed の `true` を上書き
-   できる (opt out はできるが opt in はできない)。`fallbackModel` だけは配列なのにマージされず、定義した
-   最上位のファイルがチェーン全体を供給する (重複除去後 4 件目以降は無視)。
+   できる (opt out はできるが opt in はできない)。`fallbackModel` だけは配列なのにマージされず、定義した最上位のファイルがチェーン全体を供給する (重複除去後 4 件目以降は無視)。
    → `reports/claude-global-vs-project-settings.md`, `best-practice/claude-settings.md`
 
 8. **permissions 構文には落とし穴がある**。`Tool(param:value)` (`Agent(model:opus)`,
@@ -133,26 +132,28 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
     commands 20・subagents 16 フィールドの型・意味の表と、公式ビルトイン一覧 (bundled skills 15、
     slash commands 92、agent types 5) がある。設計時は記憶で書かずここを引く。ただし**日次 drift check が
     動かすのはバッジ行と `changelog/` 追記だけで、表本体は据え置かれる**ため、個数は公式 docs と一致しない。
-    2026-08-25 (v2.1.245) 時点の未決着 3 件:
+    2026-08-27 (v2.1.247) 時点の未決着 3 件:
     - bundled skills 表 row 14 `review` — v2.1.223 で `/code-review` の alias になったが説明は旧挙動
       (fast single-pass PR review) のまま。削除すれば 15 → 14 だが 2026-07-30 から ON HOLD。
     - row 15 `security-review` — 公式 skills docs の "A few built-in commands are also available through
       the Skill tool, including `/init` and `/security-review`" を根拠に「bundled skill ではなく Skill tool
-      から呼べる built-in command」と結論され、2026-07-30 から ON HOLD が続く。公式が数える bundled skill は
-      13 で `review` / `security-review` を含まない。row 15 が挙げる `--fix` / `--comment` も公式側から消えた。
+      から呼べる built-in command」と結論され 2026-07-30 から ON HOLD。公式が数える bundled skill は 13 で
+      `review` / `security-review` を含まず、row 15 の `--fix` / `--comment` も公式側から消えた。
     - subagents 表 — 表は 5 個 (`general-purpose`, `Explore`, `Plan`, `statusline-setup`,
-      `claude-code-guide`) のままだが、2026-08-24 の scan は公式が 7 agent を挙げるとする。差分の
-      `claude` (model 継承・全ツール、dispatch された background セッションの既定) は 2026-08-07 から、
-      `fork` (親の会話・system prompt・モデル・履歴をそのまま継承。`Agent` ツールか `/subtask` から起動し、
-      さらに fork を spawn できない) は 2026-08-24 から ON HOLD。`Explore` の model を `haiku` とする行も
-      公式の「親から継承」と食い違い、`model` 欄の例は `claude-opus-4-6` のままで `fable` 未記載。
-      `fork` は 2026-08-20 に「公式 docs に無い = 誤検出」で INVALID にされた後 2026-08-24 に公式 docs
-      (v2.1.241) で確認され再オープンされた。前回蒸留の「INVALID で決着」は撤回 — 1 run の判定を確定と
-      見なさない (2026-07-27 の `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR` 改名を 4 日後に revert した件と同種)。
+      `claude-code-guide`) のままで、公式が挙げる個数は scan ごとに揺れる (08-24 は 7 個、08-27 は 6 個)。
+      安定した追加候補は `claude` (model 継承・全ツール、dispatch された background セッションの既定) の
+      1 件のみで 2026-08-07 から ON HOLD。`fork` (親の会話・system prompt・モデル・履歴を継承。`Agent`
+      ツールか `/subtask` から起動し、さらに fork を spawn できない) は 08-20 に「公式 docs に無い」で
+      INVALID → 08-24 に v2.1.241 の docs で確認され再オープン → 08-27 に「docs は 6 agent、fork 不在」で
+      再び INVALID と 3 回反転している。**1 run の判定を確定と見なさない** (2026-07-27 の
+      `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR` 改名を 4 日後に revert した件と同種)。`Explore` の model を
+      `haiku` とする行も公式の「親から継承」と食い違い、`model` 例は `claude-opus-4-6` のままで `fable` 未記載。
     さらに**日次追従を受けているのは 4 本 (skills / commands / subagents / README CONCEPTS) と 3 つの
-    コレクション表だけ**。`claude-settings.md` は 2026-08-07 / v2.1.224 で止まり (v2.1.245 に対し 21 版遅れ)、
+    コレクション表だけ**。`claude-settings.md` は 2026-08-07 / v2.1.224 で止まり (v2.1.247 に対し 23 版遅れ)、
     `claude-memory.md` (2026-03-14)・`claude-mcp.md` (2026-03-07)・`claude-cli-startup-flags.md`
-    (2026-06-06) は数か月動いていない。バッジの日付が、その表がまだ追われているかの唯一の指標。
+    (2026-06-06) は数か月動いていない。バッジの日付が、その表がまだ追われているかの唯一の指標。凍結後に
+    公式へ増えて settings レポートに無いキーの実例: `modelPicker`・`promptCacheTtl`・`keybindingFlavor`・
+    `spellcheck`・`ANTHROPIC_DEFAULT_MODEL` (v2.1.246)、`spinnerTipsOverride` (v2.1.247)。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
 
 13. **MCP は少数精鋭**。「15 個入れて日常使いは 4 個」が典型。secrets は `${VAR}` 展開で環境変数に。権限は
@@ -184,9 +185,9 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
 | 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、tips 集、ワークフロー比較、購読先 |
 | agents/commands/skills の使い分け | `reports/claude-agent-command-skill.md` | 3 機構の比較表・使い分け基準・最軽量優先の解決順・frontmatter 比較 |
 | skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 20 フィールド (`background` と Agent Skills spec の `metadata`/`license`/`compatibility` 含む) とバンドルスキル 15 個 (`doctor` は `disableBundledSkills` の唯一の例外。row 14 `review` と row 15 `security-review` はどちらも bundled と数えるかが未決着で公式は 13 個。両者は command 表にも重複) |
-| subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (公式は `claude` と `fork` を含む 7 個。`Explore` の model 欄・`model` 例の model 名も未反映の watch item) |
-| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 20 フィールド (skill と同じ 3 フィールドが追加) と built-in slash command 92 個 (v2.1.239〜245 で `/artifacts`・`/auto-mode-setup`・`/rate-limit-options` を追加。`/rate-limit-options` はコマンドメニューに出ず全文入力が要る。`/advisor` は v2.1.232 から `fable` を受ける (Fable 5 アクセス必須)、`/doctor` は bundled skill 側へ移動、`/review`・`/security-review` は両表に併記) |
-| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (1400 行、「127+ settings / 311 env vars」。2026-08-07 / v2.1.224 で更新停止。commands / subagents 表が v2.1.245 まで進んでいるのに対し 21 版遅れ — 過去に 2026-07-31・08-02・08-07 と大きな drift 修正が続きキー名・permission 挙動・スコープ制限が毎回増減した経緯があるので、v2.1.225 以降の変更は反映されていない前提で読む) |
+| subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (公式側の個数は scan ごとに 6〜7 で揺れる。`Explore` の model 欄・`model` 例の model 名も未反映の watch item) |
+| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 20 フィールド (skill と同じ 3 フィールドが追加) と built-in slash command 92 個 (v2.1.239〜245 で `/artifacts`・`/auto-mode-setup`・`/rate-limit-options` を追加。`/rate-limit-options` はコマンドメニューに出ず全文入力が要る。`/advisor` は v2.1.232 から `fable` を受ける (Fable 5 アクセス必須)、`/doctor` は bundled skill 側へ移動、`/review`・`/security-review` は両表に併記。v2.1.246 で `/permissions` に Auto mode タブが付き、classifier ルールの閲覧・編集と auto mode 拒否履歴の確認ができる) |
+| settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (1400 行、「127+ settings / 311 env vars」。2026-08-07 / v2.1.224 で更新停止。追従中の 4 表が v2.1.247 まで進んでいるのに対し 23 版遅れ — 過去に 2026-07-31・08-02・08-07 と大きな drift 修正が続きキー名・permission 挙動・スコープ制限が毎回増減した経緯があるので、v2.1.225 以降の変更は反映されていない前提で読む) |
 | CLAUDE.md の書き方・ロード規則 | `best-practice/claude-memory.md` | ancestor/descendant/sibling のロード挙動、モノレポでの配置指針 (2026-03 で更新停止) |
 | MCP 設定と選定 | `best-practice/claude-mcp.md` | 日常用 MCP 5 選、.mcp.json 例、承認 settings、権限構文、3 スコープ (2026-03 で更新停止) |
 | CLI フラグ・環境変数 | `best-practice/claude-cli-startup-flags.md` | `claude` の起動フラグ・サブコマンド・env vars の分類表 (2026-06 で更新停止) |
@@ -225,14 +226,12 @@ clone を読む (原典ルートは SKILL.md 参照)。以下のパスはすべ�
   Workflows/Git/Debugging) 別の一覧は `README.md` の TIPS AND TRICKS 節。各 tip に一次ソースリンク付き。
 - **★ 数とバッジ日付そのもの** — 原典は日次 scheduled refresh で全レポートの Last Updated バッジと
   README の ★ 数を書き換える。追いかけても腐るだけなので蒸留版は数値を持たない。バッジは「その表が
-  まだ追われているか」の指標としてのみ使う (項目 12)。追跡対象は 2026-08-25 時点で v2.1.245
-  (skills 表だけ v2.1.241 止まり)。
+  まだ追われているか」の指標としてのみ使う (項目 12)。追跡対象は 2026-08-27 時点で 4 表そろって v2.1.247。
 - **コミュニティワークフローの詳細比較・skill/agent コレクション集** — `README.md` の
   DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS / AGENT COLLECTIONS 表。★ 数だけでなく**ステップ列そのものも
   書き換わる**ため、蒸留版はこれらの数値もステップ列も持たない。上流と食い違う個数を
-  「directory-count baseline」として据え置く運用があり、それが数週間後にまとめて訂正される
-  (16 run 以上 0 だった OpenSpec の skills は 2026-08-21 に 12 へ、同日 ECC の commands は前日入れた
-  146 が 94 へ下方修正)。数日で往復する項目 (ECC の agents 67/68/96/100) は 2 回連続確認まで採用されない。
+  「directory-count baseline」として据え置き数週間後にまとめて訂正する運用があり (OpenSpec の skills は
+  16 run 以上 0 のまま据え置かれ 2026-08-21 に 12 へ)、数日で往復する項目は 2 回連続確認まで採用されない。
 - **Claude API 寄りの詳細** (Programmatic Tool Calling、SDK 設定、rate limits の数値) —
   `reports/claude-advanced-tool-use.md`, `claude-agent-sdk-vs-cli-system-prompts.md`, `claude-usage-and-rate-limits.md`。
 - **hooks の実装詳細** — 別リポジトリ (shanraisshan/claude-code-hooks) が正。実働サンプルは `.claude/hooks/`。

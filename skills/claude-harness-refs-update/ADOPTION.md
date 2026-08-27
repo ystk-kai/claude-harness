@@ -21,6 +21,24 @@
 - **grep で実ハーネスに当ててから載せる。** 原典の記述として正しくても、このハーネスに当たらなければ `FYI`。推測での「影響あり」は台帳を腐らせる
 - **却下も残す。** 消すと同じ候補が毎回上がってくる。却下理由を書けば次回の判断が要らない
 - **対応済は消さずに畳む。** 判断の履歴が provenance になる (原典側が結論を撤回することがある)
+- **環境固有・機密の値を書かない。** この repo は公開されている。アカウント ID・ホスト名・IP・バケット名・
+  ユーザー名・社内組織名や、permission / soft_deny ルールの具体的な中身は台帳に載せない。書くのは
+  「どの設計上の判断が要るか」までで、値は環境側 (`~/.claude/`) に置く。影響対象を示すのに具体値が
+  必要になったら、それは台帳ではなく環境側に書くべき項目
+
+---
+
+## 2026-08-27
+
+### awesome-harness-engineering / claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | settings | `/permissions` に v2.1.246 で **Auto mode タブ**が付き、classifier ルールの閲覧・編集と auto mode 拒否履歴の確認が UI からできるようになった。`permissions.defaultMode: "auto"` を使う環境では、手書きした `autoMode.soft_deny` が実際に発火しているかを確認する手段がこれまで無かった。拒否履歴で実効性を測り、空振りしているルールを畳める。**個々のルールの内容は環境固有なのでこの台帳には書かない** (公開リポジトリ) | ccbp: `best-practice/claude-commands.md` row 13 `/permissions`, commit `9640e8a` |
+| 未対応 | FYI | 運用 | Codex CLI (<https://github.com/openai/codex>) が `Demo Harnesses` に追加。OpenAI 公式の agent loop (sandbox 化された tool 実行・複数ファイル編集・streaming loop) の OSS 参照実装として位置づけられている。環境側に置いている codex 呼び出しの回避策は `codex-companion.mjs` の引数渡しという**プラグイン側の実装都合**に対するものなので、この upstream は直接の解決にはならない。恒久対処 (argv/stdin 経由への修正) を検討するときの一次ソース候補 | ahe: `README.md` の `### Demo Harnesses`, commit `9925eb4` |
+| 未対応 | FYI | 運用 | 自己改良ハーネスの設計軸 — Exo (<https://github.com/exoharness/exo>) は prompt / memory / tool / policy を agent 自身に編集させるが、**immutable event log だけは書き換えられない**ことで recursive self-improvement を安全側に留める。ハーネス自身に `CLAUDE.md` や skill を書き換えさせる運用を組むなら「唯一の書き換え不能な土台」を先に決める。中身は未検証 (README の注記ベース) | ahe: `README.md` の `### Generators & Meta-Harnesses`, commit `6a14670` |
+| 未対応 | FYI | settings | 凍結した `claude-settings.md` (v2.1.224 止まり、v2.1.247 に対し 23 版遅れ) に無い新キーの実例が増えた: `modelPicker`・`promptCacheTtl`・`keybindingFlavor`・`spellcheck`・`ANTHROPIC_DEFAULT_MODEL` (v2.1.246)、`spinnerTipsOverride` (v2.1.247、同版で `SendFeedback` ツールと `/claude-api cost-optimize` も追加)。`~/.claude/settings*.json` と `claude-harness` を grep したがいずれも未使用 — settings を触るときは同レポートを正としない、の裏付けとして持つだけ | ccbp: `changelog/best-practice/concepts/changelog.md` の 2026-08-26 / 08-27 entry #13 |
+| 未対応 | FYI | 運用 | `fork` agent type の判定が **3 回反転**した (08-20 INVALID → 08-24 v2.1.241 docs で確認・再オープン → 08-27「docs は 6 agent、fork 不在」で再 INVALID)。2026-08-26 の台帳項目「再オープンされた」も撤回する。二次資料の 1 run 判定を確定と見なさない規律の追加実例。`claude-harness` 内の `fork` 参照は蒸留版と本台帳だけ (grep 済) で実害なし | ccbp: `changelog/best-practice/claude-subagents/changelog.md` の 2026-08-27 entry |
 
 ---
 
@@ -30,7 +48,7 @@
 
 | 状態 | 深刻度 | 対象 | 内容 | 根拠 |
 |---|---|---|---|---|
-| 未対応 | RECOMMENDED | hook | 自然言語の禁止事項は built-in control に写像しない限り guardrail にならない (公開 `CLAUDE.md` 481 件で裏打ちがあるのは約 4%)。`~/.claude/CLAUDE.md` の「codex 呼び出し時の prompt 安全化」(`$` / バッククォート / `"` のエスケープ) は散文だけで強制がなく、`PreToolUse(Bash)` に載っているのは commit/PR 文言を見る `commit-guard.sh` のみ (grep 済)。実際に `Permission denied` / `command not found` で失敗した実績がある領域なので、`codex-companion.mjs task` を叩く Bash 呼び出しで未エスケープの `$` / バッククォート / `"` を検出して block する hook に写す価値が高い。コミットメッセージ規約は既に `commit-guard.sh` で強制済みなので該当しない | ahe: `82736a9`, README `Permissions & Authorization` の <https://arxiv.org/abs/2608.23550> |
+| 一部対応 (2026-08-28。環境ローカルの `~/.claude/hooks/` に guard スクリプトを作成・テスト済だが、`settings.json` への登録は auto mode classifier にブロックされ未完了。対象は特定プラグインの引数渡しの不具合への回避策で、この repo の収録物ではないため `hooks/` にも `settings/global.json` にも載せない) | RECOMMENDED | hook | 自然言語の禁止事項は built-in control に写像しない限り guardrail にならない (公開 `CLAUDE.md` 481 件で裏打ちがあるのは約 4%)。この repo が所有する hook は現時点でゼロなので、対象になるのは環境ローカルの `~/.claude/CLAUDE.md` に散文で書かれた規約。**どの規約が該当するかは環境固有なのでこの台帳には書かない** (公開リポジトリ)。原則だけ残す — 散文の禁止事項は `PreToolUse` の block に写すか、写さないと決めた理由を書く | ahe: `82736a9`, README `Permissions & Authorization` の <https://arxiv.org/abs/2608.23550> |
 | 未対応 | FYI | skill | 手順書型 skill では「機械的に自分で直す項目」と「user が決める項目」を行頭マーカーで分離し、末尾の Checklist / Report 節でも同じマーカーで再掲する型 (`[BREAKS]` / `[DECIDE]`)。値が確定できないものは推測で書かず report に列挙させる。この repo では `claude-harness-refs-update` が同じ分離を構造として持ち (再蒸留 = 機械的 / 取り込み候補 = user 判断、深刻度 3 値も本台帳にある) ので新規対応は不要。他の手順書 skill を足すときの型として使う | skills: `3b3fad9`, `skills/claude-api/python/claude-api/sdk-upgrade.md` |
 | 未対応 | FYI | 運用 | 二次資料の 1 run 判定を確定と見なさない、の実例が増えた。`fork` agent type は 2026-08-20 に「公式 docs に無い = 誤検出」で INVALID にされた後、2026-08-24 に公式 docs (v2.1.241) で確認され再オープン。前回蒸留の「INVALID で決着」は撤回した。`/list-agents` も v2.1.239 で挙動が反転し、除外されていた agent-team のチームメイトが列挙対象に入った。どちらも `claude-harness` 内に参照はない (grep 済) ので実害なし | ccbp: `changelog/subagents/changelog.md` の 2026-08-24 entry, `05dd0ee` |
 
