@@ -36,15 +36,15 @@ grep した実測。hallmark の 1 件が縦書きを装飾として挙げるの
    OS の明朝になる。英語圏の serif 指定を写すと本文が明朝化するのはこれが原因 (→ 症状 1) [仕様]
 2. **日本語フォントにイタリック字形はほぼ無い**。`font-style: italic` は合成斜体になり字形が破綻する。
    `font-synthesis` の初期値は全合成 ON なので、明示的に切る (→ 症状 2) [仕様]
-4. 日本語には**単語の区切りが無い**ので、英語前提の折り返し既定値では意味の切れ目で改行されない。
+3. 日本語には**単語の区切りが無い**ので、英語前提の折り返し既定値では意味の切れ目で改行されない。
    `line-break: strict` / `word-break: normal` / `overflow-wrap: anywhere` の 3 点が実務の基礎 [通説]
-5. 日本語は同じ本文サイズでも字面が大きく画数が多い。**16px 未満は使わない、行高は 150〜175%**
+4. 日本語は同じ本文サイズでも字面が大きく画数が多い。**16px 未満は使わない、行高は 150〜175%**
    (英語圏の 1.4〜1.5 は日本語には詰まる) [公的: デジタル庁 DADS]
-6. 日本語 Web フォントは Latin の 100 倍規模。Noto Sans JP は Regular 単体で約 1.5MB、
-   可変フォント版は約 9.5MB。「好きな書体を読み込む」前提が成立しない [通説]
-7. 強調は italic ではなく **`<strong>` / 色 / サイズ / 傍点 (`text-emphasis`)** で作る。
+5. 日本語 Web フォントは Latin と桁が違う。Noto Sans JP は未サブセットの原本で
+   Regular 約 4.5MB / 可変フォント版 約 9.6MB。「好きな書体を読み込む」前提が成立しない [通説]
+6. 強調は italic ではなく **`<strong>` / 色 / サイズ / 傍点 (`text-emphasis`)** で作る。
    傍点は日本語の正統な強調手段で、Latin の italic に対応する [仕様]
-8. `text-transform: uppercase`・small-caps・drop cap は日本語に対して無効か無意味。
+7. `text-transform: uppercase`・small-caps・drop cap は日本語に対して無効か無意味。
    英語圏 LP の定番である "tiny uppercase tracked eyebrow" は日本語化した時点で機能を失う
 
 ## 症状 1: 日本語だけ明朝体になる
