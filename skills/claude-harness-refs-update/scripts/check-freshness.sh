@@ -131,6 +131,14 @@ for doc in "$SKILLS_ROOT"/*/references/*.md; do
     status=1
   elif [ "$pinned_full" = "$head_sha" ]; then
     echo "OK     $name @ ${head_sha:0:12}"
+  elif git -C "$clone" merge-base --is-ancestor "$head_sha" "$pinned_full" 2>/dev/null; then
+    # HEAD が distilled_commit の祖先 = clone の方が蒸留版より古い。STALE の逆向きで、
+    # そのまま STALE 分岐に落ちると "0 commits" と表示され、空の log を見せて
+    # 「再蒸留しろ」と促してしまう (蒸留の材料が clone に無いので何もできない)。
+    # --offline で origin/HEAD が古いまま BEHIND を判定できなかったときに起きる。
+    n="$(git -C "$clone" rev-list --count "HEAD..$pinned_full" 2>/dev/null || echo '?')"
+    echo "BEHIND $name: clone が蒸留版より $n commits 古い (HEAD ${head_sha:0:12} < distilled_commit ${pinned_full:0:12}) — git -C \"$clone\" pull --ff-only してから再実行"
+    status=1
   else
     n="$(git -C "$clone" rev-list --count "$pinned_full..HEAD" 2>/dev/null || echo '?')"
     echo "STALE  $name: 蒸留時 ${pinned_full:0:12} → 現在 ${head_sha:0:12} ($n commits) — 蒸留版: skills/$rel"
