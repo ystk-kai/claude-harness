@@ -28,6 +28,20 @@
 
 ---
 
+## 2026-08-31
+
+### claude-code-best-practice / claude-cookbooks 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | subagent | subagent frontmatter に `experimental` (object 任意。`cacheTtl` に `5m` / `1h` を置き prompt cache の寿命を指定。subagent ファイルからのみ読まれる、v2.1.248) が drift check で検出された。環境側に長寿命の subagent 定義が 8 件あるので当たりうるが (grep 上いずれも未使用)、**原典自身が ON HOLD で表に未反映**のため確定事実として使えない。採用前に公式 docs で裏を取る | ccbp: `changelog/best-practice/claude-subagents/changelog.md` の 2026-08-29 / 08-30 entry |
+| 未対応 | FYI | hook | v2.1.251 で `PreModelSwitch` / `PostModelSwitch` hook が追加されたと CONCEPTS drift ログが記録。モデル切替時に決定的処理を挟む設計の候補だが、凍結した `claude-settings.md` (v2.1.224) には未収録で原典の記述も公式 changelog の孫引き。環境側 `settings.json` の hooks にも未使用 (grep 済) | ccbp: `changelog/best-practice/concepts/changelog.md` 2026-08-30 entry の verification 行 |
+| 未対応 | FYI | skill | `workflow-authoring` が bundled skill (row 16) として確定。dynamic workflows 有効環境では workflow スクリプト作成用の参照 skill が既に載っているので、同等の自作 skill を足す前に重複を確認する。この repo と環境側の skills には同種のものは無い (grep 済) ので現時点の対応は不要 | ccbp: `best-practice/claude-skills.md` row 16, `changelog/best-practice/claude-skills/changelog.md` 2026-08-29 |
+| 未対応 | FYI | 運用 | 原典の ON HOLD は「否定」ではない、の実例が増えた。Voice Dictation (06-25 起票) と Artifacts (07-03 起票) の beta バッジは 1〜2 か月 ON HOLD ののち 08-29 に confidence 0.95 で削除確定。逆に `workflow-authoring` は 08-28 INVALID → 08-29 COMPLETE、`fork` agent type は 4 回目の判定反転。「二次資料の 1 run 判定でハーネスを直さない」既存方針の追加裏付け | ccbp: 上記 3 changelog の 2026-08-28〜30 entry |
+| 未対応 | FYI | 運用 | Anthropic 公式が「コーディネータ + 安価な並列ワーカー」の**コスト優位の断言と比率 (約 2.5 倍安・3 倍速) を撤回**した。残るのは「チームの入力トークンの 84-98% がワーカー単価で課金される」という構造だけで、比率は run ごとの 1 サンプル扱い。オーケストレーション構成をコスト理由で正当化するときは、比率ではなく rigor を揃えた実測を根拠にする。この repo にコスト優位を前提とした記述は無い (grep 済) | cookbooks: `bbfab1b`, `managed_agents/CMA_plan_big_execute_small.ipynb` |
+
+---
+
 ## 2026-08-27
 
 ### awesome-harness-engineering / claude-code-best-practice 再蒸留から

@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/claude-cookbooks
-distilled_commit: 35f2eec7e44897c537e44441b7dff2f0ecbfb804
-distilled_at: 2026-08-21
+distilled_commit: bbfab1bbbe5d4c353241a6df4e7d9a112a1ba356
+distilled_at: 2026-08-31
 ---
 
 # claude-cookbooks 蒸留版
@@ -141,7 +141,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 | ↳ プロンプトのバージョン管理 | `managed_agents/CMA_prompt_versioning_and_rollback.ipynb` | v1 を labelled テストセットで評価 → v2 出荷 → 回帰検知 → セッションを version 1 に pin して rollback。「プロンプトがコードでないとき、レビューゲートはどこへ行くか」 |
 | ↳ メモリストア | `managed_agents/CMA_remember_user_preferences.ipynb` | per-attachment `instructions` 付きの `memory_stores`、顧客別 read-write ストアとブランド共通 read-only ストアの併用 |
 | ↳ 出力の自動採点 | `managed_agents/CMA_verify_with_outcome_grader.ipynb` | ステートレス grader が全 URL を実際に fetch して引用を検証し、rubric に基づくフィードバックで改稿を回す |
-| ↳ コーディネータの経済性 | `managed_agents/CMA_plan_big_execute_small.ipynb` | 高価なコーディネータがトークン重い読解を安価な並列ワーカーへ流し、rigor を揃えた単独実行と per-thread の `usage.list_cost` (サーバ側計算) で比較。fan-out 数はデータ依存で決まるためセッションに `budget` を張ってガードレールにする。自前のレート表が要るのは「全部フロンティアモデルで走らせたら」という反実仮想だけ |
+| ↳ コーディネータの経済性 | `managed_agents/CMA_plan_big_execute_small.ipynb` | 高価なコーディネータがトークン重い読解を安価な並列ワーカーへ流し、rigor を揃えた単独実行と per-thread の `usage.list_cost` (サーバ側計算) で比較。fan-out 数はデータ依存で決まるためセッションに `budget` を張ってガードレールにする。自前のレート表が要るのは「全部フロンティアモデルで走らせたら」という反実仮想だけ。原典は 2026-08-28 に「約 2.5 倍安・3 倍速」の比率と「コスト優位は実在する」という断言を削除した — 残る主張は「チームの入力トークンの 84-98% がワーカー単価で課金される」という構造だけで、比率は run ごとの 1 サンプルとして扱う |
 | ポリシー散文 → ルール artifact のパイプライン | `capabilities/content_moderation/` | `guide.ipynb` が schema → ルール言語 → エンジン → コンパイラ → LLM assertion → 抽出 → 平文 1 文からのルール追加 (`compile_single_rule`) → ドメイン差し替え → eval の順に組み立てる。ドメインは `schema.json` + `context.json` + `policies.md` の 3 ファイルだけで、コードは 3 ドメインで共通。スキーマの field description が「抽出指示」と「コンパイラがどの条項をどのフィールドに割り当てるかの手がかり」を兼ねるのが設計の要。本番運用の指示も具体的: ルールセットは immutable にして `(content, extracted fields, ruleset version, context, verdict, trace)` を 1 レビューごとに記録 (監査対応と、新ルールセット採用前の過去判定 replay の両方に効く)、スキーマはキャッシュ prefix に置く、backfill は Batch API、`needs_review` 率と特定フィールドの `null` 増加を監視シグナルにする |
 | Skill 実装例 | `skills/custom_skills/` | `SKILL.md` (frontmatter は `name` / `description`) + `scripts/*.py` + `REFERENCE.md` の構成。progressive disclosure で必要時のみロード |
 | repo 自身のハーネス | `.claude/skills/cookbook-audit/`, `.claude/agents/code-reviewer.md`, `.claude/commands/` | ルーブリックを別ファイルに分離したスキル、レビュー用サブエージェント、7 本のスラッシュコマンド (`/notebook-review` 等は CI からも呼ばれる) |
