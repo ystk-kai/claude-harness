@@ -28,6 +28,18 @@
 
 ---
 
+## 2026-09-01
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | skill | bundled alias が同名の自作 skill を完全に隠す — 公式 docs 引用 "typing the bundled alias `/review` never runs your skill"。skill 名を bundled skill / slash command と衝突させると起動経路を失う。この repo の 5 skill と環境側 12 skill を grep したが `review` 名は無く実害なし。新規 skill 命名時のチェック項目として持つ | ccbp: `changelog/best-practice/claude-skills/changelog.md` の 2026-08-31 entry (`e8f40e6`) |
+| 未対応 | FYI | subagent | 原典 subagent 表の未反映 watch item が 3 件に増えた — `permissionMode` の `manual` (`default` の alias、v2.1.200+)、`model` 例の model 名 (公式は `claude-opus-5`、原典は `claude-opus-4-6` のままで `fable` 未記載)、`prompt` フィールド (公式では `--agents` CLI JSON にしか存在せず frontmatter 表には無い)。この repo は subagent 定義ファイルも追跡対象の `settings.json` も持たない (grep 済) ので影響なし。subagent を書く場面では原典の表を正としない | ccbp: `best-practice/claude-subagents.md` と同 changelog の 2026-08-31 entry |
+| 未対応 | FYI | 運用 | `fork` agent type が 08-31 の subagents drift 表から**行ごと消えた** (08-20 INVALID → 08-24 再オープン → 08-27 再 INVALID → 08-30 ON HOLD に続く 5 回目の変転)。台帳の既存 `fork` 項目 (2026-08-31 / 08-26 分) の「ON HOLD」記述もこれで更新する。二次資料の 1 run 判定を確定と見なさない規律の実例として累積 | ccbp: `changelog/best-practice/claude-subagents/changelog.md` の 2026-08-31 entry |
+
+---
+
 ## 2026-08-31
 
 ### claude-code-best-practice / claude-cookbooks 再蒸留から
