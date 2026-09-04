@@ -28,6 +28,58 @@
 
 ---
 
+## 2026-09-05
+
+### skills (anthropics/skills) 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | skill | 公式 frontend-design の AI っぽさ tell クラスタが 3 → 5 に増え、既存の tell リストに**無い**項目が出た: **template chrome** (中黒つなぎの meta 文字列、`WORD — fragment`、`#0B0B0B`/`#111` の擬似黒、リンク末尾の `→`)、`#D97757` を「Anthropic 自身の accent なので tell」と名指し、typography 既定禁止 3 項目 (見出し中 1 語だけのアクセント / ラベルの全大文字 / 不要な typographic ラベル)、行長 80 字未満。grep 済: eyebrow・ALL-CAPS・カード kit の同一 radius/shadow (`opacity 0.1`) は `avoid-ai-slop-design/references/web-ui.md` に既出だが、上記は未収載。`ui-design` / `avoid-ai-slop-design` の次の棚卸しで差分を足す | skills: `skills/frontend-design/SKILL.md` (`41bbe19`) |
+| 未対応 | RECOMMENDED | 運用 | モデル移行後に prompt を据え置くと**精度でなくコストで効く** (Opus 4.8 向け prompt を Opus 5 で回すと ticket あたり +36%、精度は不変。監査後は未監査比 -14% かつ正答 92%→97%)。モデルを上げたら `prompt-audit` を走らせる運用にする | skills: `skills/claude-api/shared/cost-optimization.md` § 2.2 |
+| 未対応 | FYI | CLAUDE.md | 「hold all findings for the final response」「don't narrate」型の update suppressor と、「never use bullets」「no headers」「no bold」型の anti-formatting rule は over-narrate / over-format する旧モデル向けで、現行モデル (特に Fable 5.1) では逆に *under*-narrate / *under*-format を招く。`~/.claude/CLAUDE.md`・`claude-md/`・各 `SKILL.md` を grep したが該当表現は無く実害なし。今後この型の指示を書かない指針として持つ | skills: `skills/claude-api/shared/prompt-audit.md` Group 1d (`5304866`) |
+| 未対応 | FYI | hook | 数ターンごとに「reminder: ...」を履歴へ差し込み次リクエストで取り除く実装は二重に有害 — 現行モデルは 1 回で保持し、かつ preserved thinking では**取り除くこと自体が history edit** で cache が miss し以降の thinking block が無効化される。残すなら `role: "system"` + `clear_at: "next_user_message"` を毎ターン append し過去分を消さない。この repo と環境側に hook 定義は無い (grep 済) | skills: `shared/prompt-audit.md` Group 1d、`shared/prompt-caching.md` |
+| 未対応 | FYI | skill / MCP | progressive disclosure の閾値が数値化された — tool schema は**合計 ~10K token を超えてはじめて `defer_loading` が黒字**で、それ未満は検索ステップが純オーバーヘッド。「取りに行くターン」が増えて逆に高くつく場合があるので eval で検証する条件付き | skills: `shared/cost-optimization.md` § 2.2 と "Workload shape -> lever" 表 |
+| 未対応 | FYI | subagent | subagent は「自己完結する重い中間結果を吸収して 1 行返す」ステップに使う。判断側がその中間文脈を要るなら使わない。**subagent は親と cache を共有しない新規 prefix** になる。context editing は節約レバーではなく context-window ツール (クリアのたびに cache を壊す)、`max_tokens` は backstop であってチューニングノブではない | skills: `shared/cost-optimization.md` § 2.3 / § 2.4 |
+| 未対応 | FYI | 運用 | Managed Agents のリポジトリ skill 発見は **cloud sandbox 限定** (self-hosted sandbox は `github_repository` 非対応)、agent 1 つに attach できる skill は**最大 20** | skills: `shared/managed-agents-tools.md` |
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | settings | `/effort` は v2.1.243 から**モデル別に `modelSettings` へ保存**するようになり、トップレベル `effortLevel` は「`modelSettings` にエントリの無いモデルの fallback」へ降格した。環境側 `settings.json` に `effortLevel` が実在する (grep 済) ので**この repo で唯一実ハーネスに当たる項目**。no-op ではないが、モデルごとに既定 effort を固定したいなら `modelSettings` 側に書く。あわせて `modelSettings` / `modelPicker` は**マージ例外**で、最上位スコープのファイルが値全体を供給する (下位からの追記が消える) | ccbp: `best-practice/claude-settings.md` Model Overrides 表・Scope precedence 節、同 changelog 2026-09-01 項目 4・5・7 |
+| 未対応 | RECOMMENDED | 運用 | 公式の settings キー索引が **`docs/en/settings-reference` に移動**した (`docs/en/settings` は task 指向ガイドに再編されキー索引を持たない)。settings を調べるときの当たり先を変える | ccbp: `best-practice/claude-settings.md` Sources 節、同 changelog 2026-09-01 項目 2 |
+| 未対応 | FYI | settings / subagent | `CLAUDE_CODE_SUBAGENT_MODEL` は v2.1.238 で **override から「既定値」に変わった** (agent 定義の `model:` や呼び出し時の明示指定に負ける)。`teammateDefaultModel` は **v2.1.251 で削除**され残すと no-op (teammate はリードのモデルを継承)。環境側 `settings.json` と repo をいずれも grep したが未使用で該当なし | ccbp: `best-practice/claude-settings.md`、同 changelog 2026-09-01 項目 6・12 |
+| 未対応 | FYI | skill | `skillOverrides` の運用注意 — **plugin skill / `disable-model-invocation: true` の skill / managed `skillOverrides` エントリを持つ skill は `/skills` 画面から可視性を切り替えられない**。この repo では `claude-harness-refs-update` が該当する (明示起動専用の設計なので意図どおり)。ユーザーの手動 toggle を前提にした skill 設計をしない、の根拠として持つ | ccbp: `best-practice/claude-commands.md` `/skills` 行、同 changelog 2026-09-02 項目 2 |
+| 未対応 | FYI | hook | hook イベントが **26 → 28** になり v2.1.252 で `PreModelSwitch` / `PostModelSwitch` が追加された (2026-08-31 台帳の「公式 changelog の孫引き」項目が原典表に反映された形)。この repo と環境側に hook 定義は無い (grep 済) | ccbp: `best-practice/claude-settings.md` hooks リダイレクト節、同 changelog 2026-09-01 項目 13 |
+| 未対応 | FYI | settings | 凍結していた `claude-settings.md` が v2.1.224 → v2.1.252 に追いつき、新設キーが本文に載った: `crossSessionInbound` (`accept`/`hold`/`refuse`。**より厳しい値なら project/local が managed に勝つ**非対称ルールの新実例)、`dialogExpiry`、`autoContinueAtUsageLimit`、`feedbackDrafts` (`SendFeedback` の gate)、`desktopSessionCleanupPeriodDays`、`promptCacheTtl` / `subagentPromptCacheTtl`、`keybindingFlavor`、`spellcheck`、`disableCommandPluginSources` (managed のみ)、marketplace source type `command` (+`mode: "link"`)、sandbox credentials の JWT/AWS マスキング。2026-08-27 台帳の「未反映の新キー」項目はこれで解消 | ccbp: `best-practice/claude-settings.md`、同 changelog 2026-09-01 項目 3・4・8・9・10 |
+| 未対応 | FYI | 運用 | slash command の前提条件が明文化: `/subtask` は **v2.1.212+ かつ agent view 有効時限定**、`/desktop` は macOS または **x64** Windows + サブスクリプション必須、`/review` は引数が `/code-review` と同じ完全形になりレベル省略時は**前回のレベルを再利用**。`/usage-credits` の `DISABLE_EXTRA_USAGE_COMMAND=1` は公式 docs から消えたため、2026-08 蒸留に載せていた記述を撤回 | ccbp: `best-practice/claude-commands.md` #61/#66/#91、同 changelog 2026-09-02 項目 1・3 / 2026-09-04 項目 1・2 |
+| 未対応 | FYI | 運用 | 前回台帳の watch item の現況: `experimental.cacheTtl` (subagent frontmatter) と `claude` built-in agent は 09-04 時点でも **ON HOLD のまま**で公式表に未反映 → 確定情報として使わない。`fork` agent type は 08-31 に drift 表から消えて以降 09 月の run にも復活せず**判断保留のまま**。2026-09-01 台帳の `fork` 項目 (5 回目の変転) をこれで更新する | ccbp: `changelog/best-practice/claude-subagents/changelog.md`、`changelog/best-practice/claude-commands/changelog.md` |
+
+### claude-cookbooks 再蒸留から
+
+原典側では BREAKING / RECOMMENDED として上がったが、**このハーネスには permission ルールも hook も Agent SDK コードも無い** (`~/.claude/settings.json` に `permissions` / `hooks` キーが両方とも存在しないことを確認済) ため、全件 `FYI` に落とす。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | settings | permission のパスルールを絶対パスで書くとき、**スラッシュ 1 個で始めると設定ソース基準で解決されて何にもマッチしない** (`dontAsk` 下では全 read が拒否される)。正しい形はスラッシュ 2 個。環境側 `settings.json` に permission ルール自体が無いので現時点の該当なし。将来 allowlist を書くときの必須知識 | cookbooks: `claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb` code cell 12 |
+| 未対応 | FYI | hook | `allowed_tools` の `Read(...)` ルールは `Grep` / `Glob` へ **best-effort にしか適用されない**。read を repo 内に閉じ込めたいなら `PreToolUse` hook で symlink 解決後のパス検査と、`/`・`~` 始まり / `..` を含む / `{` を含む glob の deny を重ねる | cookbooks: 同 notebook (MD 11)、`scheduled_review.py` |
+| 未対応 | FYI | settings | 他人の repo を処理するエージェントには `setting_sources=[]` を設定する。マシン側設定を切るだけでなく**対象 repo 自身の `.claude/settings.json` と `CLAUDE.md` をセッションから外す** ("a repository you don't control should not configure its own reviewer")。あわせて `strict_mcp_config=True` で MCP tool 定義が全リクエストに載るのを防ぐ | cookbooks: 同 notebook (MD 11) |
+| 未対応 | FYI | 運用 | `max_budget_usd` は「超過してから止まる」ので実費は cap を超えうる。bound 超過は `ResultError` (claude-agent-sdk **0.2.140 以降**の型) として raise される | cookbooks: 同 notebook (MD 11, Prerequisites) |
+| 未対応 | FYI | 運用 | resume ベースの「前回を覚えている」エージェントは、継続が効いたかを**スキーマの required フィールド**で証明させる (前回 id と所見 id を echo させ、呼び出し側で突き合わせて行頭マーカーを出す)。resume したエージェントは前回読んだファイルの記憶で答えるので、プロンプト冒頭で「ファイル一覧を取り直せ」と明示する | cookbooks: 同 notebook (MD 9, MD 21) |
+| 未対応 | FYI | 運用 | 旧モデル ID の一括置換表が原典にある。現行の正は `claude-sonnet-5` / `claude-haiku-4-5` / `claude-opus-4-8` で、`claude-opus-4-1` / `claude-opus-4-5` / `claude-sonnet-4-5` / `claude-sonnet-4-6` は retire 済み。Bedrock は新しめが suffix 無し、古いものだけ `-YYYYMMDD-v1:0` 付きの混在。repo と `~/.claude/` を grep したが retired ID の記載は無し | cookbooks: `26b5cdc`、`CLAUDE.md` 3 節、`scripts/validate_all_notebooks.py` の `deprecated_models` |
+
+### awesome-harness-engineering 再蒸留から
+
+差分 4 件はすべて curated list への新規リンク追加で、収載規約 (`CONTRIBUTING.md`)・repo 運用規約 (`AGENTS.md`)・`templates/*.md` に変更なし。既存の書き方を無効化する内容は含まれない。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | セキュリティ系エージェントハーネスの設計型 (4 フェーズ 11 ステージ) が公開された。読みどころは解析前の threat modeling で攻撃面を絞る / multi-agent の決定論的投票で false positive を抑える / adversarial validation を修正候補の採用ゲートにする / ハーネス水準の有効性指標に **Mean Time to Adapt** を置く | ahe: `4b2305d`、`README.md` の `Security, Sandbox & Permissions` |
+| 未対応 | FYI | 運用 | 複数 agent runtime を跨ぐ運用の「harness fragmentation」に対し、統一 API 規約の裏で runtime を交換可能にする self-hosted router が登場。単一 CLI に縛られない運用を将来検討する場合の当たり先 | ahe: `1e5cbe1`、`README.md` の `Task Runners & Orchestration` |
+| 未対応 | FYI | skill / hook | ワークフロー一式 (plan→test→implement→review→verify→remember→improve) を agent + skill + hook + memory の**インストール可能な配布物**として梱包する例と、同じ構成要素を zero-code で宣言的に生成するプラットフォームが追加された。自前 skill 群のパッケージ化・配布形態を考えるときの参照 | ahe: `cf8a1a3`, `43905de`、`README.md` の `Generators & Meta-Harnesses` |
+
+---
+
 ## 2026-09-01
 
 ### claude-code-best-practice 再蒸留から
