@@ -28,6 +28,23 @@
 
 ---
 
+## 2026-09-07
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | 運用 / skill | 記憶・参照資料の失効を**主張単位**で検出する型 (OpenWiki self-correcting memory) — 各 claim をバージョン付きの根拠と紐づけ、根拠が動いた claim だけを stale として旗立て、再検証まで「不確か」を持続させる。grep 済: `check-freshness.sh` の判定は形式 1 が clone HEAD と `distilled_commit` の SHA 比較、形式 2 が `reviewed_at` の経過日数だけで、いずれも**ファイル単位**。蒸留版の個々の主張と原典パスの対応が切れても検出されない (原典側でファイルが移動・削除されても STALE は「差分がある」としか言わない)。索引テーブルの原典パス生存チェックを足すのが最小の一歩 | ahe: `README.md` `Memory & State` 節 (`0a10903`)、<https://www.langchain.com/blog/self-correcting-memory-openwiki> |
+| 未対応 | FYI | CLAUDE.md / skill / subagent / hook / settings | `lintsinghua/claude-code-book` — Claude Code ハーネス内部の teardown (15 章 139 図)。tool system・**4 段階の permission pipeline**・context compaction・memory・hooks・subagent スケジューリング・MCP・skills・streaming・plan mode を設計判断の *why* 付きで扱う。permission や hook の設計根拠を調べるときの当たり先候補。第三者の teardown なので挙動の確定には公式 docs を優先する。grep 済: この repo に permission pipeline の記述は無い | ahe: `README.md` `Tutorials & Educational` 節 (`adfc01b`) |
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | 運用 | `/skill-doctor` で「ロード済みだが未使用の skill」と「skill ごとの context コスト」を出せる。grep 済: 環境側 12 skill + この repo 5 skill が常時ロードされており剪定判断の材料になるが、台帳にも repo にも `/skill-doctor` の記述は無い。`/skills` 画面の `t` キーで token 数ソートも可。要件は **v2.1.252 以降 + feature-flag fetching** (原典が 09-06 に v2.1.261 から訂正したので古い数字を持たない) | ccbp: `best-practice/claude-commands.md` #50、`changelog/best-practice/claude-commands/changelog.md` 2026-09-05 / 09-06 (`70481a1`, `80b755c`) |
+| 未対応 | FYI | 運用 | 原典 README の DEVELOPMENT WORKFLOWS 表の agent / command / skill 個数とステップ列は run ごとに揺れ、09-05 の run は 8 リポジトリ分の変更提案を**全件 ON HOLD** で据え置いた。他リポジトリのワークフロー構成をこの表から引用してハーネス設計の根拠にしない (二次資料の 1 run 判定を確定と見なさない規律の追加実例) | ccbp: `changelog/development-workflows/changelog.md` 2026-09-05 (#10〜#21) |
+
+---
 ## 2026-09-05
 
 ### skills (anthropics/skills) 再蒸留から
