@@ -27,6 +27,27 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-09-09
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | settings | 非技術者 113 名の user study で、ユーザーが事前に書く allow/ask/never ポリシーは per-action の HITL 承認より overreach 阻止率が**約 20 ポイント低い**。原因は大半のルールを `ask` に倒すこと — 静的な事前コミットが実行時プロンプトに退行し、判断負荷だけ残って保護が増えない。grep 済: 環境側の permissions は `ask` が 0 件で、危険操作は `deny` と `autoMode.soft_deny` で決め切っている構成のため、この失敗形には当たらない (**個々のルールの中身は環境固有なので台帳に書かない**)。今後 `ask` を足したくなったときの判断材料として持つ | ahe: `README.md` `Permissions & Authorization` 節 (`86e75a3`)、<https://arxiv.org/abs/2608.27443> |
+| 未対応 | FYI | 運用 | `letta-ai/trajectory` — Claude Code / Codex / Cursor / Gemini CLI 等 15+ ハーネスの session transcript を検証済みの単一レコード形式へ正規化するライブラリ。狙いは observability ではなく **agent による消費** (記憶形成・検索・訓練)。複数ハーネスのログを記憶や eval の素材にする構想が出たときの基盤候補。grep 済: この repo に transcript 正規化の記述は無い | ahe: `README.md` `Memory & State` 節 (`c02c6a2`)、<https://github.com/letta-ai/trajectory> |
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | 上の 2026-09-07 `/skill-doctor` 項目への訂正 — 必要バージョンは原典内で**いまも食い違ったまま**。`claude-commands.md` は「v2.1.252 以降 + feature-flag fetching」、`claude-skills.md` は「Introduced v2.1.261」。09-06 の訂正で決着したわけではない。grep 済: ローカルは v2.1.266 なのでどちらの前提でも満たしており実害なし。手順に組むなら厳しい側 (v2.1.261 以上) を要求する | ccbp: `best-practice/claude-commands.md` 97 行目 / `best-practice/claude-skills.md` 65 行目 (`965621e`) |
+| 未対応 | FYI | 運用 | 二次資料の 1 run 判定を確定と見なさない規律の追加実例、かつ**逆向き**の実例。`skill-doctor` は 09-05 に「built-in command であって bundled skill ではない」で INVALID とされた後、09-07 に commands reference の `[Skill]` マーカーを根拠に採用され bundled skills 表 row 18 に入った。1 run の INVALID を根拠に台帳から項目を落とすと取りこぼす。さらに 09-08 の run は公式ページの truncation で `simplify` / `review` / `security-review` の検証に失敗しており、原典自身が「取得できなかったことは削除の証拠ではない」と明記している | ccbp: `changelog/best-practice/claude-skills/changelog.md` の 2026-09-07 / 09-08 entry (`c3f5e85`) |
+
+### community-group 再蒸留から
+
+今回は取り込み候補なし。差分 4 件は DTCG 仕様リポジトリ内に閉じる — `799af2d` は JSON Pointer 対応の MAY/MUST 内部矛盾の解消 (蒸留版の既存記述 MUST と元から一致)、`8e43819` は `@dtcg/test-suite` パッケージ追加、残り 2 件は devDependency bump。
+
+---
 
 ## 2026-09-07
 

@@ -1,7 +1,7 @@
 ---
 source: https://github.com/design-tokens/community-group
-distilled_commit: 16c902d9327c18290e956a21130c445f1b88c40f
-distilled_at: 2026-08-03
+distilled_commit: 882ebd6716abef9a46d8ef5fb12e82009d6cee2e
+distilled_at: 2026-09-09
 ---
 
 # Design Tokens Community Group (DTCG) 仕様 蒸留版
@@ -25,25 +25,25 @@ W3C Design Tokens Community Group の公式リポジトリ。design token の交
 
 4. **ファイルは JSON**。MIME は `application/design-tokens+json` を SHOULD (`application/json` でも可、ツールは両方サポート必須)、拡張子は `.tokens` / `.tokens.json` を推奨 (technical-reports/format/file-format.md)。仕様本文の例は先頭に `"$schema": "https://www.designtokens.org/schemas/2025.10/format.json"` を書くが、`$schema` 自体は仕様の一部ではない (schemas/src/2025.10/format.json の `$comment`: "$schema is not part of the official DTCG specification")。
 
-5. **token と group を分けるのは `$value` の有無だけ**。`$value` を持つ object が token (親 object の key が token 名)、持たない object が group。両方を兼ねる構造は invalid でツールはエラーにする。`$value` は token の唯一の必須プロパティ (technical-reports/format/design-token.md「Name and value」, technical-reports/format/groups.md「Group Structure」)。
+5. **token と group を分けるのは `$value` の有無だけ**。`$value` を持つ object が token (親 object の key が token 名)、持たない object が group。両方を兼ねる構造は invalid でツールはエラーにする。`$value` は token の唯一の必須プロパティ (technical-reports/format/design-token.md「Name and value」, technical-reports/format/groups.md「Group Structure」)。追加プロパティ (すべて任意) は **`$description` / `$type` / `$extensions` / `$deprecated`**。`$description` は plain JSON string。`$extensions` はベンダー固有データ置き場で、キーは reverse domain name 記法推奨、**理解できない拡張データもツールは保存時に保持しなければならない**。`$deprecated` は `true` / 説明文の string / `false` (親の既定を打ち消す) (technical-reports/format/design-token.md)。
 
-6. **token の追加プロパティは `$description` / `$type` / `$extensions` / `$deprecated`** (すべて任意)。`$description` は plain JSON string。`$extensions` はベンダー固有データ置き場で、キーは reverse domain name 記法推奨、**理解できない拡張データもツールは保存時に保持しなければならない**。`$deprecated` は `true` / 説明文の string / `false` (親の既定を打ち消す) (technical-reports/format/design-token.md)。
+6. **`$type` は推測されない。決まらなければ token は invalid**。解決の優先順は (1) token 自身の `$type` → (2) 解決後の group の `$type` → (3) 親 group を上に辿って最も近い `$type` → (4) 決まらず invalid。値が参照なら参照先の解決型を採る。`Tools MUST NOT attempt to guess the type of a token by inspecting the contents of its value` (technical-reports/format/design-token.md「Type」, technical-reports/format/types.md, technical-reports/format/groups.md「Type Inheritance」)。`$type` の値は case-sensitive。
 
-7. **`$type` は推測されない。決まらなければ token は invalid**。解決の優先順は (1) token 自身の `$type` → (2) 解決後の group の `$type` → (3) 親 group を上に辿って最も近い `$type` → (4) 決まらず invalid。値が参照なら参照先の解決型を採る。`Tools MUST NOT attempt to guess the type of a token by inspecting the contents of its value` (technical-reports/format/design-token.md「Type」, technical-reports/format/types.md, technical-reports/format/groups.md「Type Inheritance」)。`$type` の値は case-sensitive。
+7. **命名制約**: token / group 名は `$` で始めてはならない (仕様プロパティの予約接頭辞)。加えて alias 構文のため `{` `}` `.` を**名前のどこにも**使えない。名前は case-sensitive で大小のみ違う名前は valid だが、変換出力で衝突するためツールは警告してよい。schema の正規表現は `^[^${}.][^{}.]*$` (technical-reports/format/design-token.md「Character restrictions」, schemas/src/2025.10/format.json の `tokenOrGroupName`)。
 
-8. **命名制約**: token / group 名は `$` で始めてはならない (仕様プロパティの予約接頭辞)。加えて alias 構文のため `{` `}` `.` を**名前のどこにも**使えない。名前は case-sensitive で大小のみ違う名前は valid だが、変換出力で衝突するためツールは警告してよい。schema の正規表現は `^[^${}.][^{}.]*$` (technical-reports/format/design-token.md「Character restrictions」, schemas/src/2025.10/format.json の `tokenOrGroupName`)。
+8. **group のプロパティは `$description` / `$type` / `$extends` / `$deprecated` / `$extensions`**。group は「任意のまとめ」でしかなく、`tools SHOULD NOT use them to infer the type or purpose of design tokens`。group 自身に代表値を持たせたいときは予約名 `$root` を使い、参照は `{color.accent.$root}` と書く (`{color.accent}` は group を指すので無効な token 参照) (technical-reports/format/groups.md)。
 
-9. **group のプロパティは `$description` / `$type` / `$extends` / `$deprecated` / `$extensions`**。group は「任意のまとめ」でしかなく、`tools SHOULD NOT use them to infer the type or purpose of design tokens`。group 自身に代表値を持たせたいときは予約名 `$root` を使い、参照は `{color.accent.$root}` と書く (`{color.accent}` は group を指すので無効な token 参照) (technical-reports/format/groups.md)。
+9. **参照は 2 系統ある**。中括弧 `{group.token}` は **token 全体のみ**を対象とし、暗黙に `/$value` を付けて解決する。JSON Pointer は `$ref` プロパティで書き (`"$ref": "#/colors/blue/$value/components/0"`)、任意の文書位置・配列要素・サブプロパティに届く。**ツールは両方の実装が MUST** — 以前は groups.md だけ `tools MAY also support JSON Pointer` と食い違っていたが 799af2d (#442) で MUST に揃い、見出し `Current Reference Syntax (Recommended)` からも `(Recommended)` が落ちた。中括弧では配列 index にアクセスできない。alias の連鎖は可 (explicit な値まで辿る)、循環参照は禁止でチェーン全体をエラーにする (technical-reports/format/aliases.md)。
 
-10. **参照は 2 系統ある**。中括弧 `{group.token}` は **token 全体のみ**を対象とし、暗黙に `/$value` を付けて解決する。JSON Pointer は `$ref` プロパティで書き (`"$ref": "#/colors/blue/$value/components/0"`)、任意の文書位置・配列要素・サブプロパティに届く。**ツールは両方の実装が MUST**。中括弧では配列 index にアクセスできない。alias の連鎖は可 (explicit な値まで辿る)、循環参照は禁止でチェーン全体をエラーにする (technical-reports/format/aliases.md)。
+10. **`$extends` は group 継承で、JSON Schema の `$ref` の糖衣**。token を参照してはならない。group 内の解決順は local token → `$root` → `$extends` 由来 (上書きされていなければ) → nested group 再帰。`$extends` の循環も検出必須 (technical-reports/format/groups.md「Extending Groups」「Processing Rules」)。
 
-11. **`$extends` は group 継承で、JSON Schema の `$ref` の糖衣**。token を参照してはならない。group 内の解決順は local token → `$root` → `$extends` 由来 (上書きされていなければ) → nested group 再帰。`$extends` の循環も検出必須 (technical-reports/format/groups.md「Extending Groups」「Processing Rules」)。
+11. **型は 13 個で全部**。`schemas/src/2025.10/format/tokenType.json` の enum が正: `color` `dimension` `fontFamily` `fontWeight` `duration` `cubicBezier` `number` `strokeStyle` `border` `transition` `shadow` `gradient` `typography`。**`string` 型は存在しない** (`schemas/src/2025.10/format/values/color.json` の `$comment` が "no string token type exists in the specification" と明言。ただし technical-reports/format/groups.md の型継承の例には `"$type": "string"` が現れるので、本文の例より schema enum を信じる)。opacity / percentage / font style / file は未定義で、technical-reports/format/types.md の「Additional types」に検討中として挙がっているだけ。
 
-12. **型は 13 個で全部**。`schemas/src/2025.10/format/tokenType.json` の enum が正: `color` `dimension` `fontFamily` `fontWeight` `duration` `cubicBezier` `number` `strokeStyle` `border` `transition` `shadow` `gradient` `typography`。**`string` 型は存在しない** (`schemas/src/2025.10/format/values/color.json` の `$comment` が "no string token type exists in the specification" と明言。ただし technical-reports/format/groups.md の型継承の例には `"$type": "string"` が現れるので、本文の例より schema enum を信じる)。opacity / percentage / font style / file は未定義で、technical-reports/format/types.md の「Additional types」に検討中として挙がっているだけ。
+12. **色の値は hex 文字列ではなく object**。`colorSpace` (必須) と `components` (必須、要素は数値または `"none"`)、任意で `alpha` (0〜1、省略時 1) と `hex` (6 桁 CSS hex の fallback。alpha と衝突しないよう 8 桁は不可)。`"none"` は「その成分が該当しない」を `0` と区別するためのもので、補間結果が変わりうる (technical-reports/color/color-type.md)。
 
-13. **色の値は hex 文字列ではなく object**。`colorSpace` (必須) と `components` (必須、要素は数値または `"none"`)、任意で `alpha` (0〜1、省略時 1) と `hex` (6 桁 CSS hex の fallback。alpha と衝突しないよう 8 桁は不可)。`"none"` は「その成分が該当しない」を `0` と区別するためのもので、補間結果が変わりうる (technical-reports/color/color-type.md)。
+13. **composite type の sub-value は「明示値」か「同じ型の token への参照」のどちらでも書ける**。`shadow` と `gradient` は配列を取れ、配列要素も参照可 (参照は単一値に解決され、flatten も配列展開もしない)。group と composite token の違いは「group は任意で外側、composite token は sub-value 名と型が仕様で固定された 1 個の token (ゆえに他 token から参照できる)」(technical-reports/format/composite-types.md)。
 
-14. **composite type の sub-value は「明示値」か「同じ型の token への参照」のどちらでも書ける**。`shadow` と `gradient` は配列を取れ、配列要素も参照可 (参照は単一値に解決され、flatten も配列展開もしない)。group と composite token の違いは「group は任意で外側、composite token は sub-value 名と型が仕様で固定された 1 個の token (ゆえに他 token から参照できる)」(technical-reports/format/composite-types.md)。
+14. **仕様の制約は `test-suite/` の fixture で機械可読になっている**。8e43819 (#413) で `@dtcg/test-suite` パッケージが加わり、`test-suite/tests/2025.10/{format,resolver}/{positive,negative}/` に約 250 個の JSON fixture が置かれた (format: positive 93 / negative 127、resolver: positive 10 / negative 20)。各 fixture の `$description` は `POSITIVE:` / `NEGATIVE:` 接頭辞付きの一文で、`manifest.json` に `id` / `type` (`PositiveEvaluationTest` / `NegativeEvaluationTest`) / `purpose` / `features` が並ぶ。**「この書き方は valid か」を散文で悩む前に negative fixture 名を grep するのが早い** (test-suite/README.md, test-suite/CONTRIBUTING.md)。
 
 15. **light/dark やサイズ別のテーマ切替は Format ではなく Resolver モジュールの担当**。Format 側にモード概念は無い。Resolver 文書は root に `version` (`2025.10` 必須) / `sets` / `modifiers` / `resolutionOrder` を持ち、`modifiers.<name>.contexts` に `light` / `dark` / `darkHighContrast` などを列挙する。拡張子は `.resolver.json` 推奨。組み合わせ爆発を避けるための重複排除機構という位置付け (technical-reports/resolver/introduction.md, syntax.md, filetype.md)。
 
@@ -85,6 +85,8 @@ W3C Design Tokens Community Group の公式リポジトリ。design token の交
 | トークン命名の考え方 | technical-reports/color/token-naming.md | Base / Alias / Component の 3 層分類と、descriptive vs numerical 命名の pros/cons。DESIGN.md の階層設計の根拠に使える |
 | theme / mode の切替 | technical-reports/resolver/syntax.md, introduction.md | `sets` / `modifiers.contexts` / `resolutionOrder`、後勝ちマージ、modifier は他 modifier を参照禁止 |
 | resolver の入出力と結合 | technical-reports/resolver/inputs.md, resolution-logic.md, bundling.md, conformance.md | 入力検証・base set の平坦化・modifier 適用・衝突解決の手順、単一ファイルへの bundle、適合要件 |
+| conformance fixture | test-suite/tests/2025.10/format/, resolver/ (+ 各 manifest.json) | 型別フォルダ (colors, dimensions, borders, typography …) と横断フォルダ (references, group, metadata, token-name)。negative 側が制約の実例集 — `color-hsl-hue-equals-360.json` (hue は 360 未満)、`color-hex-with-alpha.json`、`token-name-starts-with-dollar.json`、`json-pointer-to-group.json`、`ref-and-value-both-present.json` など |
+| fixture の書き方 | test-suite/CONTRIBUTING.md | `$schema` 必須、1 fixture 1 論点、positive は root key を型名 (`color`) に、negative は `invalid-{type}` に。合成型の filler 値も統一 |
 | JSON Schema (機械可読な正) | schemas/src/2025.10/format.json, format/token.json, format/group.json, format/tokenType.json, format/values/*.json (13 型ぶん) | 型 enum・名前パターン・参照パターン・各値の制約。`schemas/README.md` に bundle 手順と版追加手順。Resolver 側は schemas/src/2025.10/resolver.json と resolver/{set,modifier,resolutionOrder}.json |
 
 ## 蒸留の範囲外
@@ -94,6 +96,6 @@ W3C Design Tokens Community Group の公式リポジトリ。design token の交
 - **過去の draft (first / second / third-editors-draft)**: main には HTML スナップショットが無く、公開版は designtokens.org と `gh-pages` ブランチにある。古い形式 (hex 文字列の色値など) を混ぜる事故を避けるため、実装の参照には使わない。
 - **サイト実装**: `www/` (Astro プロジェクト。`www/src/` のコンポーネント・`TokenPlayground`・ブログ、`www/public/` の資産) と `netlify.toml` / `.github/workflows/`。仕様本文は含まれない。
 - **ReSpec の記法自体**: `technical-reports/*/index.html` の respecConfig、`data-include`、`<aside class="example">` / `<div class="issue">` / `[[RFC8259]]` 形式の参照。読み方は technical-reports/README.md と https://respec.org/docs/ 。
-- **リポジトリの開発環境**: `package.json` / `pnpm-workspace.yaml` / `cspell/` / `.husky/` / `.devcontainer/` / `schemas/scripts/bundle.ts`。仕様を読むだけなら不要。
+- **リポジトリの開発環境**: `package.json` / `pnpm-workspace.yaml` / `cspell/` / `.husky/` / `.devcontainer/` / `schemas/scripts/bundle.ts` / `schemas/tests/*.ts` (AJV と vscode-json-languageservice で fixture を回す vitest。後者は `$id` ベースの `$ref` 解決が upstream 未修正で skip 中) / `schemas/schemas.config.json` の `testSuiteDir`。fixture の中身は索引したが、走らせる仕組みは仕様の内容ではない。
 - **ツール実装 (Style Dictionary / Tokens Studio / Figma 等) での使い方**: この仕様には無い。各ツールのドキュメントを見る。仕様側にあるのは「ツールが何を MUST/SHOULD 満たすか」だけ。
 - **未解決の設計論点**: 原典の `<div class="issue">` に issue 番号付きで残る (strokeStyle=98, border=99, shadow=100, gradient=101, typography=102, transition=103, fontFamily=53)。ここを踏む設計をするなら GitHub の該当 issue を直接読む。
