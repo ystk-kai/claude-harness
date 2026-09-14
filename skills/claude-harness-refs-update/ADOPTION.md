@@ -27,6 +27,39 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-09-14
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | subagent / skill | subagent へ渡す context を 2 モードで設計し分ける型。`isolated` = 新規 context で開始し context isolation を firewall として使う / `forked` = supervisor の会話全体を継承し、末尾の tool call 除去・task description を user message へ書き直し・prompt caching 維持。判断規則は「進行中の調査を継続する worker は fork、独立に判断すべき verifier は isolate」。grep 済: この repo で subagent を使うのは `claude-harness-refs-update` の手順4 だけで、自己完結した再蒸留を `general-purpose` (isolated) に投げる構成 = 規則どおり。**verifier 役の subagent も、親 context を継承する経路も持たない**ため現時点で当たらない。環境側の 8 エージェント定義もすべて新規 context。今後レビュー/検証役の subagent を足すときの設計材料 | ahe: `README.md` `Design Primitives > Context Delivery & Compaction` (`3be1ff8`)、<https://www.langchain.com/blog/organizing-context-in-a-multi-agent-harness> |
+| 未対応 | FYI | 運用 | OpenAI が Codex ハーネスを再利用可能な基盤として組み込む分業論を一次資料化 — アプリ側が UI・業務コンテキスト・MCP tool・承認ゲート、app-server 側が agent loop と sandbox 実行。付随 datapoint: ARC-AGI-3 で reasoning 保持 + compaction がスコア 3 倍・出力トークン 1/6。埋め込み型 agent を作る段になったときの境界設計の参照先 | ahe: `README.md` `Design Primitives > Task Runners & Orchestration` (`ca71915`)、<https://developers.openai.com/blog/codex-as-a-platform> |
+| 未対応 | FYI | 運用 | ハーネス改変を測定可能な最適化ループとして回す研究基盤 (Salesforce Beagle / DarwinX) と、自己改善ハーネス研究の地図 (STOP → Meta-Harness → ADAS → AFlow → AlphaEvolve、および workflow automation / filesystem を永続記憶に / sub-agent・backend job の 3 パターン) が Foundations に揃った。いまの手動チューニング運用を eval 駆動へ寄せる将来判断の材料 | ahe: `692a1a6` / `1cf81ec`、<https://lilianweng.github.io/posts/2026-07-04-harness/>、<https://arxiv.org/abs/2608.07545> |
+
+### claude-code-best-practice 再蒸留から
+
+74 commits の大半は star drift・バッジ日付・changelog 追記。実質変更は built-in command 3 件のみで、frontmatter フィールド数・settings キー・bundled skills・built-in agent types はいずれも動いていない。`BREAKING` / `RECOMMENDED` なし。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | **ON HOLD は解消されずに静かに消える** — `/cost` / `/reload-plugins` / `/effort` の 3 件が 09-05 を最後に changelog から落ちたのに公式 docs 表には未反映のまま、以降の run は "fully in sync" と宣言している。二次資料の「同期済み」宣言を、保留項目が決着した証拠として読まない | ccbp: `changelog/best-practice/claude-commands/changelog.md` (`87432c6`) |
+| 未対応 | FYI | 運用 | `/output-style [name]` が built-in slash command として復活 (Config #13、v2.1.269)。v2.1.74 で「deprecated、`/config` を使え」として表から削除された行の復活。**削除されたコマンドは戻りうる**ので「過去に消えたから存在しない」と決め打ちしない。grep 済: repo・環境側とも `output-style` / `outputStyle` の記載なし | ccbp: `0a8ab15`、`best-practice/claude-commands.md` #13 |
+| 未対応 | FYI | 運用 | `/import` が `cursor` を第 3 の取り込み元として受け付ける (`/import [codex|gemini|cursor]`、v2.1.265+)。Cursor の instruction files・MCP servers・commands・subagents・skills を移行できる。grep 済: 該当なし | ccbp: `a39717e`、`best-practice/claude-commands.md` #11 |
+| 未対応 | FYI | 運用 | `/advisor` は非対話 (`-p`) と Remote Control では引数なしで現在の advisor を**テキスト出力**し、ピッカーを開かない (v2.1.260)。ヘッドレス実行から advisor 状態を取れる。grep 済: 該当なし | ccbp: `a39717e`、`best-practice/claude-commands.md` #53 |
+
+### skills (anthropics/skills) 再蒸留から
+
+差分 1 件は claude-api skill の Managed Agents 承認まわり。grep 済: この repo と環境側に Managed Agents クライアント実装は無く (`evaluated_permission` / `always_ask` / `ant beta:sessions` のヒットは蒸留版と本台帳のみ)、**いま当たる箇所は無い**ため 3 件とも `FYI` に落とす。Managed Agents を実装する段で `RECOMMENDED` に昇格させる。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | 承認待ちの検知条件は、自分が設定した policy (`always_ask`) ではなく **イベントの `evaluated_permission === "ask"`**。`agent.tool_use` だけでなく `agent.mcp_tool_use` も対象。policy で分岐する実装は `auto` の判定不能ケースを取りこぼし、session が `requires_action` で止まる。`auto` で server が deny した呼び出しは承認フローに入らず、そこに `user.tool_confirmation` を送ると 400 | skills: `skills/claude-api/shared/managed-agents-client-patterns.md` §4、`managed-agents-tools.md` § Permission Policies (`34040c9`) |
+| 未対応 | FYI | 運用 | `auto` は人間のチェックポイントではない。safe と判定された呼び出しは誰も見ないうちに実行され、効果は取り消せないことがある。人の確認を必須にしたい tool には `auto` でなく `always_ask` を明示する | skills: `managed-agents-tools.md` § `auto` 警告ブロック |
+| 未対応 | FYI | 運用 | `auto` の評価が「あなたの意図」として信頼するのは **`user.message` のテキストだけ**で、tool result・取得した Web ページ・MCP 応答・thread 間メッセージの同じ文言には効力がない。裏返すと信頼できない end-user 入力を `user.message` に中継すると意図として読まれ、deny されるはずの呼び出しが allow されうる。multiagent では subagent thread のメッセージにこの重みはなく、`auto` の deny は primary thread に cross-post されない | skills: `managed-agents-tools.md` § "What the evaluation trusts"、`managed-agents-multiagent.md` § "`auto` in multiagent sessions" |
+| 未対応 | FYI | 運用 | `ant beta:sessions connect <session-id>` で走行中セッションに端末を接続し、承認待ちを Allow / Deny (`deny_message` 付き) で捌ける。`--web` は Console の session viewer を `127.0.0.1` にローカル配信 (URL は 1 回・2 分限り)。端末ビューは primary thread のみ、`--web` は全 thread を追従 | skills: `skills/claude-api/shared/anthropic-cli.md` § "Attach a terminal to a session" |
+
+---
 ## 2026-09-09
 
 ### awesome-harness-engineering 再蒸留から
