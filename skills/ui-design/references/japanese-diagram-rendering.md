@@ -61,8 +61,9 @@ Mermaid / Graphviz / PlantUML / D2 / 手書き SVG で日本語ラベルを出�
   <https://gitlab.com/gitlab-org/gitlab/-/work_items/554889>
 - **CJK の幅計算が壊れている**。2023-10 起票・現在も Open (Status: Triage のまま停滞) [Issue]
   <https://github.com/mermaid-js/mermaid/issues/4950>
-- **flowchart / mindmap は `FONT_INFLATE = 1.4` で幅を近似する**。日本語の長いラベルで過小評価になり、
-  ノード矩形からテキストがはみ出す [Issue] <https://github.com/mermaid-js/mermaid/issues/6424>
+- **長いラベルがノードから切れる**。foreignObject の幅がラベルに追従しない報告があり (v11.5.0 / Chrome、
+  Open)、区切りの無い長い連続文字列で顕在化する。**日本語は分かち書きが無いぶん全体が 1 語相当**に
+  なりやすく、この条件を踏みやすい [Issue] <https://github.com/mermaid-js/mermaid/issues/6424>
 - **Web フォント読み込み前にレンダリングされると fallback 幅でノードサイズが確定し、
   差し替え後に溢れる**。Web フォントを使うなら `document.fonts.ready` の後に初期化する
   [経験則] (一次出典なし。症状から逆算した回避策)
@@ -157,7 +158,7 @@ T2I が CJK を出せないこと) は据え置いてよい。腐りやすい半
 レンダラのバージョン別挙動に依存するため、間隔は 90 日とする。
 
 1. mermaid CJK 幅計算 Issue #4950 が Close したか <https://github.com/mermaid-js/mermaid/issues/4950>
-2. `FONT_INFLATE` の扱い Issue #6424 / 3. mermaid の改行記法 (`\n` / `<br/>` / Markdown String) の
+2. 長いラベルの切れ Issue #6424 が Close したか / 3. mermaid の改行記法 (`\n` / `<br/>` / Markdown String) の
    バージョン別挙動 — GitHub / GitLab が載せている mermaid のバージョン
 4. mermaid-cli / Docker イメージの同梱フォント (fonts-takao) が維持されているか
 5. SVG 2 の `inline-size` / `shape-inside` のブラウザ・ラスタライザ実装状況 (MDN / caniuse)
