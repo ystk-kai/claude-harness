@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するとき、日本語を含む UI で書体・組版 (明朝化・斜体化・折り返し・行高・Web フォント量) を決めるとき、日本語ラベルを含む図解を Mermaid / SVG / PlantUML 等のコードで生成するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。
+description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するとき、日本語を含む UI や図解コード (Mermaid / SVG 等) で書体・組版・描出 (明朝化・斜体化・折り返し・行高・Web フォント量・フォント解決・ラベル寸法) を決めるときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。
 compatibility: Requires git and network access to clone/update the reference repos at ~/.claude/references/ (external to the skill directory; run install.sh --with-references)
 ---
 
@@ -44,8 +44,11 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
   依頼文が日本語でも表示テキストが英語だけなら読まない。多言語 UI は日本語ロケールを持つ時点で該当する。
   他の 4 本は全て英語圏の成果物で日本語組版の記述を持たない (雛形 74 件の抽出元も英語サイトのみ)。
   そのまま適用すると本文が明朝になる・強調が合成斜体になる、といった日本語圏でしか出ない事故になる。
-  雛形の書体指定と日本語組版が衝突したら**日本語組版側を正**とし、雰囲気は色・余白・構造で作り直す。
-  **成果物が図解 (Mermaid / SVG / PlantUML 等のコード) なら、あわせて [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md) を読む** — 本文の組版とは別に、描出そのものが壊れる
+  雛形の書体指定と日本語組版が衝突したら**日本語組版側を正**とし、雰囲気は色・余白・構造で作り直す
+- **成果物が日本語ラベルを含む図解のコード (Mermaid / Graphviz / PlantUML / D2 / 手書き SVG) なら、
+  [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md) を当てる**。
+  こちらは上の「UI に表示されるテキスト」の判定を経由しない — README や仕様書に貼る図も対象で、
+  UI かどうかは関係ない。壊れるのは組版ではなく描出 (フォント解決・パースエラー・ラベル寸法)
 - DESIGN.md の**形式**の可否 (キー名・セクション順・component プロパティ・未知内容の扱い) は **`design.md/` 仕様**を正とする。機械検査は `npx @google/design.md lint <file>` (error があれば exit 1)
 - トークンの**型・形式・命名**の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) と DESIGN.md の frontmatter はその写像として扱う (`design.md` 仕様は DTCG から typed token group と `{path.to.token}` 参照構文だけを採った関係なので、両者は同一ではない。相互変換は `export --format dtcg`)
 - 生成時に「やっていいこと / いけないこと」が割れたら **`hallmark/`** を優先する (生成規律が本業)。DESIGN.md 側の Do's and Don'ts はそのサイト固有の制約として上乗せする。
@@ -55,9 +58,8 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 - 抽出元はマーケティングサイト / LP が中心。ダッシュボードや業務 UI にそのまま適用しない
 - **別スキルとの分担**: `avoid-ai-slop-design` は AI 臭の検出カタログと処方 (計測研究・学術ソース付き) を担当する。こちらは原典リポジトリの索引。診断・改善の手順が要るときは `avoid-ai-slop-design`、原典の規則や雛形を引くときはこのスキル
 - 図表・チャートの**配色・チャート種別・軸・凡例の設計**は built-in の `dataviz` スキルが担当する。
-  ここで扱うのは、日本語ラベルが**描出される段階**で壊れる問題 (フォント解決・パースエラー・
-  ラベル寸法) だけ — グリフが出るかどうかは配色の話ではなく、`dataviz` も英語圏前提で扱っていない。
-  → [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md)
+  ここで扱うのは日本語ラベルが**描出される段階**で壊れる問題だけ (上記の `japanese-diagram-rendering.md`)。
+  グリフが出るかどうかは配色の話ではなく、`dataviz` も英語圏前提で扱っていない
 
 ## 鮮度と更新
 

@@ -36,6 +36,7 @@ review_interval_days: 180
 3. **bullet のリズムを崩す** — 長さ・形を揃えない。言い切りと説明文を混ぜ、1 項目で足りるなら 1 項目にする (文章側は avoid-ai-slop-ja の variance 規約と同じ)
 4. **図解は raster ではなく plan から** — 先に entities / relationships / layout の plan を作り、別工程で全 arrow・label・縮尺を元資料と照合し、最終版は editable vector + 通常のテキストレンダリングで組む
 5. **関係性を 1 つ選んでから描く** — 並列/因果/手順/比較のどれかを決め、それ以外の要素を消す。装飾は視線誘導・分類・強調のどれかを言えなければ入れない
+   同じ「→」が流れ・因果・分岐・分類・相互作用・Before/After の全部に使われるのが曖昧化の実体なので、**1 図の中で矢印の意味を 2 種以内に抑え、形と向きで区別する** (白抜き = 前後の変化 / 黒塗り = 因果・影響、一方向 = 因果 / 双方向 = 相互作用 / 対向 = 対立)。**因果の矢印と時系列の矢印を混在させない** — 逆向きの因果は解釈が破綻する
 6. **日本語を含む図は描出まで確認する** — 既定フォント・既定レンダラが欧文前提なので、英語で通る
    図解コードが日本語で豆腐化・はみ出し・パースエラーになる。ツール別の回避は
    `ui-design/references/japanese-diagram-rendering.md`
@@ -51,4 +52,5 @@ review_interval_days: 180
 - https://arxiv.org/abs/2310.12128 (DiagrammerGPT: 図の文法エラー)
 - https://journals.asm.org/doi/10.1128/jmbe.00321-25 (図解エラーの教材化)
 - https://www.duarte.com/blog/design-slides-for-virtual-presentations/ (統一と変化の管理)
+- 矢印の用法と形/向きによる区別: https://itoyusuke.net/742/ / https://xtech.nikkei.com/atcl/learning/lecture/19/00027/00004/ / 因果と時系列の取り違え: https://www.krsk-phs.com/entry/DAG2
 - 日本語: https://note.com/wanho/n/na88104486e80 (関係性・要素過多・目的なし装飾) / https://qiita.com/minorun365/items/68740e4ba1d81177199b

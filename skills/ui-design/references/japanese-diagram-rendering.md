@@ -14,7 +14,8 @@ Mermaid / Graphviz / PlantUML / D2 / 手書き SVG で日本語ラベルを出�
 本文テキストの組版は姉妹ファイル [japanese-web-typography.md](japanese-web-typography.md)。
 
 確度: **[仕様]** 構文仕様・SVG/CSS/Unicode 標準 / **[Issue]** 上流の未解決 Issue・実装バグ (最も腐りやすい) /
-**[論文]** 査読論文・プレプリント / **[通説]** 複数の実務記事で一致 / **[経験則]** 一次出典なし。
+**[論文]** 査読論文・プレプリント / **[通説]** 複数の実務記事で一致 / **[経験則]** 一次出典なし /
+**[不在確認]** 探した上で「規定が存在しない」ことを確認したもの。
 
 ## Contents
 
@@ -39,14 +40,18 @@ Mermaid / Graphviz / PlantUML / D2 / 手書き SVG で日本語ラベルを出�
    文字数ベースの見積もりは必ず外れる (→ [ラベル幅](#ラベル幅は推定せず測る))
 6. **レンダラのバージョンで挙動が変わる**。GitHub / GitLab / VS Code 拡張 / mermaid-cli は
    それぞれ別バージョンを載せている。**最小公倍数の構文で書く** [Issue]
-7. **図解を 1 枚の画像として生成させない**。SDXL / Midjourney v6 を含む汎用 T2I は正当な CJK 文字を
-   生成できず、専用手法 (Glyph-ByT5-v2 / DiffCJK 系) を要する領域 [論文]
+   <https://gitlab.com/gitlab-org/gitlab/-/work_items/554889>
+7. **図解を 1 枚の画像として生成させない** — 禁止の根拠は `slides-diagrams.md` が持つ。
+   日本語で特に確実である理由 (汎用 T2I は正当な CJK 文字を生成できない) だけここに置く [論文]
    <https://arxiv.org/pdf/2404.05212> / <https://arxiv.org/html/2406.10208>
 
 ## Mermaid: 構文とレンダラ
 
-- **クォートが基本形**。`A["処理 (Gzip)"]`。クォート内の `"` `#` `&` は HTML エンティティ
-  (`&quot;` / `&#35;`) にする [仕様] <https://mermaid.js.org/syntax/flowchart.html>
+- **クォートが基本形**。`A["処理 (Gzip)"]`。クォート内にさらに `"` や `#` を出すときは
+  **Mermaid 独自のエンティティ記法 `#quot;` / `#35;`** を使う。**`&quot;` / `&#35;` は Mermaid の
+  エスケープ構文ではない** (公式は "Numbers given are base 10, so `#` can be encoded as `#35;`" と
+  規定する。HTML エンティティが通って見えることがあるのは htmlLabels 経由の偶然で、仕様ではない)
+  [仕様] <https://mermaid.js.org/syntax/flowchart.html>
 - **ただしエンティティ回避は万能ではない**。前処理層に先に解釈されて別のエラーになることがある
   (VS Code の markdown-mermaid が `&lpar;` を先に処理する報告) [Issue]
   <https://github.com/mjbvz/vscode-markdown-mermaid/issues/273>
@@ -59,11 +64,17 @@ Mermaid / Graphviz / PlantUML / D2 / 手書き SVG で日本語ラベルを出�
 - **flowchart / mindmap は `FONT_INFLATE = 1.4` で幅を近似する**。日本語の長いラベルで過小評価になり、
   ノード矩形からテキストがはみ出す [Issue] <https://github.com/mermaid-js/mermaid/issues/6424>
 - **Web フォント読み込み前にレンダリングされると fallback 幅でノードサイズが確定し、
-  差し替え後に溢れる**。Web フォントを使うなら `document.fonts.ready` の後に初期化する [通説]
-- **`htmlLabels: false` にしない**。生の SVG `<text>` になり、フォント指定が効かず豆腐化しやすくなる
-- **mermaid-cli / Docker で日本語が消える**のは同梱フォント不足。現在のイメージは
-  fonts-takao / fonts-noto-color-emoji を含む (Issue #93 → PR #132)。CI では
-  `--puppeteer-config '{"args":["--no-sandbox"]}'` が要る [Issue]
+  差し替え後に溢れる**。Web フォントを使うなら `document.fonts.ready` の後に初期化する
+  [経験則] (一次出典なし。症状から逆算した回避策)
+- **`htmlLabels` は出力経路で選ぶ** — 既定の `true` は HTML ラベルを `<foreignObject>` で描くため
+  ブラウザでは折り返しが効く一方、**ラスタライザの多くが foreignObject 未対応**で PNG 化すると
+  ラベルが消える。**ブラウザ表示なら `true` のまま、PNG 化を経由するなら `false` + `fontFamily` の
+  明示**、と経路で切り替える。`false` 側は生の SVG `<text>` になるので CJK フォント指定が必須
+  [経験則] (下の「手書き SVG」節の foreignObject の項と同じ機序)
+- **mermaid-cli / Docker で日本語が消える**のは実行環境の同梱フォント不足。CJK フォントの追加は
+  Issue #93 → PR #132 で入った経緯があるが、**使うイメージに実際に入っているかは毎回確認する**
+  (`fc-list | grep -i cjk`)。バージョンで変わる [Issue]
+  <https://github.com/mermaid-js/mermaid-cli/issues/93>
 
 ## ツール別のフォント指定
 
@@ -77,9 +88,12 @@ Mermaid / Graphviz / PlantUML / D2 / 手書き SVG で日本語ラベルを出�
 出典: <https://graphviz.org/faq/font/> / <https://mseeeen.msen.jp/plantuml-server-svg-japanese-font-issue/> /
 <https://d2lang.com/tour/fonts/> [すべて仕様・公式ドキュメント]
 
-**配布形態の既定解**: 日本語を含む図は **PNG で配る**か、SVG なら描出環境を自分で握れる場所にだけ置く。
-どうしても SVG で環境非依存にするなら、`@font-face` + base64 data URI を**サブセット化して埋める**。
-text-to-path は確実だが編集性・検索性・アクセシビリティを失うので最後の手段。
+**配布形態**: 図の**ソースはテキスト記法のまま保つ** (`slides-diagrams.md` の「最終版は editable
+vector + 通常のテキストレンダリング」と同じ立場。ラスタに焼くと検索性とアクセシビリティを失う)。
+そのうえで、**閲覧環境のフォントを自分で握れない配布先**では SVG の `<text>` が化けるので、
+`@font-face` + base64 data URI を**サブセット化して埋めた SVG** を既定にする。
+埋め込みができない経路に限って PNG に落とす。text-to-path は確実だが編集性・検索性・
+アクセシビリティを失うので最後の手段。
 
 ## 手書き SVG に日本語を置く
 
@@ -88,8 +102,12 @@ LLM が SVG を直書きするときに最も壊れる領域。
 - **自動折り返しが無い** [仕様]。SVG 1.1 の `<text>` に wrapping は無く、content area 未指定は
   「無限幅の矩形」扱いなので、長いラベルはそのまま溢れる。SVG 2 の `inline-size` / `shape-inside` は
   実装が乏しい <https://svgwg.org/svg2-draft/text.html>
-  → **改行は自分で `<tspan>` に分けて書く**。意味の切れ目で切る (日本語は分かち書きが無いので、
-  自動処理に任せると助詞の途中で折れる。詳細は japanese-web-typography.md の「組版 CSS」)
+  → **改行は自分で `<tspan>` に分けて書く**。Mermaid の `<br/>` も同じ。日本語は分かち書きが無く
+  自動処理では助詞の途中で折れるので、**切る位置は文節の境界**にする。実務則: 「〜のは」「〜ので」
+  「〜には」のような接続部は上の行に残す / 最終行を 1〜2 文字にしない [通説]
+  <https://tsutawarudesign.com/yomiyasuku5.html>
+  (CSS が効く HTML 本文側の折り返しは japanese-web-typography.md の「組版 CSS」。
+  `<tspan>` と `<br/>` の手切りには CSS の禁則が効かないので、この節が受け持つ)
 - **`textLength` を日本語に使わない** [仕様]。wrapping area 未定義時のみ適用され、字間を強制的に
   伸縮するので字送りが崩れる
 - **`foreignObject` は避ける**。bbox が positioning rectangle なので内容が溢れうる上、ラスタライザの
@@ -105,10 +123,12 @@ LLM が SVG を直書きするときに最も壊れる領域。
 - **誤**: 「日本語はラベルが長いから幅を食う」。実際は**文字数はむしろ 20〜40% 減る** [通説]
 - **正**: 1 文字あたりの前進幅が大きい (全角 ≒ 1em ≒ 欧文小文字の約 2 倍) ため、**文字数が減っても
   表示幅は増える**。UAX #11 が Wide (W) を "All other characters that are *always* wide" と定義し、
-  §1 Overview が「東アジアの**固定ピッチ**フォントでは全角か半角のいずれか」とする [仕様]
+  §1 Overview が「東アジアの**固定ピッチ**フォントでは全角か半角のいずれか」とする
   <https://www.unicode.org/reports/tr11/>
-  **2 倍幅の保証は固定ピッチ限定**で、プロポーショナル欧文が混ざる実幅は規定外
-- **短いラベルほど相対伸長が大きい** [仕様] <https://www.w3.org/International/articles/article-text-size.en>
+  ただし **UAX #11 が規定するのは幅の分類であって「1em」や「2 倍」という寸法ではない**。
+  固定ピッチ前提の近似として使う [通説]
+- **短いラベルほど相対伸長が大きい** [通説] (W3C i18n の解説記事。規格ではない)
+  <https://www.w3.org/International/articles/article-text-size.en>
   W3C の伸長率表は原文 10 字以下で 200〜300%、70 字超で 130%。
   → **ノード内ラベル・ボタン・凡例という短い要素が最も溢れる**。長い説明文ではない
 - **実務ルール**: 全角文字数 × font-size を**保守的な下限見積もり**としてだけ使い、
@@ -122,10 +142,12 @@ LLM が SVG を直書きするときに最も壊れる領域。
    自前の正規表現バリデータは本番レンダラと必ず乖離するので作らない
 2. **出力 PNG に豆腐 (U+FFFD / .notdef) が無いか**を確認する。フォント解決の失敗は無言で起きる
 3. **テキストがノード矩形に収まっているか**を目視または bbox で確認する
-4. 図の意味の検証 (要素の過不足・関係の向き) は VLM に画像を渡して批評させる
-   — Act → Render → Critique → Refine のループ [論文] <https://arxiv.org/abs/2310.12128>
+4. 図の意味の検証 (要素の過不足・関係の向き) は、レンダリング画像を VLM に渡して批評させる
+   [経験則] (生成 → レンダリング → 批評 → 修正を回す形。記号的レンダリングが raster 直生成に
+   優越することは DiagrammerGPT が示すが、この批評ループ自体の出典ではない
+   <https://arxiv.org/abs/2310.12128>)
 
-`skills/` 配下の CI に組む場合、1 と 2 は決定論的なので必須ゲート、3・4 は助言に留める。
+1 と 2 は決定論的なので自動ゲートにできる。3・4 は判断が要るので助言に留める。
 
 ## 棚卸しの当たり先
 
