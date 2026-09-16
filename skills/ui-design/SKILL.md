@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するとき、日本語を含む UI で書体・組版 (明朝化・斜体化・折り返し・行高・Web フォント量) を決めるときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。
+description: UI 生成のためのデザイン参照資料を 2 層 (このスキル内の蒸留版 references/*.md と、~/.claude/references/ の原典 clone) で使うためのスキル。Web UI・LP・アプリ画面を生成または改修するとき、デザイン言語の雛形 (DESIGN.md) を選ぶとき、デザイントークン (色・タイポ・spacing・shadow 等) を定義または命名するとき、生成した UI が AI っぽい既定値 (テンプレ再利用・紫青グラデ・均質なカード列) に落ちていないか点検するとき、日本語を含む UI で書体・組版 (明朝化・斜体化・折り返し・行高・Web フォント量) を決めるとき、日本語ラベルを含む図解を Mermaid / SVG / PlantUML 等のコードで生成するときに、まず蒸留版を読み、索引が指す原典ファイルだけを深掘りする。
 compatibility: Requires git and network access to clone/update the reference repos at ~/.claude/references/ (external to the skill directory; run install.sh --with-references)
 ---
 
@@ -25,8 +25,8 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 原典 clone がないときは、このリポジトリの `install.sh --with-references` で一括取得する。
 各リポジトリの出所 URL は、蒸留版 frontmatter の `source` を唯一の正とする。
 
-5 本のうち 4 本は原典 clone を持つ。「何を作るか」を決めるのが雛形、「どう書くか」を決めるのが形式仕様とトークン仕様、「どう外すか」を決めるのが規律。
-5 本目の `japanese-web-typography.md` だけは clone を持たない自作の知識ベースで、他の 4 本が英語圏前提であることを補正する。
+6 本のうち 4 本は原典 clone を持つ。「何を作るか」を決めるのが雛形、「どう書くか」を決めるのが形式仕様とトークン仕様、「どう外すか」を決めるのが規律。
+残る 2 本 (`japanese-web-typography.md` / `japanese-diagram-rendering.md`) は clone を持たない自作の知識ベースで、他の 4 本が英語圏前提であることを補正する。
 
 | カテゴリ | 原典 | 蒸留版 | 使いどころ |
 |---|---|---|---|
@@ -35,6 +35,7 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 | 標準仕様 | `community-group/` (DTCG) | [references/community-group.md](references/community-group.md) | デザイントークンの標準語彙と形式 (`$value` / `$type` / alias / composite type)。トークンファイルや theme 定義を書くときの典拠 |
 | 形式仕様 | `design.md/` (Google Labs) | [references/design.md.md](references/design.md.md) | DESIGN.md 形式そのものの規範 (Apache-2.0)。frontmatter のトークン schema・8 セクションの固定順序・component プロパティ・未知内容の扱い。`PHILOSOPHY.md` が「具体的な参照物は形容詞の列挙に勝る」「否定制約は具体性から自動で付く」を規定。CLI に `lint` (WCAG contrast を含む 11 ルール) / `diff` / `export --format dtcg` / `spec` |
 | 日本語組版 | (なし: 自作の知識ベース) | [references/japanese-web-typography.md](references/japanese-web-typography.md) | 日本語を含む UI の書体・組版の補正。明朝化 / 合成斜体 / 偽ボールドの原因と対策、フォントスタック、禁則と折り返し、行高・字間の下限 (デジタル庁 DADS)、日本語 Web フォントの容量制約、英語圏の型が壊れる箇所の対応表 |
+| 日本語図解 | (なし: 自作の知識ベース) | [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md) | 日本語ラベルを含む図を Mermaid / Graphviz / PlantUML / D2 / SVG で出すときの描出事故。括弧のパースエラー、ツール別フォント指定、SVG のフォント非埋め込み、ラベル幅の測り方、レンダリング検証ゲート |
 
 ## 判断の優先順位
 
@@ -43,7 +44,8 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
   依頼文が日本語でも表示テキストが英語だけなら読まない。多言語 UI は日本語ロケールを持つ時点で該当する。
   他の 4 本は全て英語圏の成果物で日本語組版の記述を持たない (雛形 74 件の抽出元も英語サイトのみ)。
   そのまま適用すると本文が明朝になる・強調が合成斜体になる、といった日本語圏でしか出ない事故になる。
-  雛形の書体指定と日本語組版が衝突したら**日本語組版側を正**とし、雰囲気は色・余白・構造で作り直す
+  雛形の書体指定と日本語組版が衝突したら**日本語組版側を正**とし、雰囲気は色・余白・構造で作り直す。
+  **成果物が図解 (Mermaid / SVG / PlantUML 等のコード) なら、あわせて [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md) を読む** — 本文の組版とは別に、描出そのものが壊れる
 - DESIGN.md の**形式**の可否 (キー名・セクション順・component プロパティ・未知内容の扱い) は **`design.md/` 仕様**を正とする。機械検査は `npx @google/design.md lint <file>` (error があれば exit 1)
 - トークンの**型・形式・命名**の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) と DESIGN.md の frontmatter はその写像として扱う (`design.md` 仕様は DTCG から typed token group と `{path.to.token}` 参照構文だけを採った関係なので、両者は同一ではない。相互変換は `export --format dtcg`)
 - 生成時に「やっていいこと / いけないこと」が割れたら **`hallmark/`** を優先する (生成規律が本業)。DESIGN.md 側の Do's and Don'ts はそのサイト固有の制約として上乗せする。
@@ -52,15 +54,20 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 - 雛形はあくまで出発点。`awesome-design-md/` の DESIGN.md をそのまま使うと元サイトの模倣になるので、ブランド固有の制約 (色数・書体・角丸・密度) を必ず上書きする
 - 抽出元はマーケティングサイト / LP が中心。ダッシュボードや業務 UI にそのまま適用しない
 - **別スキルとの分担**: `avoid-ai-slop-design` は AI 臭の検出カタログと処方 (計測研究・学術ソース付き) を担当する。こちらは原典リポジトリの索引。診断・改善の手順が要るときは `avoid-ai-slop-design`、原典の規則や雛形を引くときはこのスキル
-- 図表・チャートの配色と形式は built-in の `dataviz` スキルが担当する。ここでは扱わない
+- 図表・チャートの**配色・チャート種別・軸・凡例の設計**は built-in の `dataviz` スキルが担当する。
+  ここで扱うのは、日本語ラベルが**描出される段階**で壊れる問題 (フォント解決・パースエラー・
+  ラベル寸法) だけ — グリフが出るかどうかは配色の話ではなく、`dataviz` も英語圏前提で扱っていない。
+  → [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md)
 
 ## 鮮度と更新
 
 - 蒸留版 frontmatter の `distilled_commit` が、どのコミット時点の原典に基づくかを示す
-- `japanese-web-typography.md` は原典 clone を持たないため形式 2 (`tracking: review`) で管理する。
-  CSS の Baseline 状況 (`text-autospace` / `text-spacing-trim` / `word-break: auto-phrase`) が動くので
-  棚卸し間隔は短め (値は frontmatter の `review_interval_days` が正)。
-  再検証する項目は同ファイルの「棚卸しの当たり先」に列挙してある
+- `japanese-web-typography.md` と `japanese-diagram-rendering.md` は原典 clone を持たないため
+  形式 2 (`tracking: review`) で管理する。前者は CSS の Baseline 状況
+  (`text-autospace` / `text-spacing-trim` / `word-break: auto-phrase`)、後者は Mermaid の未解決 Issue と
+  レンダラのバージョン別挙動が動くので、どちらも棚卸し間隔は短め
+  (値は各 frontmatter の `review_interval_days` が正)。
+  再検証する項目は各ファイルの「棚卸しの当たり先」に列挙してある
 - 鮮度チェックと更新の機構は `claude-harness-refs-update` スキルが一元所有する。
   `skills/claude-harness-refs-update/scripts/check-freshness.sh` が全スキルの `references/*.md` を
   走査するので、このスキルの蒸留版も同じコマンドで検出される

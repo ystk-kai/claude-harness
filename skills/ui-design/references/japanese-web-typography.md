@@ -193,7 +193,7 @@ pre, code { text-autospace: no-autospace; }  /* 和欧間アキは既定で入�
 | ALL CAPS の eyebrow ラベル | 日本語に大文字が無く機能しない | ウェイト・色・サイズで階層を作る |
 | drop cap / 頭文字装飾 | 漢字では成立しない | 削る |
 | `max-w-prose` (60〜75 字) | 1 行が長すぎる | 30〜40 字相当に絞る |
-| 英語ラベル前提のボタン幅 | 日本語は 2 倍幅・改行や省略が発生 | `min-width` とラベル最大長を先に決める |
+| 英語ラベル前提のボタン幅 | 文字数は減るのに 1 字の前進幅が大きく表示幅は増える。**短いラベルほど相対伸長が大きい** (原文 10 字以下で 200〜300%) | `min-width` とラベル最大長を先に決める |
 | `word-break: break-all` を保険で全体に | 英単語まで割れる | `overflow-wrap: anywhere` |
 | Latin 前提の行高 1.4〜1.5 | 詰まって読みにくい | 1.5〜1.75 |
 
@@ -244,3 +244,5 @@ pre, code { text-autospace: no-autospace; }  /* 和欧間アキは既定で入�
   https://qiita.com/debiru/items/0a349bee3669b776d8e2 (auto-phrase の限界と keep-all) /
   https://hyper-text.org/archives/2016/06/windows_yu_gothic_font/ (游ゴシック) /
   https://zenn.dev/ivry/articles/f214469e05e427 (配信) / https://and-ha.com/design/biz-ud-gothic/ (UD)
+- ラベル幅: https://www.unicode.org/reports/tr11/ (UAX #11 §1 — 全角保証は固定ピッチ限定) /
+  https://www.w3.org/International/articles/article-text-size.en (原文長別の伸長率表)
