@@ -27,6 +27,23 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-09-16
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | skill / 運用 | GitHub Spec Kit (<https://github.com/github/spec-kit>) が Planning & Task Decomposition に追加。`spec.md` → `plan.md` → `tasks.md` を成果物とし、`/specify` `/plan` `/tasks` `/implement` で着手前に意図を機械検査可能な計画へ落とす型。計画の記録層を prompt でなく文書に置き、計画品質をレビュー可能な成果物にする側。grep 済: この repo は `claude-md/harness-design.md` + skill 5 本の構成で、計画 artifact も slash command 定義 (`~/.claude/commands` 自体が不在) も持たない = **当たらない**。原典の記述も README の 1 行注記のみで本体未検証。計画を成果物化する必要が出たときの参照先 | ahe: `9dd1a74` / `README.md` `### Planning & Task Decomposition` |
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | subagent | subagent frontmatter に `omitClaudeMd` (boolean、任意、v2.1.271) が追加された。`true` で user/project/local の CLAUDE.md を読まず起動する (managed policy file は読む)。`--agent` や `agent` 設定で**メインセッションとして走る場合は無視される**。grep 済: 環境側の subagent 定義 8 本はいずれも本文に「CLAUDE.md を最初に確認し」と明記しており、**CLAUDE.md を読ませる前提で書かれている** = 現状そのまま当てる対象は無い。この repo 側に subagent 定義は無い。CLAUDE.md 非依存の単機能 subagent を足すときの選択肢。原典の subagents 表には ON HOLD で未反映なので採用前に公式 docs で確認する | ccbp: `changelog/best-practice/claude-subagents/changelog.md` 2026-09-15 #1 / `34dfc03` |
+| 未対応 | FYI | settings | v2.1.271 で `maxEffortLevel` setting が追加されたと concepts changelog が CHANGELOG 由来で記録。ただし原典の settings リファレンス本体は v2.1.252 止まりで**型・取りうる値・スコープは原典から確認できない**。grep 済: 環境側 `settings.json` にトップレベル `effortLevel` が実在する (2026-09-04 台帳の `/effort` 項目と同じ当たり先) ので、effort の上限を settings 側で固定できるなら当たる。仕様は公式 docs で確認してから | ccbp: `changelog/best-practice/concepts/changelog.md` 2026-09-15 #12 / `c0099b2` |
+| 未対応 | FYI | 運用 | 2026-09-07 台帳の `/skill-doctor` 項目 (skill バジェット点検に使う RECOMMENDED) の**前提が再び揺れた**。分類が 3 回反転している — 09-05 INVALID → 09-07 bundled skill として追加確定 → 09-15 再び削除候補 ON HOLD。公式 docs は「v2.1.252 以降 + feature-flag fetching が必要」と書き原典の「v2.1.261 追加」と食い違ったまま。`/skill-doctor` 前提の運用手順を組むなら**起動可否を実機で確認してから**にする | ccbp: `changelog/best-practice/claude-skills/changelog.md` 2026-09-15 #3 / `0d9318c` |
+
+---
 ## 2026-09-14
 
 ### awesome-harness-engineering 再蒸留から
