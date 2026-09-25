@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/skills
-distilled_commit: 34040c9c568585f6929bedeaad110ad08f079624
-distilled_at: 2026-09-14
+distilled_commit: 33375500bcea98d610eb30ce10ac4e59b89c390d
+distilled_at: 2026-09-26
 ---
 
 # anthropics/skills 蒸留版

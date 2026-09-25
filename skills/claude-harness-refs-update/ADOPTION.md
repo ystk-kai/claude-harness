@@ -27,6 +27,36 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-09-26
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | hook | 検証 hook のエラー文もハーネスの出力として設計する型 — 決定論的チェックが「次に何をすべきか」(具体値・該当パス) を agent に返すとループが 1 回の修正で閉じ、prompt 上のルールだけより 10–48% 安いと原典注記。grep 済: 環境側の `PreToolUse` hook 2 本 (`commit-guard.sh` / `codex-prompt-guard.sh`) はいずれも一致箇所と「対処:」行を stderr に返しており**既に満たしている**。新しい hook を書くときの規準として保持。根拠は README の 1 文注記のみでリンク先本体は未検証 | ahe: `396366f` / `README.md` `### Verification & CI Integration` (shadcn-ui/lint) |
+| 未対応 | FYI | 運用 | 完了判定を固定の合格条件にせず、タスクに応じて test / build / 静的検査 / diff を選び、検証失敗を次の修復の入力にする (evidence-driven completion)。並列 worktree の衝突は黙って上書きせず明示する。grep 済: この repo の skill / claude-md に完了判定や並列 worktree の規約は無い = **当たらない**。README の注記のみが根拠 | ahe: `c4d4810` / `README.md` `### Demo Harnesses` (DeepCode) |
+| 未対応 | FYI | 運用 | 圧縮・効率化機構は opt-in にし、検証を飛ばさない・証拠を隠さないことを条件にする (ログを receipt に圧縮するのは、残す引用がアーカイブ原文と全件一致するときに限る)。grep 済: この repo は context 圧縮機構を持たない = **当たらない** | ahe: `1e12fda` / `README.md` `### Context Delivery & Compaction` (SoL-Pi) |
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | CLAUDE.md | v2.1.277 から Claude Code が `AGENTS.md` を公式に読む ("can read that on its own or alongside CLAUDE.md")。ON HOLD は README 表の載せ方の編集判断だけで、サポートの事実ではない。grep 済: この repo にも `~/.claude/` にも `AGENTS.md` は無く、言及は `claude-md/harness-design.md` の対象列挙と `skills/harness-design/SKILL.md` の「原典内の AGENTS.md はそのリポジトリの規約」注意書きのみ = **当たらない**。原典 clone を cwd にして作業する場合はその clone の `AGENTS.md` が読み込まれうる点は、この注意書きの前提として知っておく | cbp: `58c39e4` / `changelog/best-practice/concepts/changelog.md` |
+| 未対応 | FYI | skill | command の `allowed-tools` 型が `string/list` に訂正されたが、原典の skills 表は `string` のまま (原典内で食い違い)。grep 済: この repo の skill は `allowed-tools` を使っておらず、環境側で使うのは第三者 skill 1 本のみで文字列表記 = **当たらない**。skill でリスト表記を使う前に公式 docs で確認する | cbp: `af44910` / `dcefa30` / `best-practice/claude-commands.md`・`best-practice/claude-skills.md` |
+| 未対応 | FYI | skill | bundled skill に `update-config` (settings.json の変更を自然言語で依頼) が加わり 19 本。grep 済: この repo・環境側に settings 編集系の自作 skill は無い = **重複なし**。settings 変更系の skill を自作する前にこれを確認する | cbp: `ef69750` / `best-practice/claude-skills.md` row 19 |
+| 未対応 | FYI | 運用 | `/heapdump` の `.heapsnapshot` には会話と credentials が入る。バグ報告で共有するのは `-diagnostics.json` だけにする。grep 済: ハーネス内に言及なし。運用上の注意として保持 | cbp: `4b86b1c` / `best-practice/claude-commands.md` #37 |
+
+### claude-cookbooks 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | Messages API で自前のマルチエージェントを組むと、チームは速さより徹底性に最適化しがち。対策は共有時計 `[elapsed Ns]` (予算付きなら `[elapsed Ns / Ms]`) を毎回の呼び出し直前に最新 user message の末尾へ追記すること (末尾追記なので cache は壊れない)。`claude-fable-5-1` 前提で、Opus 5 以前は十分テストされていない、品質への影響も未測定と原典に明記。grep 済: この repo は API 直叩きのマルチエージェントを持たない = **当たらない** | cookbooks: `a4b0d89` / `patterns/agents/latency_multi_agent.ipynb` |
+| 未対応 | FYI | 運用 | Fable 5 fallback の課金記述が改訂された — 「出力前の classifier block は非課金」は撤回。`bio` / `frontier_llm` / `reasoning_extraction` カテゴリの block は通常料金で課金され、fallback すると両方に課金される。block を繰り返し再送する運用はそのぶんコストが増える。grep 済: この repo に fallback を組む API コードは無い = **当たらない** | cookbooks: `c5ff1dc` / `fable_5_fallback_billing/guide.ipynb` |
+| 未対応 | FYI | 運用 | Admin API では API キーを作れない (一覧・改名・無効化・archive のみ)。原典は定期監査用途を想定しており、例は 90 日超・無期限のキーを dry run 既定で flag する。service account を扱うには `org:admin` の OAuth が必要。grep 済: ハーネス内に言及なし = **当たらない** | cookbooks: `6b671ef` / `misc/admin_api.ipynb` |
+
+skills (anthropics/skills)・awesome-design-md (ui-design) の再蒸留は**候補なし** (前者は claude-api skill の refusal 課金記述の訂正のみ、後者は README の宣伝バナー差し替えのみ)。
+
+---
 ## 2026-09-16
 
 ### awesome-harness-engineering 再蒸留から

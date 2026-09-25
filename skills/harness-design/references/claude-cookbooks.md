@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/claude-cookbooks
-distilled_commit: a97b9a2dc300635f0c26b5e05d0b54bbe0279ee5
-distilled_at: 2026-09-05
+distilled_commit: 813fbeec03cdedfda7808529438d1c7af71f26eb
+distilled_at: 2026-09-26
 ---
 
 # claude-cookbooks 蒸留版
@@ -14,7 +14,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 
 - まず押さえる
 - 5 つのワークフローパターン
-- マルチエージェント実装の要点 (async orchestration / research prompts)
+- マルチエージェント実装の要点 (async orchestration / latency / research prompts)
 - コンテキスト設計とエージェント eval
 - コスト最適化レバーの優先順位
 - ハーネス実装例の索引
@@ -49,6 +49,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 
 24. **無人 (unattended) エージェントの境界は 6 つのオプションで作る**。(a) `tools` = そのセッションに存在する組み込み tool、`allowed_tools` = プロンプト無しで走る呼び出し。read-only レビューアは両方を `Read` / `Glob` / `Grep` に絞って書き込み tool を最初から持たせない。(b) `permission_mode="dontAsk"` は一切確認せず事前承認外を拒否する (`auto` はモデル分類器がランタイムに逐一判定するモード。tool 表面を固定したいなら `dontAsk`)。(c) パスルールの `Read(/{絶対パス}/**)` の **`//` 二重スラッシュは意図的** — 先頭スラッシュ 1 個だと設定ソース基準で解決されて何にもマッチせず、`dontAsk` 下で全 read が拒否される。(d) Claude Code は `Read` ルールを `Grep` / `Glob` へ best-effort にしか適用しないので、`PreToolUse` hook (symlink を resolve して repo 外を拒否し、`/` や `~` 始まり・`..` を含む・`{` を含む glob パターンも拒否) を決定的な閉じ込めとして重ねる。(e) `setting_sources=[]` はマシン側設定だけでなく**レビュー対象 repo 自身の `.claude/settings.json` と `CLAUDE.md`** をセッションから外す ("a repository you don't control should not configure its own reviewer")、`strict_mcp_config=True` はマシン / アカウント設定済みの MCP サーバを持ち込ませない (放置すると全リクエストにその tool 定義が乗る)、`model` は pin しないと環境の既定モデルが時間とともに変わる。(f) `max_turns` / `max_budget_usd` 超過は `error_max_turns` / `error_max_budget_usd` の terminal error result になり SDK が `ResultError` (claude-agent-sdk 0.2.140 以降の型) として raise するが、停止判定は「既に超過した後」なので実費は cap を超えうる。shell も network tool も持たない構成は、読んだ内容の出口が返答しか無くなるので prompt injection 対策そのものになる。API キーを置くサービスディレクトリには hook に加えて `disallowed_tools=["Read(/{service_dir}/**)"]` を独立した第 2 層として張る。(`claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb`, `claude_agent_sdk/scheduled_repository_reviewer/scheduled_review.py`)
 25. **「前回を覚えている」は主張ではなくスキーマで証明させ、結果は行頭マーカー + 終了コードで返す**。セッション継続は `ResultMessage.session_id` を保存して次回 `ClaudeAgentOptions(resume=...)` に渡すだけだが、効いたかどうかは `output_format` の JSON schema に `previous_review_id` / `previous_finding_ids` / `resolved` を **required** で足し、呼び出し側が前回値と突き合わせて `RESUME-LINK same_session=… prior_review_id_echoed=… recalled_findings=n/m` を印字して確かめる (壊れたら `RESUME-LINK-BROKEN`)。resume したエージェントは前回読んだファイルの記憶だけで答えるので、**プロンプトの最初の指示を「ファイル一覧を取り直せ」にする**。長寿命セッションは文脈が積もってコストが増え古い結論に固着するため、セッションファイルを定期削除して cold に戻す運用を組み、`recalled_findings` の漸減を reset シグナルとして読む。出力契約は、完了行を検証済みの成功後にしか出さず失敗は必ず非ゼロ終了で完了行を出さないこと。終了コードは 0 = 完走 / 1 = terminal error result (bound 超過・schema リトライ切れ) / 2 = 起動引数の誤り、cron 側の `flock -n -E 99` で「前回がまだ走っている skip」に専用コード 99 を与えて失敗と区別する。`except ResultError` は**狭く**捕まえる — プロセス kill や接続失敗は別の例外型で抜けるので、完了行が出ないこと自体が検知手段になる。所見はリポジトリ本文を引用するのでログはレビュー対象と同じ機密扱いにし、全フィールドを 1 行にクリップしてマーカーが必ず行頭に来るようにする。(`claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb`)
+26. **チームは放っておくと速さではなく徹底性に最適化する — 経過時間を「チーム共有の時計」で毎ターン見せる**。どの agent の context にも「依頼者がどれだけ待っているか」が無いため。仕組みは 2 つだけ: (a) タスク開始時に起動する時計を 1 つだけ作り全 agent が同じ参照を持つ (3 分後に spawn された helper の初回は `0s` ではなく `[elapsed 182s]`)、(b) **全 agent の全 API 呼び出しの直前**に `[elapsed 252s]` の 1 行を最新 user message の末尾 (初回はタスクプロンプト、以後は最後の tool result) に追記する。末尾追記なのでそれより前は次の呼び出しでも cache hit のまま。急がせ方は別々の 2 arm で混ぜない: **pressure** = タスクと各 helper の brief の末尾に 1 文 (`TIME_MATTERS`) を足すだけで system prompt は時間に一切触れない / **budget** = 時計行を `[elapsed 252s / 600s]` にするだけでプロンプト文言は足さない (budget は表示のみで強制しない)。目標値が無く早いほど良いなら pressure、目標値があるなら budget。1-2 分で終わるタスクに budget を付けると作業の余地が無く、Claude はタスクを捨てずに budget を超過しうる。時計は API 呼び出しの合間にしか差し込めないので、server-side tool 実行中は古い時計のままになる — client-side tool を経由する割合が高いほど時計が新しく保たれる。既定モデルは `claude-fable-5-1` で、Opus 5 以前では十分テストされていない。品質への影響は notebook では測っていないので、速い arm を採る前に自分のタスクで答えの質を確かめる。(`patterns/agents/latency_multi_agent.ipynb`)
 
 ## 5 つのワークフローパターン
 
@@ -80,6 +81,8 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 - リード専用の 3 tool: `create_subagents` (即座に返る)、`get_status` (active / idling / done / crashed)、`kill_subagents` (不要になったら明示的に解散)。
 - `run_agent()` が全エージェントを回す単一の tool-use ループ。`max_turns=20` 既定、`stop_reason` が想定外なら例外。`TRACE` dict に tool 呼び出し列を残して後から追える。
 
+`patterns/agents/latency_multi_agent.ipynb` は同じ hub / messaging / spawn / agent loop の形に共有時計を足した starter (タスクは同梱せず `TASK_TOOLS` と `make_task_handlers` を自分で埋める。まず押さえる 26)。orchestration 側の差分: helper の同時実行上限 `MAX_HELPERS=4` (超過分は spawn せず理由を返す)、`max_turns` はリード 40 / helper 15、helper の最終テキストはリードの inbox へ自動配送 (終了前に自分の inbox を drain するのでリードの redirect を取りこぼさない)、1 ターン内の tool 呼び出しは `asyncio.gather` で並行、helper の crash はチームを落とさずリードだけ raise、`max_tokens` 打ち切りは「速い run」に見えないよう明示ラベルを付ける。各 agent が見た `[task]` / `[clock]` / `[report]` を log に残し、決定的な reader (`show_clock_lines` / `show_timeline` 等) で「全 agent が時計を見たか」を run 自身の log から検証する。
+
 `patterns/agents/prompts/` の 3 本は本番系リサーチエージェントのプロンプト実物で、委譲設計のテンプレートとして読める。
 
 | プロンプト | 中身の要点 | 原典パス |
@@ -103,6 +106,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 | tool 定義そのものの eval | `tool_evaluation/tool_evaluation.ipynb`, `tool_evaluation/evaluation.xml` | 同一 eval タスクを複数エージェントが独立に実行して tool 定義の質を測る |
 | 非決定な段だけを測る eval | `capabilities/content_moderation/evaluation/run_eval.py`, `capabilities/content_moderation/data/*/samples.jsonl` | パイプラインで非決定なのは抽出段だけなので、eval は実質「抽出 eval」。3 ドメイン 22 サンプルのラベル付き期待判定と `decision` を突き合わせる (実測 21/22)。外した 1 件の修正先はルールでもエンジンでもなくフィールドの description 1 行で、プロンプト調整の blast radius が 1 フィールド・表の 1 数値に閉じる |
 | 使用量・コストの可観測性 | `observability/usage_cost_api.ipynb` | Usage & Cost Admin API でトークン/コストをモデル・ワークスペース・API キー別に取得。キャッシュ効率やチャージバック用 |
+| 組織管理の自動化 (Admin API) | `misc/admin_api.ipynb` | `client.beta.organization` (`anthropic>=1.1.0`) で招待・ロール・workspace・メンバー・API キー監査・service account・rate limit を操作。運用上の要点: workspace 単位の API キーでは呼べず、`org:admin` OAuth (`ant auth login --profile admin --scope org:admin`) か Admin API キー。service account 系は OAuth のみ受け付ける。API キーは作成できず一覧・改名・無効化・archive だけなので「プロビジョニングではなく定期監査に使え」。監査例は 90 日超・無期限のキーを flag し `APPLY = False` の dry run が既定 (無効化は可逆、archive は不可逆)。workspace の archive は永久で中の API キーを全部失効させる。作成直後の service account は一時的に 404 を返すので retry する |
 | コスト最適化の eval 駆動手順 | `cost_optimization/cost_optimization.ipynb` | pass rate と cost per task の 2 軸で品質バーを固定し、レバーを 1 つずつ当てて Pareto フロンティアを描く。レバー個別の効き所は下の「コスト最適化レバーの優先順位」 |
 | ↳ eval 運用の実務値 | `cost_optimization/cost_optimization.ipynb` | 本番判断には約 50 ケース x 設定ごと 5 トライアル以上。隣接設定が run 間で順位を入れ替えなくなるまで誤差幅を詰める。1 トライアルの結果で判断しない |
 | 異種モデルの orchestrator-worker | `multimodal/using_sub_agents.ipynb` | 上位モデルが各サブエージェント用のプロンプトを実行時に書き、廉価モデルが抽出を担う構成 |
@@ -136,7 +140,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 | フル装備の `.claude/` 実例 | `claude_agent_sdk/chief_of_staff_agent/.claude/` | `agents/*.md` (frontmatter に `name` / `description` / `tools`)、`commands/`、`hooks/*.py`、`output-styles/`、`settings.local.json` が一式揃った参照配置 |
 | 書き込み系の安全 hook | `claude_agent_sdk/03_The_site_reliability_agent.ipynb` | PreToolUse hook で書き込み操作 (プールサイズ範囲・設定の妥当性) を検証してから通す。read-only → read-write への拡張手順 |
 | MCP でのツール供給 | `claude_agent_sdk/02_The_observability_agent.ipynb` | git / GitHub MCP サーバでツールを外部化する。SRE 版は JSON-RPC サブプロセスの自作 MCP サーバ |
-| Managed Agents (ホスト実行) | `managed_agents/README.md` | ステートフルなホスト型ランタイム。`CMA_iterate_fix_failing_tests.ipynb` が API 形状の入口 |
+| Managed Agents (ホスト実行) | `managed_agents/README.md` | ステートフルなホスト型ランタイム。`CMA_iterate_fix_failing_tests.ipynb` が API 形状の入口。このディレクトリは notebook 専用になり、実行可能アプリ (Slack / Linear / Sentry / road trip planner / MCP サーバ) は claude-quickstarts の `managed-agents/` へ移った (範囲外参照) |
 | ↳ 人間ゲート | `managed_agents/CMA_gate_human_in_the_loop.ipynb`, `managed_agents/CMA_operate_in_production.ipynb` | custom tool の `decide()` / `escalate()`、`requires_action` idle バウンス、長時間接続を張らずに HITL を回す `session.status_idled` webhook |
 | ↳ 異種スペシャリストチーム | `managed_agents/CMA_coordinate_specialist_team.ipynb`, `managed_agents/CMA_watch_subagents_live.ipynb` | `multiagent` coordinator 設定、ロール別の tool スコープを絞る理由、per-thread の event delta とモデル `effort` をコストレバーにする。roster には agent 以外に advisor 1 件を混在させられる |
 | ↳ 上位モデルへの相談 (advisor) | `managed_agents/CMA_consult_an_advisor.ipynb` | roster に `{"type": "advisor", "model": ...}` を 1 件だけ置くと、中位モデルが turn の途中で上位モデルへ相談できる。tool は入力を取らず会話全体がそのまま渡るので、「いつ相談するか」を決めるのは system prompt だけ。相談は `agent.tool_use` ではなく `anthropic.advisor` という短命スレッドの lifecycle として primary stream に現れ、コストはそのスレッドの `usage.list_cost` で個別に読める。子スレッドの同時実行上限の対象外。モデルのポリシー次第で応答が `redacted` ブロックで返る (働くモデルは全文を読むので結果は変わらない) ため、text / redacted の両方を正常系として書く |
@@ -151,7 +155,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 | Skill 実装例 | `skills/custom_skills/` | `SKILL.md` (frontmatter は `name` / `description`) + `scripts/*.py` + `REFERENCE.md` の構成。progressive disclosure で必要時のみロード |
 | repo 自身のハーネス | `.claude/skills/cookbook-audit/`, `.claude/agents/code-reviewer.md`, `.claude/commands/` | ルーブリックを別ファイルに分離したスキル、レビュー用サブエージェント、7 本のスラッシュコマンド (`/notebook-review` 等は CI からも呼ばれる) |
 | ドキュメント品質のルーブリック | `.claude/skills/cookbook-audit/SKILL.md` | 問題起点の導入・学習目標・コード前後の説明・アンチパターン集。技術文書のレビュー基準としてそのまま流用できる |
-| repo 規約 | `CLAUDE.md`, `scripts/validate_all_notebooks.py` | 日付なしモデルエイリアスを使う (現行は `claude-sonnet-5` / `claude-haiku-4-5` / `claude-opus-4-8`。Bedrock だけ別書式で、新しめのモデルは `anthropic.claude-<model>` の suffix 無し、古いものは `-YYYYMMDD-v1:0` 付き)、notebook 内は `!pip` ではなく `%pip`、1 notebook 1 概念、出力は意図的に残す、`make check` を commit 前に回す。旧モデル ID → 現行 ID の対応表がバリデータに機械可読な形で載っており (`--auto-fix` で置換もする)、自分の資産の一括置換表としてそのまま流用できる |
+| repo 規約 | `CLAUDE.md`, `scripts/validate_all_notebooks.py` | 日付なしモデルエイリアスを使う (現行は `claude-sonnet-5` / `claude-haiku-4-5` / `claude-opus-4-8`。Bedrock だけ別書式で、新しめのモデルは `anthropic.claude-<model>` の suffix 無し、古いものは `-YYYYMMDD-v1:0` 付き)、notebook 内は `!pip` ではなく `%pip`、1 notebook 1 概念、出力は意図的に残す、`make check` を commit 前に回す。Managed Agents の notebook は全 `agents.create` に `metadata={"anthropic_cookbook": "claude-cookbooks/<kebab-case の notebook 名>"}` を付ける (session は agent から継承)。形の崩れた値は attribution で**エラー無しに無視される**ため、`tests/notebook_tests/test_notebooks.py` が各コードセルを構文解析して `agents.create` ごとに metadata を検査する (`CONTRIBUTING.md`)。旧モデル ID → 現行 ID の対応表がバリデータに機械可読な形で載っており (`--auto-fix` で置換もする)、自分の資産の一括置換表としてそのまま流用できる |
 
 ## 12-factor-agents との食い違い
 
@@ -169,13 +173,14 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 
 - **API 一般の話題は別スキル (`claude-api`) の担当**。この蒸留版では扱わない。上の「コスト最適化レバー」もアーキテクチャ判断の粒度までで、価格表・パラメータの詳細仕様は追わない (notebook 内の `PRICING` は執筆時点のリスト価格のハードコードで、原典自身が陳腐化を明記している)。当たる場所: prompt caching・JSON mode・batch 等は `misc/`、RAG と contextual embeddings は `capabilities/retrieval_augmented_generation/` と `capabilities/contextual-embeddings/`、分類・要約・text-to-sql は `capabilities/` 配下、vision / multimodal は `multimodal/`、fine-tuning は `finetuning/`、extended thinking は `extended_thinking/`、外部ベンダ連携は `third_party/` (Pinecone / VoyageAI / MongoDB / LlamaIndex / Wolfram / Deepgram / ElevenLabs / Wikipedia)。
 - **Skills 機能の API 面** (beta header `skills-2025-10-02`、`container` パラメータ、Files API での成果物ダウンロード、組み込み `xlsx` / `pptx` / `pdf` / `docx`): `skills/README.md` と `skills/CLAUDE.md` に詳しい。ここではハーネス設計に効く「SKILL.md + scripts + REFERENCE.md の構成」だけを索引した。
-- **各 notebook のコードセル全文**: 本蒸留は README・markdown セル・`patterns/agents/` の実装コード・`prompts/`・`.claude/` を読んだ範囲で書いた。`managed_agents/` と `claude_agent_sdk/` の個々の notebook は原則として README の記述と目次までで、セル単位の実装は未確認。例外 (markdown セル全部と主要コードセルを読んだもの) は `claude_agent_sdk/08_Dynamic_workflows.ipynb`, `claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb`, `managed_agents/CMA_cap_session_spend.ipynb`, `managed_agents/CMA_consult_an_advisor.ipynb`, `managed_agents/CMA_use_skills_from_a_repo.ipynb`, `managed_agents/CMA_pin_inference_geo.ipynb`, `cost_optimization/cost_optimization.ipynb`, `capabilities/content_moderation/guide.ipynb`。API 形状を正確に知りたいときは該当 notebook を直接読む。
+- **各 notebook のコードセル全文**: 本蒸留は README・markdown セル・`patterns/agents/` の実装コード・`prompts/`・`.claude/` を読んだ範囲で書いた。`managed_agents/` と `claude_agent_sdk/` の個々の notebook は原則として README の記述と目次までで、セル単位の実装は未確認。例外 (markdown セル全部と主要コードセルを読んだもの) は `claude_agent_sdk/08_Dynamic_workflows.ipynb`, `claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb`, `managed_agents/CMA_cap_session_spend.ipynb`, `managed_agents/CMA_consult_an_advisor.ipynb`, `managed_agents/CMA_use_skills_from_a_repo.ipynb`, `managed_agents/CMA_pin_inference_geo.ipynb`, `cost_optimization/cost_optimization.ipynb`, `capabilities/content_moderation/guide.ipynb`, `patterns/agents/latency_multi_agent.ipynb`, `misc/admin_api.ipynb`。API 形状を正確に知りたいときは該当 notebook を直接読む。
 - **コスト最適化 notebook の合成データと実行結果**: `cost_optimization/assets/` (`policy_manual.md` の約 12K トークン引受マニュアル、`claims_ledger.csv` の 5,000 行台帳、`eval_set.csv` の 10 件ラベル、見積書・写真) はデモ用の合成データなので索引しない。notebook 通しの実行に約 $40 かかる旨と、掲載スコアがハードコードで実行ごとに変動する旨は原典が明記している。Pareto フロンティアの作図・トライアル集計コードも未索引。
 - **content moderation の合成データと golden ruleset**: `capabilities/content_moderation/data/` (3 ドメインの `schema.json` / `context.json` / `policies.md` / `samples.jsonl`、493 行の `rules.golden.json`、Pillow 生成の広告画像と `build_creatives.py`) はデモ用の合成データなので索引しない。ルール言語の全文法・演算子の意味論は `engine.py` の docstring と `pipeline.py` の `RULE_FORMAT_SPEC` にまとまっており、自分のドメインで書き起こすときはそこを直接読む。notebook 通しの実行は約 10-15 分・約 $1、`RUN_FULL_EVAL=1` でその倍。原典自身が「ここのルールは実在の広告規制ではないので compliance guidance に使うな」と明記している。なお原典は、CSAM や暴力のような業界標準タクソノミの単一カテゴリ検出には専用分類器を使えとし、ポリシー変更の話が無い一度きりの分類には素の分類プロンプトで十分だと書いている。
-- **レイテンシ最適化・商用価格**: 原典が明示的に対象外としている領域 (レイテンシは follow-up cookbook 予定、committed-use discount 等はアカウントチームの話)。
-- **ホスティング・インフラ**: `claude_agent_sdk/hosting/` (docker / kubernetes / modal)、`managed_agents/self_hosted_sandboxes/`、`managed_agents/cma-mcp/`。
-- **統合デモ**: `managed_agents/slack/`, `managed_agents/linear/`, `managed_agents/sentry/`, `managed_agents/roadtrip_planner/`、`claude_agent_sdk/session_browser_demo/`、`claude_agent_sdk/vulnerability_detection_agent/`。
+- **商用価格**: `cost_optimization/cost_optimization.ipynb` が対象外としている領域 (committed-use discount 等はアカウントチームの話)。同 notebook が follow-up 扱いにしていたレイテンシのうち、マルチエージェントの時間意識は `patterns/agents/latency_multi_agent.ipynb` として追加された (まず押さえる 26)。
+- **ホスティング・インフラ**: `claude_agent_sdk/hosting/` (docker / kubernetes / modal)、`managed_agents/self_hosted_sandboxes/`。
+- **統合デモ**: `claude_agent_sdk/session_browser_demo/`、`claude_agent_sdk/vulnerability_detection_agent/`。
+- **claude-quickstarts へ移った Managed Agents アプリ**: `managed_agents/slack/`, `managed_agents/sentry/`, `managed_agents/linear/`, `managed_agents/roadtrip_planner/`, `managed_agents/cma-mcp/` は README 1 枚だけが残り、コードは anthropics/claude-quickstarts の `managed-agents/` (cma-mcp は `mcp-server-typescript`) にある。各 README に移行時の変更点 (例: MCP サーバの HTTP 既定 bind が全インタフェースから `127.0.0.1` へ、bearer token は 32 文字以上必須、`ALLOWED_AGENT_IDS` 追加 / Linear は最初にインストールした workspace が bridge を所有し他は `LINEAR_ALLOWED_ORG_IDS` 無しでは拒否、webhook route は `/managed-agents/webhook`) と、コードが最後に存在した commit へのリンクがある。
 - **フロントエンド美観のプロンプティング**: `coding/prompting_for_frontend_aesthetics.ipynb` (DESIGN.md 系の判断には別リファレンスを使う)。
-- **課金**: `fable_5_fallback_billing/guide.ipynb`。
+- **課金**: `fable_5_fallback_billing/guide.ipynb`。2026-09-24 に記述が変わった (#890): classifier の block カテゴリに `frontier_llm` (競合 AI モデル開発の支援) が加わり、「出力前 block の入力トークンは課金しない」は撤回 — `stop_details.category` が `bio` / `frontier_llm` / `reasoning_extraction` の出力前 block は要求モデルの料金で通常課金 (それ以外のカテゴリ・カテゴリ無しは 2026-09-23 時点で非課金)、課金後に fallback すれば両方課金される。stream 途中の block は入力と送出済み出力をカテゴリを問わず課金。fallback 側入力を cache read 扱いにする件と、server-side fallback 非使用時に fallback credit token が要る点は維持 (credit を使う再送は system / messages / tools を block 時と完全一致させる)。詳細は `claude-api` スキルの担当。
 - **未読だがプロンプト / eval 設計に隣接するもの** (内容未確認、必要なら直接読む): `misc/metaprompt.ipynb` (プロンプト自動生成)、`misc/building_evals.ipynb` と `misc/generate_test_cases.ipynb` (eval とテストケース生成)、`misc/session_memory_compaction.ipynb`。
 - **リポジトリ運営系**: `registry.yaml` / `authors.yaml` / `tests/` / `scripts/` / `CONTRIBUTING.md`。
