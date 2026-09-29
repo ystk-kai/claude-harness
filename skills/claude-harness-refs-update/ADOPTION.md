@@ -27,6 +27,25 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-09-29
+
+### claude-cookbooks 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | 会話途中で top-level `output_config.effort` を変えると prompt cache が壊れる (effort はプロンプトに描画される)。会話内では固定するか、対応モデルなら per-message effort 変更 (beta) を使う。grep 済: この repo に Messages API を呼ぶコードは無く、環境側の `effortLevel` は Claude Code の設定で API の `output_config` ではない = **当たらない**。自前の agent loop を書くときの規準として保持 | cc: `bf24d45` / `cost_optimization/cost_optimization.ipynb` |
+| 未対応 | FYI | 運用 | preserved thinking check を走らせるモデルでは、client 側で過去の tool 結果を prune すると以降の thinking block が全部無効になり、次のリクエストが拒否されうる (境界ごとの一括 prune がそのままでは壊れる)。server 側 context editing / compaction を使うか、prune 時に該当 thinking block も落とす。grep 済: この repo に client 側 compaction の実装は無い = **当たらない** | cc: `bf24d45` / `cost_optimization/cost_optimization.ipynb` |
+| 未対応 | FYI | 運用 | effort の既定値はモデルごとに違うので呼び出しごとに明示する。thinking を切れないモデルでは effort が推論コストの主な制御手段。1 世代古いモデルなら、下位階層へ下げる前に「新世代 + 低 effort」を測る。cache read 0.1x は一部の新モデルでさらに低い。compaction の `instructions` は既定の要約プロンプトを置き換える (追記ではない)。grep 済: API を呼ぶコードが無い = **当たらない** | cc: `bf24d45` / `cost_optimization/cost_optimization.ipynb` |
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | MCP / 運用 | Kimi Code CLI は MCP 設定を JSON の手編集でなく対話コマンド `/mcp-config` で行い、plugin の trust level をハーネスの一級の関心事として扱う。grep 済: この repo に MCP 設定手順・plugin trust の規約は無い = **当たらない**。README の注記のみが根拠で本体は未検証 | ahe: `cf40b01` / `README.md` `### Demo Harnesses` |
+
+claude-code-best-practice の再蒸留は**候補なし** (38 commits はバッジ・★数・drift-check の定期エントリで、changelog は既報 ON HOLD 項目の繰り返し。v2.1.283 の `/doctor prompt-audit` は名前が出るだけで使い方の記述が無い — 2026-09-05 の `prompt-audit` 運用項目の関連情報)。
+
+---
 ## 2026-09-26
 
 ### awesome-harness-engineering 再蒸留から

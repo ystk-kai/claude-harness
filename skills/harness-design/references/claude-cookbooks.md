@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/claude-cookbooks
-distilled_commit: 813fbeec03cdedfda7808529438d1c7af71f26eb
-distilled_at: 2026-09-26
+distilled_commit: d7265d6ae994ccd8429db0594b000073b2f9ad43
+distilled_at: 2026-09-29
 ---
 
 # claude-cookbooks 蒸留版
@@ -117,16 +117,16 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 (Opus `effort=high` / 12 tools / 10 件の eval セット) で 1 レバーずつ実測した 1 本。ベースライン 10/10 正解・$0.29/task に対し、
 最終的な Pareto 最適は **`sonnet · medium` + system ブロックへの明示 breakpoint** で 13 倍安。
 読みどころは順序そのものより **試したレバーの大半が効かなかった**事実で、効くかどうかはエージェントの形
-(ターン数・スキーマの重さ・数値処理の有無・入力が前段結果に依存するか) で決まる。
+(ターン数・スキーマの重さ・数値処理の有無・入力が前段結果に依存するか) で決まる。原典は締めで、Claude Code の `/claude-api cost-optimize` で支出の内訳を profile し、レバーを 1 変更ずつ提案させる入口を案内している。
 
 | レバー | 実装の要点 | 効かない / 避ける条件 |
 |---|---|---|
-| prompt caching | auto は `cache_control={"type": "ephemeral"}` をリクエストに置くと最後の cacheable ブロック直後に breakpoint が 1 つ置かれ会話とともに前進。明示は最大 4 個で層ごとに TTL を変えられる。write は 5 分 TTL で 1.25x / 1 時間で 2x、read は 0.1x | キャッシュ破壊の 3 大要因: breakpoint より上の動的コンテンツ (timestamp / request ID)、会話途中のモデル切り替え (キャッシュはモデル単位)、毎ターンの compaction。lookup は breakpoint から約 20 ブロックしか遡らないので、append の多い loop は明示 breakpoint が要る |
+| prompt caching | auto は `cache_control={"type": "ephemeral"}` をリクエストに置くと最後の cacheable ブロック直後に breakpoint が 1 つ置かれ会話とともに前進。明示は最大 4 個で層ごとに TTL を変えられる。write は 5 分 TTL で 1.25x / 1 時間で 2x、read は notebook の使用モデルで 0.1x (一部の新しいモデルはさらに低い。倍率表はハードコードの snapshot) | キャッシュ破壊の要因: breakpoint より上の動的コンテンツ (timestamp / request ID。動的部分は最新の user turn へ寄せ、過去ターンは送った形のまま)、会話途中のモデル切り替え (キャッシュはモデル単位)、会話途中の top-level `output_config.effort` 変更 (effort はプロンプトに描画される。対応モデルでは per-message effort 変更 (beta) なら cache を保つ)、毎ターンの compaction。lookup は breakpoint から約 20 ブロックしか遡らないので、append の多い loop は明示 breakpoint が要る |
 | 入力トークン管理 | progressive disclosure。参照文書を `read_manual` 等の tool の裏へ、system prompt の tool 再掲を削る、`defer_loading: True` + `tool_search_tool_regex_20251119`、画像を 1280x720 まで事前縮小 (1 画像 ~1,200 tokens に収まる)、大きな表は Files API + code execution へ、`count_tokens` を ingestion gate に | 毎回文書の大半を読むならキャッシュ済み system prompt のままが安い。スキーマが 10K token 未満なら tool search は純オーバーヘッド。計算する数値が無ければ code execution はトークンを足すだけ |
-| エージェントループ効率 | server 側は `clear_tool_uses_20250919` (`trigger` = `input_tokens` 150K, `keep.tool_uses`) / `clear_thinking` / `compact_20260112`。client 側は **jagged compaction** = 嵩む結果を溜めて自然な境界で一括 prune し、prune 間は message 配列を byte 同一に保つ。自己完結なサブタスクは subagent へ切り出して結果 1 行だけ返す | edit は必ずその地点以降の cache を無効化するので trigger は高めに置いて発火を稀にする。6 ターン程度の loop では trigger に届かず無意味 |
+| エージェントループ効率 | server 側は `clear_tool_uses_20250919` (`trigger` = `input_tokens` 150K, `keep.tool_uses`) / `clear_thinking` / `compact_20260112`。compaction の `instructions` は既定の要約プロンプトを**置き換える** (追記ではない)。trigger を待たない on-demand 形 (beta) もある。client 側は **jagged compaction** = 嵩む結果を溜めて自然な境界で一括 prune し、prune 間は message 配列を byte 同一に保つ。自己完結なサブタスクは subagent へ切り出して結果 1 行だけ返す | edit は必ずその地点以降の cache を無効化するので trigger は高めに置いて発火を稀にする。6 ターン程度の loop では trigger に届かず無意味。**preserved thinking check を走らせるモデル**では、client 側で過去の tool 結果を畳むことが履歴の編集扱いになり以降の thinking block を全部無効化し、次リクエストが拒否されうる — その場合は server 側 edit を使うか、prune 時に該当 thinking block も落とす |
 | 出力トークン管理 | `max_tokens` は backstop であって tuning knob ではない (モデルは値を見ず、超えたら `stop_reason="max_tokens"` で途中で切れる)。短くしたいなら出力の形を例つきでプロンプトに書く。早期離脱は sentinel (`<CANNOT_REVIEW>`) を `stop_sequences` に登録して説明文の生成を止める | — |
 | Batch API | 全トークン 50% off / 24 時間以内の非同期処理。caching も併用できる | 単発リクエストなので tool loop は畳めない。適用するには loop の入力を全部先読みして 1 リクエストに inline する**アーキテクチャ変更**が要る。batch 内の cache hit は並行実行のため best effort。24 時間は expiry であって SLA ではない |
-| モデルと `effort` | `effort` を low まで下げて eval が通るならモデル階層を 1 つ落とし `effort` を high に戻して再掃引。Haiku 4.5 は `effort` を取らない。advisor tool (`advisor_20260301`, beta `advisor-tool-2026-03-01`) で安いドライバに上位モデルの相談役を付ける | advisor は「いつ相談するか」を安い signal (payout 閾値 / fraud score 帯) で gate できないと成立しない — 難しいケースの識別自体がドライバに欠けている判断力だから |
+| モデルと `effort` | `effort` を low まで下げて eval が通るならモデル階層を 1 つ落とし `effort` を high に戻して再掃引。既定値はモデルごとに違うので各段で `effort` を明示する。thinking を切れないモデルでは `effort` が推論コストの主な制御手段。1 世代古いモデルなら「新世代へ上げて effort を下げる」が最安になりうるので、階層を下げる前に測る。Haiku 4.5 は `effort` を取らない。advisor tool (`advisor_20260301`, beta `advisor-tool-2026-03-01`) で安いドライバに上位モデルの相談役を付ける | advisor は「いつ相談するか」を安い signal (payout 閾値 / fraud score 帯) で gate できないと成立しない — 難しいケースの識別自体がドライバに欠けている判断力だから |
 | タスク分解 (subagent routing) | Haiku 5 体が事実収集 → Sonnet 1 回が rule card に照らして判断。実測で最安 (Opus ベースライン比 約 90% 減) | 1 件落として不採用。原因は例外条項の欠落で、"Flattening a manual into a rule list is where decomposition gives up accuracy." 判断側が中間コンテキストを必要とするなら分解しない |
 
 ## ハーネス実装例の索引

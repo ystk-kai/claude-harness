@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 035cd8bafc8eccac08a74cdda82924660c36266e
-distilled_at: 2026-09-26
+distilled_commit: cca026c790efb80c3d2afd15e885b23b514bf74a
+distilled_at: 2026-09-29
 ---
 
 # claude-code-best-practice 蒸留版
@@ -41,7 +41,7 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
    決してロードされない。root に共通規約、コンポーネント配下に固有規約。個人用は CLAUDE.local.md。
    subagent 単位で CLAUDE.md を切る手段が `omitClaudeMd: true` (boolean、任意、v2.1.271) — user/project/local の
    CLAUDE.md を読まずに起動し managed policy file だけは読む。`--agent` や `agent` 設定で**メインセッションとして
-   走る場合は無視**。原典の subagents 表には 09-25 も未反映 (ON HOLD、項目 12)。`AGENTS.md` は v2.1.277 から
+   走る場合は無視**。原典の subagents 表には 09-28 も未反映 (ON HOLD、項目 12)。`AGENTS.md` は v2.1.277 から
    公式サポート (公式 overview の引用: "Claude Code can read that on its own or alongside CLAUDE.md") だが、README の
    Memory 行 Location には未記載で 09-23 から ON HOLD。 → README.md「CLAUDE.md + .claude/rules」tips、
    `best-practice/claude-memory.md`、`changelog/best-practice/claude-subagents/changelog.md`、`concepts/changelog.md` (09-23)
@@ -133,7 +133,7 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
 12. **frontmatter の正確なリファレンスは best-practice/ にあるが、そのまま信じない**。skills 20・
     commands 20・subagents 16 フィールドの型・意味の表と、公式ビルトイン一覧 (bundled skills 19、
     slash commands 94、agent types 5) がある。設計時は記憶で書かずここを引く。ただし**日次 drift check が動かす
-    のはバッジ行と `changelog/` 追記が中心で、表本体は ON HOLD で据え置かれる項目が多い**。09-25 時点:
+    のはバッジ行と `changelog/` 追記が中心で、表本体は ON HOLD で据え置かれる項目が多い**。09-28 時点:
     - bundled skills は 09-23 に row 19 `update-config` (settings.json を自然言語で編集。theme/model 等の単純な
       設定は `/config`) が入り 19。09-24 から `artifact-design` (v2.1.281 の CHANGELOG に "bundled" とあるが
       commands reference に無く model 起動のみらしい) が追加候補 ON HOLD。削除候補 3 件 — row 15 `review`
@@ -156,12 +156,13 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
       `permissionMode` に公式の `manual` (`default` の alias、v2.1.200+) が無く、`Explore` の model は `haiku`
       (公式は「親から継承」、Claude API では Opus 上限)、`model` 例は `claude-opus-4-6` のまま、`prompt` は
       公式の `--agents` CLI JSON 側にしか無い。
-    - バッジは 09-25 に v2.1.282 まで進んだが subagents 側の ON HOLD 3 件と watch item は 1 つも解消していない —
+    - バッジは 09-28 に v2.1.283 まで進んだが subagents 側の ON HOLD 3 件と watch item、skills 側の ON HOLD 4 件は 1 つも解消していない —
       **バッジの更新は表本体が直ったことを意味しない**。`model` 欄の watch item は 09-15 に拡張され、
       公式が `fable` エイリアスと `claude-opus-5` を例示しているのに原典は `claude-opus-4-6` のままと明記された。
     - **ON HOLD は解消されずに静かに消えることがある**。commands 側の `/cost` (cache miss 表示)・`/reload-plugins`
       (headless 対応)・`/effort` (既定保存と `s` キー) は 09-05 を最後に changelog から落ちたが公式 docs 表には
       入っておらず、以降の run は「fully in sync」と宣言。**「最新 run に出ていない = 解決した」ではない**。
+      v2.1.283 で入った `/doctor prompt-audit` サブコマンドも skills 側の changelog (09-26) が触れるだけで commands 表には無い。
     - `claude-settings.md` は 09-01 に v2.1.252 へ追いついたが、`claude-memory.md` (2026-03)・`claude-mcp.md` (2026-03)・
       `claude-cli-startup-flags.md` (2026-06) は数か月動いていない。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
@@ -223,13 +224,13 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
   `best-practice/claude-cli-startup-flags.md` を引く。
 - **tips 全文** — カテゴリ別一覧は `README.md` の TIPS AND TRICKS 節。各 tip に一次ソースリンク付き。
 - **★ 数とバッジ日付** — 日次 refresh で書き換わる。蒸留版は数値を持たない。バッジは「その表がまだ追われているか」の
-  指標としてのみ使う (項目 12)。2026-09-25 時点で skills / commands / subagents が v2.1.282、settings は v2.1.252
-  (09-01) のまま 3 週間以上動いていない。
+  指標としてのみ使う (項目 12)。2026-09-28 時点で skills / commands / subagents が v2.1.283、settings は v2.1.252
+  (09-01) のまま 4 週間近く動いていない。
 - **コミュニティワークフローの詳細比較・skill/agent コレクション集** — `README.md` の
   DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS / AGENT COLLECTIONS 表。★ 数だけでなく**ステップ列も行の並び順も
   日次で書き換わる** (09-19 に Matt Pocock の workflow 先頭へ `setup-matt-pocock-skills` が追加) ため蒸留版は
   数値もステップ列も持たない。run ごとに各リポジトリで別系統のステップ列が提案され大半が「1 run 目」として ON HOLD、
-  個数も揺れる (gstack skills は 53/48/65/53/32/53/58、BMAD agents は 0 と 5 を往復)。採用の閾値は **2 run 連続で
+  個数も揺れる (gstack skills は 53/48/65/53/32/53/58 を経て 09-27 に 2 run 連続の 54 で更新、翌 run でもう 55 案、BMAD agents は 0 と 5 を往復)。採用の閾値は **2 run 連続で
   同じ値**だが、**確定した値も翌週には変わる** — 表の数値はスナップショットであって定説ではないので他所へ引用しない。
 - **Claude API 寄りの詳細** (Programmatic Tool Calling、SDK 設定、rate limits の数値) —
   `reports/claude-advanced-tool-use.md`, `claude-agent-sdk-vs-cli-system-prompts.md`, `claude-usage-and-rate-limits.md`。
