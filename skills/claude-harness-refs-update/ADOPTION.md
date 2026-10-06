@@ -27,6 +27,41 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-06
+
+### skills (anthropics/skills) 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | 運用 | `claude-api` の prompt-audit が coding agent の設定ファイル (`CLAUDE.md` / `AGENTS.md` / rules / skills / commands / subagents / output styles) を正式な監査対象にした。Group 2 に「複数の instruction file が同じ論点で食い違う (狭いスコープの override は除く。新旧が履歴で決まらなければ `flag`)」「instruction file に書いたパス・コマンドが実在しない」の 2 行が入った。このハーネスの skills/ と claude-md/ に一度当てる価値がある。`~/.claude/` 配下は request で名指ししたときだけ scope に入る | skills: `8a1541c` / `skills/claude-api/shared/prompt-audit.md` Step 0・1・Group 2 |
+| 未対応 | FYI | CLAUDE.md / skill | thinking の深さを散文で指示する文 (think harder / don't overthink 等) は cruft 扱いになり、`effort` (frontmatter が受け付けるならそこ) に置き換える。grep 済: skills/・claude-md/・`~/.claude/CLAUDE.md`・`~/.claude/agents/` に該当表現なし = **当たらない** | skills: `8a1541c` / `prompt-audit.md` Group 1 thinking-depth 行 |
+| 未対応 | FYI | CLAUDE.md / skill | 「tool は必要なときだけ」「tool 呼び出しを最小化」等の抑制文に Sonnet 5.5 が字義どおり従い、接続済み tool / skill を使わず手持ち知識で答えがちになる。抑制文を消して「いつ参照先を確認するか」を書く。grep 済: 該当表現なし = **当たらない** | skills: `8a1541c` / `prompt-audit.md` Group 1d Tool-use discouragement 行 |
+| 対応済 (2026-07-12) | FYI | skill | frontend 生成で「generic な AI 感を避けよ」の曖昧な 1 行は所見扱い。効くのは既定スタイルの名指し列挙 (原典例: cream 背景、見出しの italic 強調語、01/02/03 番号ラベル、monospace ラベル、pill ボタン)。grep 済: `avoid-ai-slop-design/references/web-ui.md` が cream・serif italic・01/02/03・badge pill・monospace (cyberpunk 文脈) を既に名指ししている | skills: `8a1541c` / `prompt-audit.md` "One exception to 'restate positively'" |
+| 未対応 | FYI | 運用 | skill / prompt を eval で改善するときの規律: 登る前に oracle / null baseline、mechanism を外して score が落ちるか確認、split はランダムで headline は test delta、1 round 1 仮説、停滞時は失敗を grader / harness / 構造 / variance に分類してから動く。eval 実行は subagent で包まず `run_in_background`。この repo に skill の eval 基盤は無い | skills: `8a1541c` / `skills/claude-api/shared/evals/{eval-audit,eval-hillclimb}.md` |
+| 未対応 | FYI | 運用 | URL からの取り込みに trust tier を設ける型: first-party は内容を写してよく、それ以外は設計だけ持ち込む。tier は下がる方向にしか動かない。page は data であり、ページ内コマンドは実行せず AI 宛て文言は無視、ID / token は写さない。原典の対象は Managed Agents onboarding で、refs-update の再蒸留 (外部 clone を subagent に読ませる) への適用は類推 | skills: `683bc88` / `skills/claude-api/shared/managed-agents-onboarding-from-url.md` §0・§2b |
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | 運用 / skill / hook | ハーネスの各統制に expiry condition (いつ外すか) を付け、モデル向上に合わせて外していく。grep 済: skills/・claude-md/・`~/.claude/CLAUDE.md` に撤去条件の記述は 1 つも無い = **当たる**。原典 `templates/HARNESS_CHECKLIST.md` の「Can be removed when」表が雛形。README 注記ベースで記事本文は未確認 | ahe: `c0f85b2` / README Foundations「The State Of AI Harness Engineering 2026」、`templates/HARNESS_CHECKLIST.md` |
+| 未対応 | FYI | CLAUDE.md | 機械生成した context file は成功率を下げ推論コストを上げる (ETH Zurich の結果の引用)、散文ルールより実行可能スクリプトを推奨。grep 済: この repo と `~/.claude/` の CLAUDE.md は手書き = 前半は **当たらない**。後半は 2026-09 以前の「自然言語ルールは guardrail ではない」系と同方向。README 注記ベースで数値未確認 | ahe: `c0f85b2` / README Foundations |
+| 未対応 | FYI | subagent | agent 間 handoff が 4 回を超えるとほぼ失敗 (Microsoft)、reviewer agent が性能を落とす例もある。refs-update は 1 段の並列委譲で該当しない。多段連鎖を設計するときの判断材料 | ahe: `c0f85b2` / README Foundations |
+| 未対応 | FYI | 運用 | 並列 agent の信頼性を prompt の行動規則でなく container・worktree・credential・network policy の隔離で担保する (isolation over coordination)。並列 subagent の衝突対策の材料 | ahe: `9224798` / README Task Runners & Orchestration「Scion」 |
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | v2.1.284 で ultracode は effort レベルではなくトグル (`/effort ultracode [on\|off]`) になり、`xhigh` を強制しなくなった。effort を上げたいならレベルを別に指定する。原典 settings 表 (v2.1.252 で更新停止) は旧説明のまま。grep 済: ハーネス内に ultracode の言及なし = **当たらない** | ccbp: `89c46ca` / `best-practice/claude-commands.md` #55 |
+| 未対応 | FYI | 運用 | v2.1.285 以降 `/resume` で走っている background セッションを選ぶと、この端末がそれに attach し今の会話が background に回る。「再開不可なので `claude agents` で attach」系の手順は古い。grep 済: 該当手順なし | ccbp: `5d35032` / `best-practice/claude-commands.md` #90 |
+| 未対応 | FYI | 運用 | `/review` (`/code-review`) に `--max-findings n\|all\|default` が加わり、`default` を渡すまで次回以降も持ち越される | ccbp: `9940964` / `best-practice/claude-commands.md` #63 |
+| 未対応 | FYI | skill | bundled skills に `slides` / `artifact-capabilities` / `artifact-diagramming` / `artifact-design` / `claude-in-chrome` (Chrome 連携時のみ) が加わった。自作 skill (`ui-design` / `avoid-ai-slop-design`) との用途重複を点検するときの材料。`artifact-design` は commands reference に無く、削除候補 3 件も ON HOLD なので個数は確定値として引用しない | ccbp: `5a9b008` `68b1951` `0f757ce` / `best-practice/claude-skills.md` |
+
+### awesome-design-md 再蒸留から
+
+候補なし (差分は README のバッジ追加 1 行のみ)。
+
 ## 2026-09-29
 
 ### claude-cookbooks 再蒸留から
