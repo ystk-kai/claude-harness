@@ -27,6 +27,48 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-13
+
+### avoid-ai-slop-design 棚卸しから
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | skill | `avoid-ai-slop-design/SKILL.md` の Quick checklist は既定ルックを indigo/purple-blue・cream-beige・Inter・serif italic・eyebrow・pill・01/02/03 までしか名指ししていない。`references/web-ui.md` に足した 4 類型 (near-black + acid green / vermilion の単色アクセント、terracotta `#D97757`、broadsheet 調、テンプレ小道具 = `A · B · C` 連結・末尾 `→`・小ラベルだけ monospace) が常に読まれる checklist に無い。grep 済: SKILL.md に該当語なし | anthropics/skills `41bbe19` の `skills/frontend-design/SKILL.md` calibration 節 |
+| 未対応 | FYI | skill | Anthropic 公式 frontend-design skill が 2026-09-03 に改訂 (5 類型の既定ルック回避、見出しの一語強調・ALL CAPS ラベル禁止、行長 80 字未満、plan → review の 2 パス)。併用環境では生成時の振る舞いが変わる | anthropics/skills `41bbe19` (June 版 `2235be7` との差分) |
+| 未対応 | FYI | 運用 | 画像内の日本語テキスト崩れは GPT Image 2 以降で弱まった (常用漢字の短い語句は読める)。短い見出しが正しくても実写・人手の証拠にならない。小さい文字・長文は今も崩れ、OpenAI 公式も Limitations に文字配置を挙げるので、処方「画像に日本語を焼き込まない」は据え置き | developers.openai.com image-generation guide Limitations 節、aifromjapan.com の実地検証 |
+
+### skills (anthropics/skills) 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | skill | 並列 fan-out の指示に入れる 4 点: (1) 起動は条件付きで書き "always" にしない (2) 子 agent に日付を渡す (3) 1 agent の失敗で全体を落とさず「未カバー」として列挙 (4) miss が高くつく review は全 item を独立 second look に回す。全 agent に届くべき規則は "state this to every agent word for word" と書く。grep 済: `claude-harness-refs-update` 手順4 は (2) を持つが (3) の失敗時の扱いが無い | skills: `dbd4588`、`skills/claude-api/shared/managed-agents-multiagent.md` § Dynamic workflows、`shared/managed-agents-quickstarts/bug-hunter.md` |
+| 未対応 | FYI | CLAUDE.md / skill / subagent | 出力や tool input に `reasoning` / `thinking` / `trace` field を要求する指示が Fable 5/5.1・Opus 5/5.5・Sonnet 5.5 で refusal を招きうる。thinking block を読むか「答えの短い説明」を求める形に書き換える。grep 済: skills/・claude-md/・`~/.claude/agents/`・`~/.claude/CLAUDE.md` に該当なし = **当たらない** | skills: `9d63080`、`skills/claude-api/shared/prompt-audit.md` Group 1 |
+| 未対応 | FYI | subagent | 独立判定のはずの複数 agent が共有ファイルで互いの結果を見られる構成は独立性が崩れる。作業フォルダを分け、証明役には claim だけ渡す。この repo の fan-out (再蒸留) は 1 agent 1 出力ファイルで判定の独立性を要しないので当たらない | 同上 2 ファイル |
+| 未対応 | FYI | MCP | Managed Agents の既定推奨は agent toolset `auto` 明示 + `web_fetch`/`web_search` 明示 off (bare toolset では 8 tool 全有効)、`mcp_toolset` は `always_ask` 既定のまま。Claude Code の settings とは直接対応しないが MCP 承認を緩めるときの判断材料 | skills: `dbd4588`、`shared/managed-agents-tools.md` |
+| 未対応 | FYI | 運用 | セットアップ手順では check で捕まる失敗に本番 run を使わない: 着手前に read-only の前提確認、user に用意させるものは 1 ターンで列挙、token は対象 host に who-am-I で検証、seed は読み戻す | skills: `dbd4588`、`shared/managed-agents-onboarding-from-url.md` |
+
+### awesome-harness-engineering 再蒸留から
+
+原典は README 注記のみ。リンク先の論文・記事本体は未読。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | CLAUDE.md / hook | 安全上重要な制約を compaction されうる context (CLAUDE.md の散文・会話中の指示) だけに置くと、compaction 後に違反率が 0% → 30% (モデルにより 59%) に上がり、Constraint Pinning で 0% に戻る。禁止事項は permissions / hooks のように compaction の外で効く仕組みに寄せる。grep 済: グローバル CLAUDE.md の禁止事項のうち commit 規約は PreToolUse hook で一部機械化済み、他は散文のみ | ahe: `f106c46` (arXiv 2606.22528)、`README.md` Context Delivery & Compaction |
+| 未対応 | RECOMMENDED | 運用 | 積み上げた指示はモデル能力への賭けで古くなる。Anthropic は Opus 5 で Claude Code の system prompt を約 80% 削り eval 退行なし。モデル更新ごとに指示を剥がし、繰り返す失敗を直す行だけ足し戻す棚卸しを運用に組む。grep 済: CLAUDE.md・claude-md/ にモデル更新時の棚卸し規定は無い | ahe: `14aa095`、`README.md` Context Delivery & Compaction |
+| 未対応 | FYI | 運用 | Pi / OpenClaw / Claude Code / Letta と Arize 自社 agent が独立に同じ context 管理機構に収束: read 上限 + pagination、tool call 境界での閾値 compaction、巨大結果の disk 退避、subagent の context 分離。自作ハーネス点検の基準線 | ahe: `2bcb329` |
+| 未対応 | FYI | 運用 | 自律的なハーネス生成・進化は code / deep-research 系で人手ハーネスに大きく劣り、改善の未知タスクへの転移も部分的。自己改善型 meta-harness 導入の判断材料 | ahe: `3452ab7` (arXiv 2609.01437) |
+
+### claude-code-best-practice / awesome-design-md 再蒸留から
+
+claude-cookbooks (`9c1e493`、self-hosted sandbox の claude-quickstarts への移動のみ) は候補なし。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | skill | `plugin-authoring` が bundled skill に追加 (pane・band・status line・toast・slash command・hook の mod 作成/修正)。本セッションの skill 一覧で実在を確認。原典内では skills 側 COMPLETE / commands 側 INVALID と判定が割れ、公式 docs の bundled 一覧にも未掲載。この repo と環境側 skills に同名・同用途なし (grep 済) | ccbp: `d9f3c8b`, `b8d79b6`、`best-practice/claude-skills.md` row 25 |
+| 未対応 | FYI | subagent | subagent frontmatter の `autoCompactWindow` (v2.1.296、主会話より早く compact) は CHANGELOG のみが根拠で 2 run 連続 ON HOLD。公式 frontmatter 表に載るまで agent 定義に書かない | ccbp: `8d65977`, `5913991`、`changelog/best-practice/claude-subagents/changelog.md` 10-12・10-13 |
+| 未対応 | FYI | skill | awesome-design-md の DESIGN.md は 10 章型と 8 章型 (Responsive Behavior / Iteration Guide 章なし、34 件) の 2 型。8 章型のレスポンシブ方針は Layout 節の "Responsive Strategy"。grep 済: `ui-design` 等に両章を前提にした記述なし = **当たらない** | awesome-design-md: `c7c1bad` |
+
+---
 ## 2026-10-06
 
 ### skills (anthropics/skills) 再蒸留から

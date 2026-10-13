@@ -1,7 +1,7 @@
 ---
 source: https://github.com/ai-boost/awesome-harness-engineering
-distilled_commit: cc06822327ad85d632a3e0cc76b71241cacab993
-distilled_at: 2026-10-06
+distilled_commit: 2bcb329ea555923e9111c53de1c12f71dff7699d
+distilled_at: 2026-10-13
 ---
 
 # awesome-harness-engineering 蒸留版
@@ -21,9 +21,9 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 
 ## まず押さえる
 
-1. **リポジトリの正体**: 実体は `README.md` (672 行の注釈付きリンク集) + `templates/` の 4 テンプレート + `verify_urls.py` (URL 到達性検証スクリプト)。それ以外の情報はすべて外部リンク。本文を読みたいものはローカルには無く、URL 先を見る必要がある。
+1. **リポジトリの正体**: 実体は `README.md` (680 行の注釈付きリンク集) + `templates/` の 4 テンプレート + `verify_urls.py` (URL 到達性検証スクリプト)。それ以外の情報はすべて外部リンク。本文を読みたいものはローカルには無く、URL 先を見る必要がある。
 2. **定義** (`README.md` 冒頭): "Harness engineering is the discipline of designing the scaffolding — context delivery, tool interfaces, planning artifacts, verification loops, memory systems, and sandboxes — that surrounds an AI agent and determines whether it succeeds or fails on real tasks"。焦点はモデルではなくハーネス。
-3. **中心原則**: "Every component here exists because the model can't do it alone — and the best harnesses are designed knowing those components will become unnecessary as models improve"。`templates/HARNESS_CHECKLIST.md` の「When this harness component should be removed」表 (Component / Exists because / Can be removed when) がこの原則を運用に落としている。Foundations の Marmelab "The State Of AI Harness Engineering 2026" (2026 年 9 月) も、統制に expiry condition を持たせてモデル向上に合わせハーネスを graceful に腐らせることを推奨している (README の注記ベース、記事本文は未検証)。
+3. **中心原則**: "Every component here exists because the model can't do it alone — and the best harnesses are designed knowing those components will become unnecessary as models improve"。`templates/HARNESS_CHECKLIST.md` の「When this harness component should be removed」表 (Component / Exists because / Can be removed when) がこの原則を運用に落としている。Foundations の Marmelab "The State Of AI Harness Engineering 2026" (2026 年 9 月) も、統制に expiry condition を持たせてモデル向上に合わせハーネスを graceful に腐らせることを推奨している (README の注記ベース、記事本文は未検証)。`Context Delivery & Compaction` の Boris Cherny の YC Startup School 講演 (2026 年 7 月) はこれを実測で裏づける: Opus 5 出荷時に Claude Code の system prompt の約 80% を、モデルがもう持たない挙動への補正だったとして削除し、eval の退行は無かった。手法は「prompt を全部剥がし、繰り返す失敗を直す行だけ足し戻す」をモデルのリリースごとに繰り返す ablation で、蓄積した指示は「モデル能力に対する賭け」であり古びる (harness rot) という主張 (README の注記ベース、講演本体は未検証)。
 4. **分類原則** (`AGENTS.md`): セクションは vendor 別ではなく「解決する問題」別に編成する。各エントリは `- [Title](URL) — 1–2 sentence note` 形式で、note は「なぜ読む価値があるか」を opinionated に書くのが規約。
 5. **`templates/AGENTS.md`**: プロジェクトレベルのエージェント指示テンプレート。要点は tool permissions を Allowed / Restricted (ask before proceeding) / Not allowed の 3 段で明示することと、タスク完了前の Verification gates (tests / linter / 変更範囲) をチェックリスト化すること。"agents perform better with clear boundaries than vague restrictions" とコメントで明言。
 6. **`templates/PLAN.md` + `templates/IMPLEMENT.md`**: 長時間タスク用のペア artifact。PLAN.md は milestone ごとに `verify: <command>` を付け scope boundaries (in/out) を書く。IMPLEMENT.md は append-only の実装ログで、Deviations summary (Deviation / Reason / Plan updated?) と Open questions を追跡。OpenAI の "Run Long-Horizon Tasks with Codex" が示す Plan.md/Implement.md パターンのテンプレート化。
@@ -35,7 +35,8 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 12. **自然言語ルールは guardrail ではない**: arXiv "When `Do Not` Is Not Deny: Security Rules in CLAUDE.md vs Built-In Controls" (README `Permissions & Authorization`, https://arxiv.org/abs/2608.23550) は公開 `CLAUDE.md` 481 件を分析し、自然言語のセキュリティルールのうち対応する built-in control に裏打ちされているのは約 4% だけと報告。「documented intent と enforced permission の乖離」を数値で示す資料で、CLAUDE.md に「〜するな」と書くだけの禁止事項は決定論的な強制 (permissions / hooks) に写像しない限り guardrail にならない、という主張 (README の注記ベース、論文本文は未検証)。
 13. **ユーザーが事前に書く permission policy は per-action 承認より弱い**: arXiv "Do User-Authored Permission Policies Improve Protection Against AI Agent Overreach?" (README `Permissions & Authorization`, https://arxiv.org/abs/2608.27443) は非技術者 113 名の user study (2026 年 8 月) で、per-action の HITL 承認・自動モデルレビュー・ユーザー自作の allow/ask/never ルールを比較。事前に書いたポリシーは per-action 承認より overreach の阻止率が約 20 ポイント**低かった**。原因はユーザーが大半のルールを "ask" に設定し、結局その場で承認してしまうこと — 静的な事前コミットが実行時プロンプトに退行し、保護は増えない。項目 12 と合わせると「ルールを書く」層 (CLAUDE.md / settings の allow-ask-deny) だけでは不十分で、permission の UX 設計が実効性を決めるという主張 (README の注記ベース、論文本文は未検証)。
 14. **subagent に渡す context 量の判断規則**: LangChain "Organizing Context in a Multi-Agent Harness" (README `Context Delivery & Compaction`, https://www.langchain.com/blog/organizing-context-in-a-multi-agent-harness, 2026 年 9 月) は subagent の context mode を 2 つに分ける。`isolated` は新規 context で開始し、context isolation を firewall として使う。`forked` は supervisor の会話全体を継承し、末尾の tool call を除去・task description を user message として書き直し・prompt caching を保つ。判断規則は **進行中の調査を継続する worker は fork、独立に判断すべき verifier は isolate** (README の注記ベース、記事本文は未検証)。
-15. **鮮度と信頼性の注意**: エントリ数が多く (README 全体で `- [Title](URL)` 形式の外部リンクエントリが 490。先頭の目次アンカー 9 行は別。旧版の「482」は目次アンカー 8 行を含んだ数で、外部リンクだけなら 474 だった)、2026 年の新しめの記事・arXiv・小規模リポジトリが大量に混在する。本蒸留は README の注記に基づき、外部 URL の生死や記載内容の真偽は未検証。重要判断では URL 先の一次資料を直接確認すること。リンク検証は原典の `verify_urls.py` で行う建て付け。
+15. **compaction は統制の面でもある**: arXiv "Governance Decay" (README `Context Delivery & Compaction`, https://arxiv.org/abs/2606.22528, 2026 年 6 月) の ConstraintRot ベンチ (1,323 episode, 7 モデル系列) では、ポリシーを全文 context に置くと違反率 0% だが compaction 後は 30% (モデルによって 59%) に上がり、summarizer に正当なポリシーを落とさせる Compaction-Eviction Attack は評価した全モデルに通った。対策の Constraint Pinning (統制制約を lossy な compaction から隔離する、訓練不要) で 0% に戻る。設計規則は「安全上重要な指示は compaction されうる context 領域の外に置く」 (README の注記ベース、論文本文は未検証)。
+16. **鮮度と信頼性の注意**: エントリ数が多く (README 全体で `- [Title](URL)` 形式の外部リンクエントリが 498。先頭の目次アンカー 9 行は別)、2026 年の新しめの記事・arXiv・小規模リポジトリが大量に混在する。本蒸留は README の注記に基づき、外部 URL の生死や記載内容の真偽は未検証。重要判断では URL 先の一次資料を直接確認すること。リンク検証は原典の `verify_urls.py` で行う建て付け。
 
 ## 索引
 
@@ -43,7 +44,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 
 | トピック | 場所 (原典相対パス) | 内容 (一行) |
 |---|---|---|
-| リンク集本体 | `README.md` | 全カテゴリの注釈付き外部リンク集 (672 行)。この蒸留の元 |
+| リンク集本体 | `README.md` | 全カテゴリの注釈付き外部リンク集 (680 行)。この蒸留の元 |
 | repo 運用規約 | `AGENTS.md` (`CLAUDE.md` は symlink) | この repo 自体への agent 指示: entry 形式、問題別分類の原則、収載/除外基準 |
 | 収載基準 | `CONTRIBUTING.md` | 収載 3 条件 (specific problem / worth time / vendor-agnostic) と除外基準 |
 | AGENTS.md テンプレ | `templates/AGENTS.md` | プロジェクト用 agent 指示: 構成・規約・permissions 3 段・verification gates |
@@ -58,23 +59,23 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 |---|---|
 | Foundations | harness engineering を定義する canonical essays (OpenAI / Anthropic / Google / Fowler / arXiv 調査) |
 | Design Primitives | 以下 12 サブカテゴリ。「問題別」分類の本体 |
-| — Agent Loop | ReAct 以来のループ構造、hooks、middleware、compaction 段階、loop 制御の研究と実装 |
+| — Agent Loop | ReAct 以来のループ構造、hooks、middleware、compaction 段階、loop 制御の研究と実装、将来の tool call を先行実行して検証後に順序どおり commit する投機実行 |
 | — Planning & Task Decomposition | 計画 artifact (Plan.md / spec→plan→tasks 等)、planner/executor 分離、multi-agent topology 選択 |
-| — Context Delivery & Compaction | context engineering、圧縮/compaction、prompt caching、filesystem paradigm、コード検索 MCP、agent 可読 wiki 生成、log 検索型の programmatic memory、コード関係グラフによる navigation 型の context 供給、DWH/BI/wiki から承認済みメトリクスの semantic layer を組んで MCP で配る系、subagent への context 継承モード (isolated / forked) の設計、検証や証拠を省かずに token 流量を減らす opt-in の効率化拡張 |
+| — Context Delivery & Compaction | context engineering、圧縮/compaction、prompt caching、filesystem paradigm、コード検索 MCP、agent 可読 wiki 生成、log 検索型の programmatic memory、コード関係グラフによる navigation 型の context 供給、DWH/BI/wiki から承認済みメトリクスの semantic layer を組んで MCP で配る系、subagent への context 継承モード (isolated / forked) の設計、検証や証拠を省かずに token 流量を減らす opt-in の効率化拡張、モデル更新ごとに system prompt を剥がして足し戻す ablation (harness rot 対策)、複数ハーネスの context 管理機構の比較 teardown |
 | — Tool Design | tool の命名・schema・エラー設計、structured output、tool annotation |
 | — Skills & MCP | MCP 仕様・公式サーバ・skills フレームワーク・agent 間プロトコル (A2A 等)、ハーネス横断の plugin 配布、外部 SaaS 接続の auth gateway、skill 自体を eval で検証する系、skill の作成/評価/リリースを 1 つの lifecycle にまとめる系、multimodal capability の plugin 化、agent loop (propose → run → score → keep/revert の反復) 自体を skill として配る系 |
 | — Permissions & Authorization | 構造化 permission、excessive agency、agent の認証認可標準、実行前 firewall と監査ログ、自然言語ルールと built-in control の乖離を測る研究、ユーザー自作 permission policy の実効性を測る user study、credential を workspace 側で管理し呼び出し元の identity で実行する on-behalf-of 認可 |
-| — Memory & State | クロスセッション記憶 (Letta/mem0/Zep 系)、graph memory・記憶ガバナンスの研究、既存セッションログを記憶に転用する系、ハーネス横断のセッション記録を単一フォーマットへ正規化する系、記憶の鮮度・失効 (symbol 接地 + drift 検出、証拠バージョンによる stale 判定) を扱う系 |
+| — Memory & State | クロスセッション記憶 (Letta/mem0/Zep 系)、graph memory・記憶ガバナンスの研究、既存セッションログを記憶に転用する系、ハーネス横断のセッション記録を単一フォーマットへ正規化する系、記憶の鮮度・失効 (symbol 接地 + drift 検出、証拠バージョンによる stale 判定) を扱う系、compaction による安全制約の消失 (Governance Decay) |
 | — Task Runners & Orchestration | multi-agent フレームワーク (LangGraph/ADK/AutoGen/CrewAI 等)、並列実行基盤 (worktree 分離)、handoff 用の artifact 参照プリミティブ、deploy 先を差し替えられる TS ハーネス、JVM ネイティブの分散 agent 基盤、既存ハーネスの上に載る provider 中立の control plane、複数 agent runtime を単一 API 規約の裏で交換可能にする router、OSS ハーネスを自社アプリの基盤として組み込む分業論、各 agent をコンテナ・worktree・credential・network policy ごと隔離して並走させる「agent の hypervisor」 |
 | — Verification & CI Integration | 検証をループに組み込む方法、eval の CI 統合、regression testing、agent が 1 回で自己修正できるエラー文を返す agent-first linter |
 | — Observability & Tracing | trace 基盤 (Langfuse/Phoenix 等)、OTel GenAI 規約、token/コストの作業単位への帰属 |
 | — Debugging & Developer Experience | session replay、agent 用デバッガ、fault taxonomy 研究、MCP wire の proxy trace |
 | — Human-in-the-Loop | interrupt/approval パターン、HITL プロトコル、自律度の計測 |
-| Reference Implementations | 実リポジトリ研究用。4 サブカテゴリ: Tutorials & Educational / Generators & Meta-Harnesses (自己改善ハーネス。immutable event log を書き換え不能な土台に据える系、ワークフロー一式を配布物として梱包する系、宣言的に production agent を生成する zero-code 系、ハーネス改変を benchmark で探索する研究基盤、失敗軌跡からハーネス編集を RL で学習させる研究、経験バンクから case ごとにハーネス設定を検索適応させる研究、ハーネスの効果を SFT で重みへ蒸留する研究を含む) / Demo Harnesses (OpenHands, SWE-agent、Codex CLI、long-horizon computer-use 系、prefix-cache 経済性や小型モデル前提の系、plugin 合成を第一軸にした系、realtime voice で既存 CLI agent を包む系、1 つの agent core を複数の client surface に出す系 (ACP で IDE に載せる系を含む)、agent ハーネスと eval ハーネスを同一エンジンにする系、goal 駆動ループで検証結果を次の修復の入力にする系、context builder が省いた・切り詰めた・compact した内容の記録を model 入力と一緒に返す系) / Adjacent Collections |
+| Reference Implementations | 実リポジトリ研究用。4 サブカテゴリ: Tutorials & Educational / Generators & Meta-Harnesses (自己改善ハーネス。immutable event log を書き換え不能な土台に据える系、ワークフロー一式を配布物として梱包する系、宣言的に production agent を生成する zero-code 系、ハーネス改変を benchmark で探索する研究基盤、失敗軌跡からハーネス編集を RL で学習させる研究、経験バンクから case ごとにハーネス設定を検索適応させる研究、ハーネスの効果を SFT で重みへ蒸留する研究、制約ごとの verifier bank とハーネス方針を同時学習する研究、改善状態を Evidence/Hypothesis/Intervention/Outcome のグラフに外出しする研究、自律的なハーネス生成・進化の限界を測るベンチマークを含む) / Demo Harnesses (OpenHands, SWE-agent、Codex CLI、long-horizon computer-use 系、prefix-cache 経済性や小型モデル前提の系、plugin 合成を第一軸にした系、realtime voice で既存 CLI agent を包む系、1 つの agent core を複数の client surface に出す系 (ACP で IDE に載せる系を含む)、agent ハーネスと eval ハーネスを同一エンジンにする系、goal 駆動ループで検証結果を次の修復の入力にする系、context builder が省いた・切り詰めた・compact した内容の記録を model 入力と一緒に返す系) / Adjacent Collections |
 | Security, Sandbox & Permissions | sandbox 実装 (E2B/Daytona/microVM 系、V8 isolate 系、K8s Sandbox CRD、使い捨て DB sandbox)、eBPF による tool call 強制、prompt injection 防御、封じ込め・ガバナンス、ベンダー公式の zero-trust agent 設計ガイド、セキュリティ業務そのものを対象にした公開ハーネス (攻撃側の meta-harness を含む) |
 | Evals & Verification | eval フレームワークとベンチマーク (SWE-bench, Terminal-Bench, tau-bench, Inspect AI 等)、実サービス複製環境での long-horizon タスク採点 |
 | Templates | 上記 `templates/` 4 ファイルへの索引 (ローカル実体はここだけ) |
-| Production Infrastructure & Operations | 本番運用: managed 基盤、コスト最適化、スケーリング、self-healing、OSS のフルハーネスランタイム (2026-09 に README 冒頭の目次へ追加され、目次アンカーは 9 行になった) |
+| Production Infrastructure & Operations | 本番運用: managed 基盤、コスト最適化、スケーリング、self-healing、OSS のフルハーネスランタイム、control plane 固定で実行 sandbox を差し替える managed agent API (2026-09 に README 冒頭の目次へ追加され、目次アンカーは 9 行になった) |
 | Related Awesome Lists | 隣接領域の curated list (context engineering, Claude Code, MCP servers, LLM agent 時代の graph engineering サーベイ等) |
 
 ### カテゴリ別の要資料 (外部 URL)
@@ -96,6 +97,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Agent Loop | https://arxiv.org/abs/2210.03629 | ReAct 論文。Thought/Action/Observation ループの原典 |
 | Agent Loop | https://openai.com/index/unrolling-the-codex-agent-loop/ | Codex のループ 1 周 (observe/plan/act/verify) の分解 |
 | Agent Loop | https://blog.langchain.com/improving-deep-agents-with-harness-engineering/ | ハーネス変更のみで Terminal Bench rank 30→top5 の実証 |
+| Agent Loop | https://arxiv.org/abs/2609.38201 | TomasuLLM (2026 年 9 月)。CPU の投機実行を agent loop に移植: 将来の tool call を予測して copy-on-write sandbox で先行実行し、検証後に元の軌跡順で commit する。長い compile / test 待ちの "observation stall" を狙い SWE-bench Verified 1.31x・Terminal-Bench 2.0 1.35x 高速化、監査した 4,010 commit で false accept ゼロ。loop 並列化は検証と commit 順序を**モデルでなくハーネスが強制する**ときに安全、という主張 (README の注記ベース、論文本文は未検証) |
 | Agent Loop | https://github.com/cobusgreyling/loop-engineering | agent loop の 7 production pattern + readiness/state/cost/drift を扱う CLI 群。one-off prompting から durable/observable な loop への実践資料 |
 | Planning | https://developers.openai.com/blog/run-long-horizon-tasks-with-codex/ | Plan.md / Implement.md を再利用可能なハーネス artifact にする実践 |
 | Planning | https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents | コンテキストウィンドウをまたぐ進捗維持: initializer→coder の引き継ぎ設計 |
@@ -109,6 +111,8 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Context | https://github.com/NanoNets/Graft | repo の平易な英語による system 説明とコード関係をローカルの再生成可能グラフに持ち、MCP + statusline hook で Claude Code / Cursor / Codex / Gemini の中に同居させ、セッションごとの repo 再発見をやめさせる。context 供給を圧縮問題ではなく **navigation 問題**として扱う側 (SWE-bench Verified と効率のベンチを公開、中身は未検証) |
 | Context | https://www.langchain.com/blog/organizing-context-in-a-multi-agent-harness | subagent の context mode を `isolated` (新規 context = firewall) と `forked` (supervisor の会話全体を継承、末尾 tool call を除去し task description を user message 化、prompt caching を維持) に分け、「worker は fork / verifier は isolate」の判断規則を示す |
 | Context | https://github.com/NVlabs/SoL-Pi | NVIDIA の Pi ハーネス向け拡張 (2026 年 9 月)。auto-research ループで 152 案を試して残った 4 機構: Action Fusion (編集と後続検証を同じ tool call で実行)、ObservationPack (繰り返す大きな tool 結果を安定 handle にし、正確な paged recall を可能にする)、Evidence-Preserving Reducer (保持する引用がすべてアーカイブ原文と一致するときだけ長いログを receipt に圧縮)、Online Context Compact (完了した plan step を経済性チェック付きで compaction 候補にする)。全機構 opt-in で、検証を飛ばさず証拠を隠さずに token 流量を減らすという規律が読みどころ (README の注記ベース、数値・中身は未検証) |
+| Context | https://www.ycombinator.com/library/UN-boris-cherny-building-claude-code | Boris Cherny (Claude Code 作者) の YC Startup School 講演 (2026 年 7 月)。Opus 5 で system prompt の約 80% を削除し eval 退行なし。「全部剥がして繰り返す失敗を直す行だけ足し戻す」をモデルのリリースごとに回す ablation が harness rot への答え (README の注記ベース、講演本体は未検証) |
+| Context | https://arize.com/blog/context-management-in-agent-harnesses/ | Arize の 2026 年 4 月の比較 teardown。Pi / OpenClaw / Claude Code / Letta の context 管理を並べ、read の hard cap + pagination、token 閾値で起動し tool call 境界を壊さない LLM compaction、巨大な tool 結果の disk 退避、subagent の context 分離に 4 ハーネス + Arize 自社 agent が独立に収斂したと示す。どの機構が実験段階でなく標準になりつつあるかの根拠付きカタログ (README の注記ベース、記事本文は未検証) |
 | Tool Design | https://www.anthropic.com/engineering/writing-effective-tools-for-agents | tool の命名・schema・エラーメッセージ・返り値規約の公式ガイド |
 | Tool Design | https://platform.openai.com/docs/guides/function-calling | function calling の事実上の業界標準 JSON Schema 規約 |
 | Skills & MCP | https://modelcontextprotocol.io/introduction | MCP 公式イントロダクション |
@@ -134,6 +138,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Memory | https://github.com/mex-memory/mex | agent が学んだ知識を repo ローカルの symbol 接地 wiki として持ち、コード変更で失効した記憶を drift detection で検出する。「事実の保存」ではなく**記憶の鮮度・失効**をハーネス側の関心事に引き上げる系 |
 | Memory | https://www.langchain.com/blog/self-correcting-memory-openwiki | LangChain の 2026 年 8 月の設計記事。agent が書く各 claim を**バージョン付きのコード証拠**と一緒に保存し、証拠が変わったら claim を stale として旗立てする。再検証されるまで「不確か」を持続させ、定期再生成の副作用ではなく stale を一級の検査可能なハーネス状態にする。記憶の無効化の最も具体的な公開機構 (README の注記ベース、記事本文は未検証) |
 | Memory | https://github.com/letta-ai/trajectory | Letta の 2026 年 7 月のライブラリ。Claude Code / Codex / Cursor / OpenCode / Pi / Gemini CLI / OpenHands 等 15+ ハーネスのネイティブ session transcript を、検証済みの単一レコード形式へ正規化する。observability dashboard ではなく **agent が消費する側** (記憶形成・検索・訓練) を明示的な用途に置き、セッションログを cross-harness の可搬な基盤に変える (README の注記ベース、中身は未検証) |
+| Memory | https://arxiv.org/abs/2606.22528 | Governance Decay (2026 年 6 月)。ConstraintRot ベンチで compaction 後に制約違反率が 0% → 30% (最大 59%)、summarizer にポリシーを落とさせる Compaction-Eviction Attack が全モデルに通る。統制制約を compaction から隔離する Constraint Pinning で 0% に戻る |
 | Memory | https://github.com/vshulcz/deja-vu | 既にディスクにあるコーディングエージェントのセッションを索引して MCP で返すだけの zero-dependency binary。LLM 呼び出し・embedding・API key 無しで memory の cold-start を埋める |
 | Orchestration | https://github.com/langchain-ai/langgraph | graph ベース state machine。ループ制御・checkpoint の具体的実装 |
 | Orchestration | https://github.com/openai/openai-agents-python | OpenAI Agents SDK: handoffs と guardrails 中心の軽量 multi-agent |
@@ -185,6 +190,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Reference impl | https://arxiv.org/abs/2608.02276 | `Generators & Meta-Harnesses` の Harness-R1 (2026 年 8 月)。ハーネス編集を固定の editor agent でなく**学習される能力**にする: 9B の harness engineer を online RL で post-train し、target agent の失敗バッチを検証済みの実行可能パッチに変え、凍結した target の再実行結果を報酬にして engineer だけを更新。vanilla Qwen3.5-9B を WebShop / ALFWorld / DBBench 平均 44.3% → 53.6% に上げ、target を fine-tune した後も効果が残る (README の注記ベース、論文本文は未検証) |
 | Reference impl | https://arxiv.org/abs/2607.14159 | `Generators & Meta-Harnesses` の MemoHarness (2026 年 7 月)。ハーネスを推論の流れに沿った 6 制御次元 (context assembly / tool interaction / generation control / orchestration / memory management / output processing) に分解し、case ごとの失敗診断と蒸留した全体パターンの 2 層経験バンクから検索して設定を case 単位で適応させる (test 時の label・feedback・探索ラウンド不要)。Terminal-Bench で Codex 超え (0.806 vs 0.722) を低コストで。6 次元分解は任意のハーネスの編集可能面を監査する分類として再利用できる。OSS 実装 https://github.com/HowieHwong/MemoHarness (README の注記ベース、論文本文は未検証) |
 | Reference impl | https://arxiv.org/abs/2609.24974 | `Generators & Meta-Harnesses` の Harness-Zero (2026 年 9 月, PKU / Google / HKUST)。進化させた reference harness に導かれた harnessing agent が、student 自身の軌跡を target ハーネスの action space で実行前に添削し SFT デモに変える。最小ハーネス下の蒸留モデルが最適化ハーネス付きの base モデルを上回り (44.3% vs 41.7%)、強いモデルの軌跡より student 自身の軌跡の添削のほうが転移する。ハーネスの知能を重みに置くか足場に置くかの境界条件を示す (README の注記ベース、論文本文は未検証) |
+| Reference impl | https://arxiv.org/abs/2609.01437 | `Generators & Meta-Harnesses` の HarnessDev (2026 年 9 月)。ハーネスそのものを評価対象にするベンチ: 最小の seed から creator LLM にハーネスを一から作らせ、下流 feedback で進化させ、能力と実行 token コストで採点 (4 ドメイン・5 ベンチ・2,207 instance)。生成ハーネスは code / deep-research で人手のハーネスに大きく劣り、writing / ML 実験では同等以上。進化の利得は不安定で未知タスクへの転移は部分的、実行モデル依存が大きい — 同セクションの肯定的結果への反証役で「evolution ≠ generalization」を数値化 (README の注記ベース、論文本文は未検証) |
 | Security/Sandbox | https://www.anthropic.com/engineering/how-we-contain-claude | Anthropic のプロダクト横断の封じ込め (containment) 設計 |
 | Security/Sandbox | https://openai.com/index/building-codex-windows-sandbox/ | Seatbelt/seccomp 相当の capability isolation が無い Windows で Codex を sandbox 化した OpenAI の一次資料。AppContainer / Windows Sandbox / MIC が不足した理由と、write-restricted token + network 抑止で作る elevated sandbox |
 | Security/Sandbox | https://developers.googleblog.com/build-zero-trust-ai-agents-with-googles-agent-development-kit/ | Google の 2026 年 8 月ガイド。ADK agent の prompt injection と本番状態改変への対策として、暗号署名付き write・gVisor sandbox・**LLM の context の外**に置く決定論的 semantic gateway を示す。OSS の顧客サポート agent が付属 |
@@ -202,6 +208,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 | Evals | https://github.com/sierra-research/tau-bench | user-tool-policy の三者相互作用を測るベンチマーク |
 | Evals | https://github.com/Accio-org/RealReplicaBench | Alibaba International 製。実オンラインサービスの高忠実 stateful 複製上で long-horizon agent を測る 107 タスク (CLI / browser / file / API・MCP)。毎回新しいコンテナで deterministic または LLM 補助の verifier が採点し、mock service・監査可能な trajectory・container metadata で再現性を契約化する |
 | Production | https://www.langchain.com/state-of-agent-engineering | LangChain の業界サーベイ (1,300+ 回答) |
+| Production | https://developers.openai.com/api/docs/guides/agents | OpenAI Agents API (2026 年 9 月 10 日 public beta)。`POST /v1/agents/sessions` 1 回で Codex ハーネス一式 (自動 compaction・復旧付き durable session・programmatic tool calling・HTTP 越し MCP・context 分離した並行 subagent への委譲) を使える。managed control plane は固定し、実行面を OpenAI hosted sandbox / 自社 VPC / partner sandbox (E2B, Daytona, Modal 等) から選ぶ — ハーネスの control plane と差し替え可能な execution plane の分離を first-party で示した例 (README の注記ベース、中身は未検証) |
 | Production | https://github.com/kvcache-ai/AgentENV | agent 環境を大規模に走らせる分散基盤 (Kimi K3 の agentic RL 訓練基盤)。50ms 未満の snapshot boot/resume・native fork・overlaybd ベースの image ロードで、数個ではなく数千の ephemeral sandbox が要るハーネスの基盤層 |
 | Production | https://github.com/getagentseal/codeburn | 31 のツール/エージェント横断で token 使用量とコストを model / project / task 別に追う local 完結ツール。Observability 行の `agentacct` と役割が重なるが対応ツールの幅が広い側 (agentacct は 3 ツールを作業ステップへ confidence 付きで帰属させる深さ側) |
 | Production | https://github.com/truefoundry/trueforge | TrueFoundry の OSS ハーネスランタイム。実行ループ・MCP tool・skills・sandbox・承認・context 管理・session state を一式持ち、chat UI / HTTP API / 埋め込み UI SDK で露出する。ループを自作せずに本番ハーネスを立てる参照実装 (同セクションの解説記事 "What Is an Agent Harness?" と対) |
@@ -210,8 +217,8 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 
 ## 蒸留の範囲外
 
-- **各エントリの詳細な注記**: README の各エントリには 1–2 文の opinionated note が付いており、本蒸留はその大半 (外部リンクエントリ 490 のうち索引に載せたのは 124 件) を割愛した。特定の問題領域を深掘りするときは `README.md` の該当セクションを直接 Grep/Read する (セクション見出しは `## ` / `### `、エントリは `- [Title](URL) — note` 形式で機械的に抽出できる)。
-- **Generators & Meta-Harnesses と研究系エントリの個別評価**: 自己改善ハーネス (meta-harness / harness-evolver 系) や 2026 年の arXiv 論文群は数が多く玉石混交のため、代表 8 件 (`ruvnet/metaharness`、`exoharness/exo`、`affaan-m/ECC`、`ModelEngine-Group/nexent`、`SalesforceAIResearch/Beagle`、Harness-R1 (arXiv 2608.02276)、MemoHarness (arXiv 2607.14159)、Harness-Zero (arXiv 2609.24974)) 以外は個別に挙げていない。関心があれば `README.md` の `### Generators & Meta-Harnesses` と各カテゴリ末尾の arXiv エントリを見る。
+- **各エントリの詳細な注記**: README の各エントリには 1–2 文の opinionated note が付いており、本蒸留はその大半 (外部リンクエントリ 498 のうち索引に載せたのは 130 件) を割愛した。特定の問題領域を深掘りするときは `README.md` の該当セクションを直接 Grep/Read する (セクション見出しは `## ` / `### `、エントリは `- [Title](URL) — note` 形式で機械的に抽出できる)。
+- **Generators & Meta-Harnesses と研究系エントリの個別評価**: 自己改善ハーネス (meta-harness / harness-evolver 系) や 2026 年の arXiv 論文群は数が多く玉石混交のため、代表 9 件 (`ruvnet/metaharness`、`exoharness/exo`、`affaan-m/ECC`、`ModelEngine-Group/nexent`、`SalesforceAIResearch/Beagle`、Harness-R1 (arXiv 2608.02276)、MemoHarness (arXiv 2607.14159)、Harness-Zero (arXiv 2609.24974)、HarnessDev (arXiv 2609.01437)) 以外は個別に挙げていない (SBCO (arXiv 2608.10157) や Causal Improvement Graph (arXiv 2610.05039) 等もここで見る)。関心があれば `README.md` の `### Generators & Meta-Harnesses` と各カテゴリ末尾の arXiv エントリを見る。
 - **templates/ の全文**: 各テンプレートは短い (40–80 行) ので、使うときは原典の `templates/*.md` をそのままコピーして使う。コメントが本体なので、`AGENTS.md` (repo 運用規約) の指示どおりコメント構造を保つ。
 - **音声・realtime な対話面**: 既存 CLI agent を realtime voice shell で包む系 (`Demo Harnesses` の `QwenAudio/qwen-audio-agent`、`Pipecat` 等) は、ハーネス設計の判断材料ではなく対話面の実装なので索引に載せていない。必要なら該当セクションを直接見る。
 - **URL の生死確認**: 本蒸留では実施していない。必要なら原典で `python verify_urls.py` を実行する (要 `aiohttp`)。

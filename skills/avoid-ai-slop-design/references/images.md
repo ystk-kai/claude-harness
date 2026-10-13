@@ -1,6 +1,6 @@
 ---
 tracking: review
-reviewed_at: 2026-07-12
+reviewed_at: 2026-10-13
 review_interval_days: 90
 ---
 # AI 画像・イラストの tell — 陳腐化と持続の区別つき
@@ -9,7 +9,7 @@ review_interval_days: 90
 
 ## 判定の優先順位 (メタ助言)
 
-1. **provenance を先に見る** — C2PA / SynthID 等の来歴情報を目視より先に確認する
+1. **provenance を先に見る** — C2PA / SynthID 等の来歴情報を目視より先に確認する。2026-05 に OpenAI も C2PA 準拠と SynthID 埋め込みを表明した (検証ツールは自社生成物のみ対象)。C2PA はメタデータなので剥がせる — 来歴情報の不在は実写の証拠にならない
 2. 目視 tell は単独で断定せず、複数の合致で判断する
 3. 「完璧な手」「正しい綴りの看板」は実写の証拠にならない (中立情報として扱う)
 
@@ -17,9 +17,9 @@ review_interval_days: 90
 
 | tell | 持続性 | 内容 |
 |---|---|---|
-| 解剖学的破綻 (手指・歯・目・四肢) | **陳腐化** | 指の過不足・融合、重なる歯、丸くない瞳孔、人物間の身体比率差。2025-26 モデルでほぼ解消 (手の成功率は世代間で約 40%→85-90% との検証)。CHI 2025 の artifact 分類の一項目 |
+| 解剖学的破綻 (手指・歯・目・四肢) | **陳腐化** | 指の過不足・融合、重なる歯、丸くない瞳孔、人物間の身体比率差。2025-26 モデルでほぼ解消 (2026 年の上位モデルは手を破綻なく描き、画像内テキストも 90% 台半ばの精度、と felloai 2026-09 版)。CHI 2025 の artifact 分類の一項目 |
 | 英語テキストの崩れ | **陳腐化** | 最新モデルはほぼ正しく綴る。ただし長い語句の一貫性には限界が残る (EMNLP 2025 STRICT) |
-| **日本語 (漢字) の崩れ** | **当面持続** | 学習データ不足と画数の多さによる構造的問題。「遠目では日本語、近づくとデタラメ」は日本語圏で現役の tell |
+| **日本語 (漢字) の崩れ** | **弱まりつつ持続** | 学習データ不足と画数の多さによる構造的問題。GPT Image 2 (2026-04) 以降、常用漢字の短い語句 (目安 20 字未満) は読める水準になった。残るのは複合語の一部の画の誤り、希少な漢字、長文、ふりがな等の小さい文字 (潰れる)。OpenAI の公式ガイドも文字の正確な配置と鮮明さを依然として制約に挙げる。短い見出しが正しいことは実写・人手の証拠にならず、本文・注記・小さい文字で判定する |
 | waxy skin・過剰シネマティック | 部分的に陳腐化 | 毛穴のない glossy skin、日常シーンの映画ポスター調ライティング。スタイルを抑えた生成は人間の検知を回避できる (作為的に外せる) |
 | **光源・影・反射の物理破綻** | **持続** | 影の角度と光源の不一致、鏡・水面・眼鏡・目 (catchlight) の反射内容の矛盾。CVPR 2024 が生成モデルの projective geometry の系統的破綻を実証 |
 | **透視・奥行き・幾何の崩れ** | **持続** | 消失点に収束しない直線、行き止まりの階段、不可能な前後関係・縮尺 |
@@ -46,8 +46,19 @@ review_interval_days: 90
 - https://proceedings.neurips.cc/paper_files/paper/2023/hash/a3bf71c7c63f0c3bcb7ff67c67b1e7b1-Abstract-Datasets_and_Benchmarks.html (NeurIPS 2023 GenEval)
 - https://openaccess.thecvf.com/content/ICCV2025W/APAI/papers/Sharma_Explainable_AI-Generated_Image_Forensics_A_Low-Resolution_Perspective_with_Novel_Artifact_ICCVW_2025_paper.pdf (テクスチャ反復)
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC12827715/ (Patterns: 生成ループの motif 収束)
-- https://insight.kellogg.northwestern.edu/article/ai-photos-identification / https://felloai.com/how-to-tell-if-a-photo-is-ai-generated/ (provenance-first)
+- https://insight.kellogg.northwestern.edu/article/ai-photos-identification (目視 tell の 5 分類: 解剖・スタイル・機能・物理・社会文化。provenance には触れない)
+- https://felloai.com/how-to-tell-if-a-photo-is-ai-generated/ (provenance-first。2026-09 更新)
+- https://thenextweb.com/news/openai-c2pa-synthid-ai-image-detection-watermark (OpenAI の C2PA / SynthID 採用、2026-05)
 - https://roblaughter.medium.com/is-that-image-ai-here-are-14-telltale-signs-to-look-for-d40e5cff2d0a / https://apnews.com/article/one-tech-tip-spotting-deepfakes-ai-8f7403c7e5a738488d74cf2326382d8c
 - https://adobe.design/ideas/creative-direction-the-secret-to-great-ai-images (art direction)
 - https://en.wikipedia.org/wiki/Corporate_Memphis
-- 日本語 (漢字崩れ): https://www.theaiventure.com/ai-image-generation-text-garbled/ / https://zenn.dev/satofun/articles/8fa0283ccd4e74
+- 日本語 (漢字崩れ): https://www.theaiventure.com/ai-image-generation-text-garbled/ / https://zenn.dev/satofun/articles/8fa0283ccd4e74 / https://aifromjapan.com/chatgpt-images-2-0-japan-review/ (GPT Image 2 の実地検証、2026-07 更新) / https://developers.openai.com/api/docs/guides/image-generation (Limitations 節)
+
+## 棚卸しの当たり先
+
+期限が来たら、モデル世代で動くこの 4 点だけ再検証する。光源・透視・社会文化の tell は機構に根ざすので、反証研究が出ない限り据え置く。
+
+1. 日本語 (漢字) の崩れ — 主要モデル (GPT Image / Nano Banana / Seedream 等) の新世代で長文・小さい文字が通るか。OpenAI 公式ガイドの Limitations 節の文言
+2. 手・英語テキストの精度の数値 — felloai の更新版
+3. provenance の普及範囲 — C2PA / SynthID の採用社と検証ツールの対象範囲
+4. waxy skin・過剰シネマティック — 新世代で既定ルックが変わったか

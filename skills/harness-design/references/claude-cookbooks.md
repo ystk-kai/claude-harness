@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/claude-cookbooks
-distilled_commit: d7265d6ae994ccd8429db0594b000073b2f9ad43
-distilled_at: 2026-09-29
+distilled_commit: 9c1e493ddd2b82df399d2a61b9c806c539e18be6
+distilled_at: 2026-10-13
 ---
 
 # claude-cookbooks 蒸留版
@@ -140,7 +140,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 | フル装備の `.claude/` 実例 | `claude_agent_sdk/chief_of_staff_agent/.claude/` | `agents/*.md` (frontmatter に `name` / `description` / `tools`)、`commands/`、`hooks/*.py`、`output-styles/`、`settings.local.json` が一式揃った参照配置 |
 | 書き込み系の安全 hook | `claude_agent_sdk/03_The_site_reliability_agent.ipynb` | PreToolUse hook で書き込み操作 (プールサイズ範囲・設定の妥当性) を検証してから通す。read-only → read-write への拡張手順 |
 | MCP でのツール供給 | `claude_agent_sdk/02_The_observability_agent.ipynb` | git / GitHub MCP サーバでツールを外部化する。SRE 版は JSON-RPC サブプロセスの自作 MCP サーバ |
-| Managed Agents (ホスト実行) | `managed_agents/README.md` | ステートフルなホスト型ランタイム。`CMA_iterate_fix_failing_tests.ipynb` が API 形状の入口。このディレクトリは notebook 専用になり、実行可能アプリ (Slack / Linear / Sentry / road trip planner / MCP サーバ) は claude-quickstarts の `managed-agents/` へ移った (範囲外参照) |
+| Managed Agents (ホスト実行) | `managed_agents/README.md` | ステートフルなホスト型ランタイム。`CMA_iterate_fix_failing_tests.ipynb` が API 形状の入口。このディレクトリは notebook 専用になり、実行可能アプリ (Slack / Linear / Sentry / road trip planner / MCP サーバ / self-hosted sandbox 各種) は claude-quickstarts の `managed-agents/` へ移った (範囲外参照) |
 | ↳ 人間ゲート | `managed_agents/CMA_gate_human_in_the_loop.ipynb`, `managed_agents/CMA_operate_in_production.ipynb` | custom tool の `decide()` / `escalate()`、`requires_action` idle バウンス、長時間接続を張らずに HITL を回す `session.status_idled` webhook |
 | ↳ 異種スペシャリストチーム | `managed_agents/CMA_coordinate_specialist_team.ipynb`, `managed_agents/CMA_watch_subagents_live.ipynb` | `multiagent` coordinator 設定、ロール別の tool スコープを絞る理由、per-thread の event delta とモデル `effort` をコストレバーにする。roster には agent 以外に advisor 1 件を混在させられる |
 | ↳ 上位モデルへの相談 (advisor) | `managed_agents/CMA_consult_an_advisor.ipynb` | roster に `{"type": "advisor", "model": ...}` を 1 件だけ置くと、中位モデルが turn の途中で上位モデルへ相談できる。tool は入力を取らず会話全体がそのまま渡るので、「いつ相談するか」を決めるのは system prompt だけ。相談は `agent.tool_use` ではなく `anthropic.advisor` という短命スレッドの lifecycle として primary stream に現れ、コストはそのスレッドの `usage.list_cost` で個別に読める。子スレッドの同時実行上限の対象外。モデルのポリシー次第で応答が `redacted` ブロックで返る (働くモデルは全文を読むので結果は変わらない) ため、text / redacted の両方を正常系として書く |
@@ -177,7 +177,7 @@ Anthropic 公式のクックブック集。`12-factor-agents` が原則なら、
 - **コスト最適化 notebook の合成データと実行結果**: `cost_optimization/assets/` (`policy_manual.md` の約 12K トークン引受マニュアル、`claims_ledger.csv` の 5,000 行台帳、`eval_set.csv` の 10 件ラベル、見積書・写真) はデモ用の合成データなので索引しない。notebook 通しの実行に約 $40 かかる旨と、掲載スコアがハードコードで実行ごとに変動する旨は原典が明記している。Pareto フロンティアの作図・トライアル集計コードも未索引。
 - **content moderation の合成データと golden ruleset**: `capabilities/content_moderation/data/` (3 ドメインの `schema.json` / `context.json` / `policies.md` / `samples.jsonl`、493 行の `rules.golden.json`、Pillow 生成の広告画像と `build_creatives.py`) はデモ用の合成データなので索引しない。ルール言語の全文法・演算子の意味論は `engine.py` の docstring と `pipeline.py` の `RULE_FORMAT_SPEC` にまとまっており、自分のドメインで書き起こすときはそこを直接読む。notebook 通しの実行は約 10-15 分・約 $1、`RUN_FULL_EVAL=1` でその倍。原典自身が「ここのルールは実在の広告規制ではないので compliance guidance に使うな」と明記している。なお原典は、CSAM や暴力のような業界標準タクソノミの単一カテゴリ検出には専用分類器を使えとし、ポリシー変更の話が無い一度きりの分類には素の分類プロンプトで十分だと書いている。
 - **商用価格**: `cost_optimization/cost_optimization.ipynb` が対象外としている領域 (committed-use discount 等はアカウントチームの話)。同 notebook が follow-up 扱いにしていたレイテンシのうち、マルチエージェントの時間意識は `patterns/agents/latency_multi_agent.ipynb` として追加された (まず押さえる 26)。
-- **ホスティング・インフラ**: `claude_agent_sdk/hosting/` (docker / kubernetes / modal)、`managed_agents/self_hosted_sandboxes/`。
+- **ホスティング・インフラ**: `claude_agent_sdk/hosting/` (docker / kubernetes / modal)。self-hosted sandbox の参照実装 (docker / Cloudflare / Modal / Daytona / Vercel) は 2026-10 に claude-quickstarts の `managed-agents/self-hosted-sandboxes/` へ移り、`managed_agents/self_hosted_sandboxes/README.md` は移行メモ 1 枚だけになった (`cf/` → `cloudflare-containers/` 等の改名、agent / environment を `ant apply` のファイルで作る、Daytona / Modal / Vercel では sandbox が environment key を持たず per-session secret を使う、SDK 下限 0.124)。MongoDB cookbook 専用の `pymongo` 入り docker image だけは `managed_agents/mongodb_on_cma/self_hosted_sandbox/` に残る。
 - **統合デモ**: `claude_agent_sdk/session_browser_demo/`、`claude_agent_sdk/vulnerability_detection_agent/`。
 - **claude-quickstarts へ移った Managed Agents アプリ**: `managed_agents/slack/`, `managed_agents/sentry/`, `managed_agents/linear/`, `managed_agents/roadtrip_planner/`, `managed_agents/cma-mcp/` は README 1 枚だけが残り、コードは anthropics/claude-quickstarts の `managed-agents/` (cma-mcp は `mcp-server-typescript`) にある。各 README に移行時の変更点 (例: MCP サーバの HTTP 既定 bind が全インタフェースから `127.0.0.1` へ、bearer token は 32 文字以上必須、`ALLOWED_AGENT_IDS` 追加 / Linear は最初にインストールした workspace が bridge を所有し他は `LINEAR_ALLOWED_ORG_IDS` 無しでは拒否、webhook route は `/managed-agents/webhook`) と、コードが最後に存在した commit へのリンクがある。
 - **フロントエンド美観のプロンプティング**: `coding/prompting_for_frontend_aesthetics.ipynb` (DESIGN.md 系の判断には別リファレンスを使う)。

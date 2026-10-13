@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 1669d61b2f332eb1ef84797fab67984a959034a1
-distilled_at: 2026-10-06
+distilled_commit: 8b55a0bc381a9ff300f09a94ed0be9302fb76d79
+distilled_at: 2026-10-13
 ---
 
 # claude-code-best-practice 蒸留版
@@ -133,19 +133,15 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
     → `reports/claude-agent-memory.md`
 
 12. **frontmatter の正確なリファレンスは best-practice/ にあるが、そのまま信じない**。skills 20・
-    commands 20・subagents 16 フィールドの型・意味の表と、公式ビルトイン一覧 (bundled skills 24、
+    commands 20・subagents 16 フィールドの型・意味の表と、公式ビルトイン一覧 (bundled skills 25、
     slash commands 94、agent types 5) がある。設計時は記憶で書かずここを引く。ただし**日次 drift check が動かす
-    のはバッジ行と `changelog/` 追記が中心で、表本体は ON HOLD で据え置かれる項目が多い**。10-05 時点:
-    - bundled skills は 19 → 24。09-23 に row 19 `update-config`、09-29 に row 20 `slides` (Claude Slides artifact
-      を brief から作る)、09-30 に row 21–23 `artifact-capabilities`・`artifact-diagramming` (v2.1.221+)・
-      `claude-in-chrome` (Chrome 連携有効時のみ)。`artifact-design` は 09-24 から ON HOLD のまま 10-04 に row 24 へ
-      昇格したが、根拠は「v2.1.281 の CHANGELOG + 実行セッションの skill 一覧に在る」で commands reference には
-      無い (model 起動のみ)。artifact 系 4 つは Claude が自分で load する前提の参照 skill。削除候補 3 件 — row 15 `review`
-      (v2.1.223 で `/code-review` の alias、説明が旧挙動のまま)・row 16 `security-review` (公式は「Skill ツール経由で
-      呼べる built-in command」)・row 18 `skill-doctor` (commands reference の `[Skill]` マークが run ごとに揺れる) —
-      は判定が**反転を繰り返している** (09-17 / 09-20 の INVALID が翌 run 以降に再 ON HOLD)。**1 run の INVALID を確定と
-      見なさない**、bundled skill の個数は引用しない。10-05 時点で 3 件とも ON HOLD 継続。**`review` という名前の自作 skill は `/review` から起動できない**
-      (公式 docs の "typing the bundled alias `/review` never runs your skill")。
+    のはバッジ行と `changelog/` 追記が中心で、表本体は ON HOLD で据え置かれる項目が多い**。10-13 時点:
+    - bundled skills は 19 → 25。09-23〜09-30 に row 19–23 (`update-config`・`slides`・`artifact-capabilities`・`artifact-diagramming` (v2.1.221+)・`claude-in-chrome` (Chrome 連携有効時のみ))、
+      10-04 に row 24 `artifact-design` (根拠は v2.1.281 の CHANGELOG + 実行セッションの skill 一覧)、10-12 に row 25 `plugin-authoring` (mod = pane・prompt 上の band・status line・toast・slash command・tool call/prompt の hook を作る/直す。根拠は CHANGELOG v2.1.290/v2.1.295 の "the built-in `plugin-authoring` skill")。
+      **row 24・25 は公式 docs の bundled 一覧に無い** — 10-13 run 自身が「report 25 vs official docs 24」と書き、commands 側は `/plugin-authoring` を「built-in plugin の skill」として 10-11・10-12 に INVALID (範囲外) 判定。artifact 系 4 つは Claude が自分で load する参照 skill。
+      削除候補 3 件 — row 15 `review` (v2.1.223 で `/code-review` の alias、説明が旧挙動のまま)・row 16 `security-review` (公式は「Skill ツール経由で呼べる built-in command」)・row 18 `skill-doctor` (commands reference の `[Skill]` マークが run ごとに揺れる) —
+      は判定が**反転を繰り返している** (09-17 / 09-20 の INVALID が翌 run 以降に再 ON HOLD)。**1 run の INVALID を確定と見なさない**、bundled skill の個数は引用しない。10-13 時点で 3 件とも ON HOLD 継続。
+      **`review` という名前の自作 skill は `/review` から起動できない** (公式 docs の "typing the bundled alias `/review` never runs your skill")。
     - `allowed-tools` の型は commands 表が 09-16 に `string` → `string/list` へ訂正されたが、skills 表は `string` の
       ままで**原典内で食い違う** (`disallowed-tools` は両表とも `string/list`)。
     - subagents 表 — 5 個 (`general-purpose`, `Explore`, `Plan`, `statusline-setup`, `claude-code-guide`)
@@ -155,17 +151,17 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
       (object、任意。`cacheTtl` に `5m` / `1h` を置き prompt cache の寿命を指定。subagent ファイルからのみ
       読まれる。v2.1.248 導入) が 08-29 から ON HOLD で未反映 — **未確定扱いで使う**。09-15 に
       `omitClaudeMd` (boolean、任意、v2.1.271) が HIGH / NEW として追加提案されたがこれも ON HOLD で
-      表は 16 フィールドのまま (項目 4 に内容)。公式とずれる watch item:
+      表は 16 フィールドのまま (項目 4 に内容)。10-12 から subagent 単位の `autoCompactWindow` (v2.1.296 の CHANGELOG のみ。
+      主会話より早く compact させる) も LOW の watch として ON HOLD — 公式 frontmatter 表に載るまで前提にしない。公式とずれる watch item:
       `permissionMode` に公式の `manual` (`default` の alias、v2.1.200+) が無く、`Explore` の model は `haiku`
       (公式は「親から継承」、Claude API では Opus 上限)、`model` 例は `claude-opus-4-6` のまま (公式は `fable` /
       `claude-opus-5`)、`prompt` は公式の `--agents` CLI JSON 側にしか無い。
-    - バッジは 10-05 に v2.1.289 まで進んだが subagents 側の ON HOLD 3 件と watch item、skills 側の削除候補 3 件は 1 つも解消していない —
-      **バッジの更新は表本体が直ったことを意味しない**。
+    - バッジは 10-13 に v2.1.296 まで進んだが subagents 側の ON HOLD 3 件と watch item、skills 側の削除候補 3 件は 1 つも解消していない — **バッジの更新は表本体が直ったことを意味しない**。
     - **ON HOLD は解消されずに静かに消えることがある**。commands 側の `/cost` (cache miss 表示)・`/reload-plugins`
       (headless 対応)・`/effort` (既定保存と `s` キー) は 09-05 を最後に changelog から落ちたが公式 docs 表には
       入っておらず、以降の run は「fully in sync」と宣言。**「最新 run に出ていない = 解決した」ではない**。
       v2.1.283 で入った `/doctor prompt-audit` サブコマンドも skills 側の changelog (09-26) が触れるだけで commands 表には無い。
-      CHANGELOG のみの変更は docs 反映まで ON HOLD (`/mcp reconnect all` は 09-29 → 10-03 適用、`/autocompact` のモデル別保存 (v2.1.288) は未適用)。
+      CHANGELOG のみの変更は docs 反映まで ON HOLD (`/mcp reconnect all` は 09-29 → 10-03 適用、`/autocompact` のモデル別保存 (v2.1.288) は 10-05 から 10-13 まで毎日 ON HOLD で未適用)。
     - `claude-settings.md` は 09-01 に v2.1.252 へ追いついたが、`claude-memory.md` (2026-03)・`claude-mcp.md` (2026-03)・
       `claude-cli-startup-flags.md` (2026-06) は数か月動いていない。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
@@ -189,9 +185,9 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
 |---|---|---|
 | 全体目次・機能→docs 対応表 | `README.md` | CONCEPTS 表 (機能ごとの docs/実装リンク)、Hot features、tips 集、ワークフロー比較、購読先 |
 | agents/commands/skills の使い分け | `reports/claude-agent-command-skill.md` | 3 機構の比較表・使い分け基準・最軽量優先の解決順・frontmatter 比較 |
-| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 20 フィールド (`background` と Agent Skills spec の `metadata`/`license`/`compatibility` 含む。`allowed-tools` は `string` 表記のままで commands 表と食い違う) とバンドルスキル 24 個 (`doctor` は `disableBundledSkills` の唯一の例外。row 11 `design` は v2.1.234 追加。row 17 `workflow-authoring` は v2.1.248 追加・dynamic workflows 有効時のみ。row 19 `update-config` は 09-23 追加。row 20–24 (`slides`・`artifact-capabilities`・`artifact-diagramming`・`claude-in-chrome`・`artifact-design`) は 09-29〜10-04 追加。row 15 `review`・row 16 `security-review`・row 18 `skill-doctor` は削除候補 ON HOLD で INVALID との間を往復中。`review` と `security-review` は command 表にも重複) |
-| subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (`experimental` と `omitClaudeMd` (v2.1.271) の 2 フィールド・`claude` agent は ON HOLD で表に未反映、`fork` は 08-31 以降 drift 表から消えたまま。`Explore` の model 欄・`model` 例の model 名 (公式は `claude-opus-5` / `fable`)・`permissionMode` の `manual` も未反映の watch item) |
-| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 20 フィールド (skill と同じ 3 フィールドが追加。`allowed-tools` は 09-16 に `string/list` へ訂正) と built-in slash command 94 個。#13 `/output-style [style]` (09-20 に引数表記を `[name]` から訂正、v2.1.269+) は **v2.1.74 で「deprecated、`/config` を使え」として削除された行の復活**で、削除済みコマンドも戻りうる実例。09-23 に v2.1.280 準拠で 10 行の説明が更新: `/clear` 前の会話は rewind メニューから復元可 (v2.1.191+)、`/model` と `/rename` は `-p` でも動く (v2.1.205+、`/model` は現セッションのみ)、`/rename` は制御文字除去と 200 文字上限 (v2.1.221+)、`/heapdump` はメニュー非表示で `.heapsnapshot` に会話と credentials が入るため共有は `-diagnostics.json` のみ、`/bug` はサードパーティ provider では `~/.claude/feedback-bundles/` にローカル保存、`/feedback` は引数なしで Claude が起草した feedback の下書きキュー、`/import` (`[codex\|gemini\|cursor]`) は Bedrock/Vertex/Foundry/gateway 等と feature-flag fetching 無効時に使えない。既存の記載: `/advisor` は `-p` と Remote Control で引数なしだと現在値をテキスト出力 (v2.1.260)。`/review` は `/code-review` の alias で引数も同形、レベル省略時は前回のレベルを再利用。`/skill-doctor` は v2.1.252 以降 + feature-flag fetching (skills 表 row 18 の「v2.1.261」と食い違う)。`/status` の "Auto mode server" 行 (v2.1.278) は公式 docs 未掲載で 09-19 から ON HOLD。09-29〜10-04 の更新: `/effort` の ultracode はトグル (`ultracode [on\|off]`)、`/review` に `--max-findings n\|all\|default` (指定は `default` まで持ち越し)、`/mcp reconnect all` と `-p` で引数なしなら状態をテキスト出力、`/rename` は同名の live セッションがあると variant を付け空名を拒否、`/rate-limit-options` はメニューに出るようになった |
+| skill frontmatter + 公式 skill | `best-practice/claude-skills.md` | skill の 20 フィールド (`background` と Agent Skills spec の `metadata`/`license`/`compatibility` 含む。`allowed-tools` は `string` 表記のままで commands 表と食い違う) とバンドルスキル 25 個 (`doctor` は `disableBundledSkills` の唯一の例外。row 11 `design` は v2.1.234 追加。row 17 `workflow-authoring` は v2.1.248 追加・dynamic workflows 有効時のみ。row 19 `update-config` は 09-23 追加。row 20–24 (`slides`・`artifact-capabilities`・`artifact-diagramming`・`claude-in-chrome`・`artifact-design`) は 09-29〜10-04、row 25 `plugin-authoring` は 10-12 追加 (row 24・25 は公式 docs の一覧に無く CHANGELOG 根拠)。row 15 `review`・row 16 `security-review`・row 18 `skill-doctor` は削除候補 ON HOLD で INVALID との間を往復中。`review` と `security-review` は command 表にも重複) |
+| subagent frontmatter + 公式 agent | `best-practice/claude-subagents.md` | subagent の 16 フィールドと built-in agent type 5 個 (`experimental` と `omitClaudeMd` (v2.1.271) の 2 フィールド・`claude` agent は ON HOLD で表に未反映、`fork` は 08-31 以降 drift 表から消えたまま。`Explore` の model 欄・`model` 例の model 名 (公式は `claude-opus-5` / `fable`)・`permissionMode` の `manual` も未反映の watch item。subagent 単位の `autoCompactWindow` (v2.1.296) は 10-12 から LOW watch) |
+| command frontmatter + 公式コマンド | `best-practice/claude-commands.md` | command の 20 フィールド (skill と同じ 3 フィールドが追加。`allowed-tools` は 09-16 に `string/list` へ訂正) と built-in slash command 94 個。#13 `/output-style [style]` (09-20 に引数表記を `[name]` から訂正、v2.1.269+) は **v2.1.74 で「deprecated、`/config` を使え」として削除された行の復活**で、削除済みコマンドも戻りうる実例。09-23 に v2.1.280 準拠で 10 行の説明が更新: `/clear` 前の会話は rewind メニューから復元可 (v2.1.191+)、`/model` と `/rename` は `-p` でも動く (v2.1.205+、`/model` は現セッションのみ)、`/rename` は制御文字除去と 200 文字上限 (v2.1.221+)、`/heapdump` はメニュー非表示で `.heapsnapshot` に会話と credentials が入るため共有は `-diagnostics.json` のみ、`/bug` はサードパーティ provider では `~/.claude/feedback-bundles/` にローカル保存、`/feedback` は引数なしで Claude が起草した feedback の下書きキュー、`/import` (`[codex\|gemini\|cursor]`) は Bedrock/Vertex/Foundry/gateway 等と feature-flag fetching 無効時に使えない。既存の記載: `/advisor` は `-p` と Remote Control で引数なしだと現在値をテキスト出力 (v2.1.260)。`/review` は `/code-review` の alias で引数も同形、レベル省略時は前回のレベルを再利用。`/skill-doctor` は v2.1.252 以降 + feature-flag fetching (skills 表 row 18 の「v2.1.261」と食い違う)。`/status` の "Auto mode server" 行 (v2.1.278) は公式 docs 未掲載で 09-19 から ON HOLD。09-29〜10-04 の更新: `/effort` の ultracode はトグル (`ultracode [on\|off]`)、`/review` に `--max-findings n\|all\|default` (指定は `default` まで持ち越し)、`/mcp reconnect all` と `-p` で引数なしなら状態をテキスト出力、`/rename` は同名の live セッションがあると variant を付け空名を拒否、`/rate-limit-options` はメニューに出るようになった。10-11 更新: `/focus [on\|off]` (Remote Control から現セッションのみ切替、保存値は変えない、v2.1.281+。tool-call 要約に subagent 数と完了 background 通知の集約)、`/copy` の picker は blockquote も選べる (v2.1.295) |
 | settings.json 網羅リファレンス | `best-practice/claude-settings.md` | 階層・permissions 構文・hooks・sandbox・model/effort・env vars・完全例 (「140+ settings / 315+ env vars」、2026-09-01 に v2.1.224 → v2.1.252 へ追いついた)。この run で入った主なキー: `crossSessionInbound`・`dialogExpiry`・`autoContinueAtUsageLimit`・`feedbackDrafts` (`SendFeedback` ツールの gate)・`desktopSessionCleanupPeriodDays`・`modelSettings`・`modelPicker`・`modelPricing` (managed)・`promptCacheTtl`/`subagentPromptCacheTtl`・`keybindingFlavor`・`spellcheck`・`disableCommandPluginSources`・marketplace source type `command` (+`mode: "link"`)・sandbox credentials の JWT/AWS マスキング (`decode: "jwt"`・`maskClaims`・`awsPairs`・`sigv4`)。公式側の**キー索引は `docs/en/settings-reference` に移動**し (`docs/en/settings` は task 指向のガイドに再編)、原典もこちらを Sources に追加した |
 | CLAUDE.md の書き方・ロード規則 | `best-practice/claude-memory.md` | ancestor/descendant/sibling のロード挙動、モノレポでの配置指針 (2026-03 で更新停止) |
 | MCP 設定と選定 | `best-practice/claude-mcp.md` | 日常用 MCP 5 選、.mcp.json 例、承認 settings、権限構文、3 スコープ (2026-03 で更新停止) |
@@ -226,8 +222,8 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
 - **公式 slash command・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と `claude-cli-startup-flags.md` を引く。
 - **tips 全文** — カテゴリ別一覧は `README.md` の TIPS AND TRICKS 節。各 tip に一次ソースリンク付き。
 - **★ 数とバッジ日付** — 日次 refresh で書き換わる。蒸留版は数値を持たない。バッジは「その表がまだ追われているか」の
-  指標としてのみ使う (項目 12)。2026-10-05 時点で skills / commands / subagents が v2.1.289、settings は v2.1.252
-  (09-01) のまま 5 週間動いていない。
+  指標としてのみ使う (項目 12)。2026-10-13 時点で skills / commands / subagents が v2.1.296、settings は v2.1.252
+  (09-01) のまま 6 週間動いていない。
 - **コミュニティワークフローの詳細比較・skill/agent コレクション集** — `README.md` の
   DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS / AGENT COLLECTIONS 表。★ 数だけでなく**ステップ列も行の並び順も
   個数も日次で書き換わる** (gstack skills は 53/48/65/32/58/54/55 と揺れ、BMAD agents は 0 と 5 を往復) ため蒸留版は
@@ -235,7 +231,8 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
 - **Claude API 寄りの詳細** (Programmatic Tool Calling、SDK 設定、rate limits の数値) —
   `reports/claude-advanced-tool-use.md`, `claude-agent-sdk-vs-cli-system-prompts.md`, `claude-usage-and-rate-limits.md`。
 - **hooks の実装詳細** — 別リポジトリ (shanraisshan/claude-code-hooks) が正。v2.1.252 で
-  `PreModelSwitch` / `PostModelSwitch` が加わり全 28 イベント。実働サンプルは `.claude/hooks/`。
+  `PreModelSwitch` / `PostModelSwitch` が加わり全 28 イベント。実働サンプルは `.claude/hooks/`。hooks の
+  `onFailure: "block"` (v2.1.295) は concepts changelog の 10-12 verification 行で触れるだけで本文に無い — 公式 docs で確かめる。
 - **プレゼン資料・チュートリアル本文と CLI バイナリ抽出物** — `presentation/`, `tutorial/`, `reports/claude-spinner-verbs-and-tips.md`。
 - 注意: 特定バージョン (v2.1.x) や beta 機能に固定された記述が多い。beta バッジは GA 化で外れる (Auto Mode 2026-07-28、
   Voice Dictation と Artifacts 2026-08-29) ため、バージョン依存・beta 前提の断定は避け `changelog/` の drift ログで確認する。
