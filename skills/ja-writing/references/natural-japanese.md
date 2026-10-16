@@ -1,0 +1,149 @@
+---
+source: https://github.com/coji/natural-japanese
+distilled_commit: 03bc944a0c4a9f0b2a66eab065b30de5c529bf08
+distilled_at: 2026-10-16
+---
+
+# natural-japanese 蒸留版
+
+仕事の日本語文書 (議事録・調査レポート・社内ガイド・リサーチメモ・スライド構成・技術記事・PR 説明・エッセイ) を書く・直すための Agent Skill。設計の芯は「検出は機械 (`lint.py`、sudachipy の形態素解析)、直すかどうかの判断はエージェントが文脈で」(README.md「仕組み」、skills/natural-japanese/SKILL.md 冒頭)。**この蒸留版は「規則の根拠と原典の当たり先」の索引**であり、診断・書き直しの手順そのものは姉妹スキル `avoid-ai-slop-ja` が持つ。閾値の数字は主に原典の lint.py コメントと corpus/reports/ の実測から取り、ほかは semantic.py・references/diagnose.md・doctypes の各ファイルから取っている。
+
+## Contents
+
+- まず押さえる
+- 文書種別ごとの要点 (doctypes 5 本)
+- lint の検出カテゴリと閾値
+- 閾値校正の結論 (corpus/reports/)
+- 索引テーブル
+- 蒸留の範囲外
+
+## まず押さえる
+
+1. **最上位規則は「元にない内容を足さない」**。既存文書を直すとき、元にない事実・数値・人名・日付・条件・評価・意見・方針を足さない。次の変更も「足す」に数える: 確信の度合いを変える (「次回また相談する」→「合意した」、**逆に断定を推定に弱めるのも含む**)、書き手の経験や見解を書き足す、元にない数の枠組み (「理由は3つある」) を足す、元の数値を書き換える (誤りに見えてもユーザーに伝える)、一般論の注意段落を足す。足してよいのは略語の正式名称・用語の短い説明・接続の言葉など、元から直接言える補足だけ (skills/natural-japanese/SKILL.md「いちばん大事な規則」)。
+
+2. **直す対象を 3 区分する**。いつでも直す (演出・誇張語、lint 指摘、不要な打ち消し、読み手の手間を増やす 5 種、意味の取れない言い回し) / 理由があるときだけ直す (箇条書き⇔地の文、段落の組み直し、見出しの数や順序) / どの文書でもしない (要約節の新設、主語の補完、数字の修正、具体例の自作、主張・条件の削除、定型文での必須要素の穴埋め、書き手の癖の均し)。lint が指摘していない語を「より自然そうな語」に置き換えない (「お知らせいたします」→「お知らせします」にしない)。直し方は人が書いたか AI が書いたかで変えない (SKILL.md §3)。
+
+3. **構成変更は既定 keep**。着手前に見出しと節を keep / change に分け、change が 3 割を超えたら理由を記録。見出しを結論文に書き換えるのは 2〜3 か所まで。根拠はブラインド評価で「全見出しを結論に書き換えた改稿が、読み手価値では元に勝ち、人間らしさでは負けた」こと (SKILL.md §3「理由があるときだけ直すもの」)。
+
+4. **書く前に決めること**: 読み手と目的 → 文書タイプが決まれば doctypes の 1 ファイルを読む → 主メッセージを一文で書く (書けないなら素材不足) → 見出しだけで論旨が通るか確かめる → 濃淡 (分量の差であって順位づけではない。並列項目に「最優先・次点」を付けない) → 素材 (固有名詞・数値・実例なしで説明できてしまう主張は素材不足。推測で埋めずユーザーに聞く) (SKILL.md §1)。
+
+5. **見出しの規則は条件付き**。節の結論を書くが、全見出しを「名詞: 結論文」の同形にそろえない、短い節はラベルでよい、条件が込み入った節は話題の見出しにする、**見出しで本文より確信度を上げない** (本文「予定」を見出しで断定しない)。ガイドだけは逆に「何についての節か分かる短い名前」を優先する (SKILL.md §1, references/doctypes/guide.md)。
+
+6. **書くときの原則 12 個** (SKILL.md §2): 結論先 / 見出しに結論 / 因果は地の文 (箇条書きは本当に独立した項目だけ。関係が素材にないなら関係を足さない) / 用語は働きを先に説明 / 抽象は固有名・数値で支える / 太字は文書全体で本当に要る箇所だけ、絵文字・記号で飾らない / 濃淡 / **同じ型を 3 回続けない、ただし疑問形や体言止めを型崩しの手段として入れない** / 打ち消しは誤解が実在する場面だけ / 確信度は語尾でぼかさず書き分け (推定は「〜と推定する」、未確認は【要確認】) / 事実と意見を分ける / 結びは要約の繰り返しでなく要点 1〜2 文。既存文書を直すときは、原則を満たすために内容を足さない (例: 元に「次にすべきこと」がなければ原則 12 のために書き足さない)。
+
+7. **打ち消しは 3 種に分けて扱う**: (a) 誰も言っていない思い込みの先回り打ち消し (「CI を入れれば自動的にバグがなくなるわけではない」) は文ごと削る (削ると次の文がつながらないときは残す)、(b) 「A は B ではない。C だ。」は打ち消し部を削って肯定文につなぐ、(c) 意味を絞る・誤解されやすい事実・注意・違いの説明は残す。GPT 系は (a) を特に多く書くと明記 (SKILL.md §2 原則9, §3)。
+
+8. **演出の言葉は「削るだけ」**。誇張 (「徹底的に」「例外なく」「劇的に」)・大げさな身体描写・読み手への呼びかけは、削っても文が成り立つときだけ削り、言い換えや補いをしない (「圧倒的に多く」→「多く」、「非常に多く」にはしない)。足すとそこに別の演出が入る。問いを短文に割って決め台詞で締める直しは「演出を足している」悪例 (SKILL.md §3「演出の言葉」)。
+
+9. **「読み手が何のことか取れない言い回し」7 分類**: 中身の見えない比喩 / 既に名前のあるものの言い直し (一度付けた名前を別語で呼ばない) / 擬人化 / 英語の逐語訳 (「真実の源」「既存の利用者を壊す」) / 語の組み合わせのずれ (「期限が終了する」) / エンジニアの話し言葉 (「ログを吐く」) / 動作の名詞化 (「重複登録が起きうる点の対処」)。4・5・7 は書いたモデルにも読み直すモデルにも自然に見えるので、英語に訳し戻す・動詞文に書き直す・会話で言うかを確かめる、という手を動かす確認で見る。読み方が絞れなければ直さず候補を挙げて聞く (SKILL.md §3)。README.md「苦手なこと」は、逐語訳と名詞化を**半分ほど見逃す**と自認している。
+
+10. **読み手の手間を増やす箇所は段落ごとに全件書き出す**。lint 出力末尾の「段落ごとの確かめ」(見出し・箇条 1 項目・表 1 行・段落に番号) について「番号: 言い回し → 指しているもの」か「番号: なし」を最後まで書き出してから直し始める。クイックモードでも省かない (SKILL.md §3、`scripts/paragraphs.py`)。
+
+11. **収束は回数でなく状態**。全指摘が「直した」か「残す (理由)」に分かれ、直したことで new が出なければ終える (`--baseline` で resolved / new / persisting)。同じ指摘が 2 回続けて再発したら言い換えを重ねず、文や段落ごと書き直すか理由をつけて残す。理由のない「残す」は判断していないのと同じ (SKILL.md §4, §6)。
+
+12. **仕上げは元文書との突き合わせ**。`newfacts.py` (または `--git`) で直した文書にだけある数値・固有名詞・英字語を列挙する。拾えるのはそれだけで、普通名詞で足した細部・確信度の変化・発言者の入れ替えは拾えないので目視確認は省かない。実測 (2026-10、sonnet の推敲 47 本): 判定器が「元にない事実なし」とした 14 本では 0 語、「あり」とした 24 本のうち 11 本で検出 (手順は SKILL.md §6、実測値は skills/natural-japanese/scripts/newfacts.py docstring)。
+
+13. **実行モード**: クイック (既定。lint は短文でも必ず 1 回、doctypes 1 本だけ読む、会議メモで 30 秒前後) / フル (「しっかり」指定・対外/経営向け・1 万字超。outline.py と terms.py も実行、§5 を全項目。短文 7 分前後、1 万字級 15〜20 分。effort high 推奨 — 低 effort では工程を理由をつけて省きやすいと実測) (SKILL.md「実行モード」)。
+
+14. **診断モード (score) は書き換えない**。機械ベース = `max(100 − (critical×8 + warn×4 + info×0.5) × 1000/max(文字数,1000), 20)`、full/exp では構造の癖で ±15 の判断調整、100 字未満はスコアを出さない。バンドは 90〜 自然 / 70〜89 軽微 / 50〜69 要修正 / 〜49 濃厚。**CI ゲートに使う数値ではない**と結果に添える (references/diagnose.md)。
+
+15. **書き手の癖は均さない**: 話し言葉の引用、敬語の度合い、絵文字や顔文字、矢印や略記、改行区切り、節ごとの不揃いは、読解を妨げない限り残す。「誰が書いたのか分からない文書になる」ため (SKILL.md §3「どの文書でもしないこと」)。新しく書くときは原則 6 で飾らない、という非対称に注意。
+
+## 文書種別ごとの要点 (doctypes 5 本)
+
+| 種別 | 答える問い | 必須要素 (抜粋) | AI がやりがちな失敗 |
+|---|---|---|---|
+| 議事録 (minutes.md) | 何が決まり、誰が、いつまでに何をするか | 会議名・日時・参加者、議題ごとの要点、決定事項・宿題 (担当+期日)・継続議題を冒頭にまとめる、記録の前提 (録音有無・話者特定の確かさ・訂正先) | 全発言を同じ重さで要約 / 提案や賛成を「合意した」と取り違える / 言いよどみは消すのに冗長な話し言葉は残す |
+| 調査レポート (report.md) | 何が起きていて、次に何をすべきか | 目的 (誰が何を決めるため) → 冒頭まとめ (主メッセージ+論点 2〜4) → 結果 → 提案 → データの限界 → 方法 (この順) | 記述で終わり次の手を書かない / 根拠を超えた提案 / セグメントを同文型で並べる / 外れ値の注記を末尾に回す / 母集団定義なしで前回比較 |
+| 社内ガイド (guide.md) | いまこの操作をどうやるか | 冒頭「まず覚えること」3〜4 個、対象読者、通読部と引く部の区別、用語集、問い合わせ先 | 全章を同じ組み立て・同じ文長 / 定型の橋渡し (「詳細は次章で」) を全章に貼る / 確かめていない画面操作を断定 |
+| リサーチメモ (memo.md) | どこまで分かり、何が未決で、何を判断してほしいか | 中心の主張をタイトルか冒頭に、範囲と対象外 (素材にあるものだけ)、決めたいこと (冒頭)、未解決の論点 | 概念整理だけで一次情報がない / 疑問を並べて見立てがない / 逆に素材にない見立て・数値・計画を書き足す |
+| スライド構成 (slide.md) | メッセージだけ読んで筋が通るか | 各枚: タイトル (名詞句) + メッセージ (結論の 1 文・50 字程度) + 根拠 (数値・事例)。本論は 3 まとまり以内 | メッセージがラベルで終わる / 「[サービス名]」の穴埋めのまま出す / 毎枚ちょうど 3 点の箇条 |
+
+種別固有の注意:
+
+- 議事録: 既存を直すときは節の順序を変えず、決定事項を前に出す案は提案に留める。元にない列や節を足して「未定」ばかりになるなら足さない。核心の発言は口調のまま残す (「それ先に言ってよ」を整えない)。助言には相手の反応を一言 (元に無ければ推測しない) (references/doctypes/minutes.md)。
+- レポート: 誤読されやすい数字の注記はその数字のすぐそば。「継続率 4%」で止めず「96% は継続しなかった」まで言い換える。提案は「決める前にできる検証」と「決める場で選ぶ選択肢 (支える数字・選ぶ条件付き)」に分け、推す案は「〜と考える」で 1 つまで。比較は表にしてよい (原則 3 より優先) (references/doctypes/report.md)。
+- ガイド: 見出しは結論文でなく短い名前、項目ごとに小見出し、中身は箇条と番号だけ、理由は行末の括弧で一言。よくある間違いは「症状 | 直し方」の 2 列表。書き手の事情と読み手への指示を一文に混ぜない (主語のねじれ) (references/doctypes/guide.md)。
+- メモ: 見立ては論点への見方であって順位づけではない。比較は軸を決めた表、当てはまらないマスは「—」(「該当しない」「記載なし」と書かない)。定義文の型を段落頭に 3 回続けない (references/doctypes/memo.md)。
+- スライド: 「タイトル:」等のラベルや箇条の語句を太字にしない。枚数は結論のまとまり数から決める。素材が足りなければ埋める前に聞き、確かめられなければ【要確認】(references/doctypes/slide.md)。
+
+## lint の検出カテゴリと閾値
+
+`lint.py` は CI ゲートではなく、exit code は常に 0 (入力エラーのみ 1)。オプション: `--json` / `--genre essay|tech|business` / `--baseline <前回json>` / `--experimental` / `--reading-load` (skills/natural-japanese/scripts/lint.py)。
+
+既定で出る AI らしさの検出器 (severity):
+
+| カテゴリ | 閾値・条件 | severity |
+|---|---|---|
+| `forbidden_phrase` | 辞書一致 (と言えるでしょう、いかがでしょうか、大切なのは、まとめると、総じて、正面から扱う、不可欠、包括的、深掘りする 等) | warn。弱いシグナル 5 語 (重要なのは / このように / 不可欠 / ポイントは / さて、) は info |
+| `translationese` | という点で / という観点から / にとって重要 / を持つこと / することによって / であることは間違いない / に他ならない 等 | info |
+| `antithesis_repetition` | 「ではなく」「だけでなく〜も」が 3 回以上で発火。総文数比 <2% info / 2〜3% warn / ≥3% critical (tech は critical 4.5%) | 比率で 3 段階 |
+| `negation_repetition` | 文末が「ではない / わけではない」等の文が 4 回以上 | warn |
+| `low_sentence_variance` | 5 文以上で文長の変動係数 < 0.25 | warn |
+| `low_burstiness` | モーラ長の (σ−μ)/(σ+μ) < −0.30 | warn |
+| `english_syntax_inanimate_subject` / `inanimate_subject_morph` | もの・ことが主語の「もたらす / 示す」等 | info |
+| `nominal_ending` | **体言止めが一度もない**こと (2000 字以上。essay 1500、tech/business 3000) | info |
+| `uniform_paragraph_structure` | 4 段落以上で段落あたり文数の CV < 0.15 | info |
+| `repeated_sentence_lead` | 同じ書き出しが 6 回以上 (essay 5、tech/business 7) | info |
+| `low_lexical_diversity_ttr` / `_mtld` | 4000 字以上で TTR < 0.45 / MTLD < 40 | info |
+| `low_specificity` | 段落単位で固有名詞・数値・例示マーカーが抽象名詞に負ける (score < −0.15) | info |
+| `high_bold_density` | 文中の太字が 1000 字あたり 3 回以上かつ 3 か所以上 (行頭の「**ラベル**:」は数えない) | info |
+
+`--experimental` でのみ出るもの: `high_length_autocorrelation` / `paragraph_lead_conjunction` / `repeated_syntax_template` / `english_syntax_cleft_because` / `high_bullet_ratio` / `boilerplate_heading` / `numbered_phase_structure` / `high_emoji_symbol_density`。business ジャンルではこのうち構造系 3 つ (bullet / 定型見出し / フェーズ) を無効化するが、太字密度は無効化しない (lint.py `EXPERIMENTAL_CATEGORIES`, `GENRE_PROFILES`)。
+
+読解負荷レーン (`--reading-load`) は**AI らしさを測らない**別レーン。スコア・by_category・baseline に入らず全件 info: `sentence_too_long` (90 字超、essay 110 字) / `buried_list` (読点区切りの名詞句 4 個以上かつ 50 字以上、3 個なら 80 字以上) / `kanji_run` (漢字 7 字以上、固有名詞除外) / `double_negative` (否定形態素が距離 6 以内、条件形除外) / `no_chain` (「の」3 連鎖以上)。足してよい検出器は「AI が読み流すと見落とすもの」だけで、起きていなかった `doubled_conjunctive_ga` は削除済み (lint.py 読解負荷レーンのコメント)。
+
+`semantic.py` (exp モード、ruri-v3-310m、約 1GB) は隣接文類似度のレンジ `coherence_flatness_range` ≤ 0.1612 で `semantic_topic_flatness` (warn)。ジャンル別は essay 0.1581 / business 0.1556 / tech 0.1426。10 文未満は判定しない (skills/natural-japanese/scripts/semantic.py)。
+
+## 閾値校正の結論 (corpus/reports/)
+
+校正の規律は「人間側 FP 率 5% 未満を保ちつつ AI 側の検出率を最大にする閾値」(corpus/README.md)。
+
+- **体言止めは検出方向を反転**: AI の手癖ではなく人間の修辞で、essay では人間 60% が使い AI は 0%。「多用」警告をやめ「長文なのに一度もない」を拾う (lint.py `NOMINAL_ENDING_*` コメント、archive の deep-analysis 由来)。
+- **文頭反復は人間のほうが多い** (人間 web 93% vs AI 41%、essay 92% vs 35%)。閾値を 3→6 に上げ warn→info に格下げ。business では白書の節構成で発火しやすく、文書単位の二値判定より密度ベースの閾値が適切である可能性が高いとする (lint.py コメント、corpus/reports/business-fp-check.md)。
+- **禁止語の逆転**: 当初は禁止語全体の文書発火率が人間 58〜67% > AI 30〜33%。「最後に」(人間 48 回 vs AI 2 回) と「まさに」(24 vs 0) を削除、人間にも出る 5 語を info に格下げ (lint.py `FORBIDDEN_PHRASES` コメント)。「することができる」も 2026-10 の測定で生成 AI 以前の人間文書のほうが多く使っており、AI の印から外して読解負荷側の冗長さ扱いにした (lint.py `TRANSLATIONESE_PATTERNS` コメント)。
+- **対比 (ではなく) は絶対回数でなく密度**: 人間 quality:high (n=81) の 3 回以上ヒット文書の比率は中央値 1.5%・最大 4.6%、AI ヒット文書は中央値 8.3%・最小 2.65%。2%/3% で critical 化率は人間 4.9%・AI 11.6%。tech だけ人間 critical 化率 11.1% だったため 4.5% に緩めた (corpus/reports/antithesis-recalibration.md)。
+- **文長の揺らぎ (burstiness) は唯一弁別力のある統計系だが FP が高い**: 研究レポートは旧閾値 −0.24 で人間 32.4% に発火、FP<5% には −0.36 (AI 検出 57.5%) が要ると指摘。現行は前処理を変えて −0.30 (人間 21%・17%、AI 63%)。lag-1 自己相関は方向が仮説と逆で削除候補。**文長変動の識別力はジャンル依存で、全ジャンル共通の品質規範にはできない** (corpus/reports/research/sentence-length-analysis.md, prose-rhythm-evidence-matrix.md, lint.py `BURSTINESS_THRESHOLD` コメント)。
+- **読みやすさ指標 14 候補は「AI 検出器」としても「下手な人間の文章検出器」としても全滅** (実装推奨 0 件)。受動態率・「が」連鎖・こそあど密度は AI は拾えても quality:ordinary の人間文はほぼ素通り。結論は「AI らしさと読みにくさは別軸」(corpus/reports/readability-sweep.md)。これを受けて読解負荷レーンは弁別力でなく「直すと読みやすくなるか」で採否を決める。90 字は対象コーパスの p91、130 字以上はほぼ全件分割で改善、90〜105 字は判断が割れる。人間執筆 (zenn 10 本) は 37 件/千文、AI 生成は 145 件/千文で、指摘密度は内容の密度に連動する (corpus/reports/reading-load-calibration.md)。
+- **NN 系 4 系統**: perplexity・教師あり分類器・GiNZA 係り受けは不採用 (白書の様式を誤検知 / 学んでいたのはジャンルの顔つき / 整った文を罰する方向逆転)。埋め込みの話題平板さだけが FP 3.7%・AI 検出 85.2% で残り、スキルのフル工程で仕上げたリライトまで検出した。教訓は「統計的に人間と AI を分ける信号は文体・ジャンルを測っていることが多く、規律ある良い書き手ほど罰する」(corpus/reports/nn-detector-sweep.md)。
+- **business ジャンル**: 人間側 10 件と薄く、AI で光る検出器を厳しくする調整はしない。`lead_repeat_threshold` 7 は人間誤検知を 20%→10% に半減させ AI 検出 4% を維持する局所最適 (corpus/reports/business-calibration.md)。同レポートは `high_bold_density` も無効化と書くが、現行コードは 2026-10 の測定で既定有効・business でも無効化しない (コードを正とする)。
+
+## 索引テーブル
+
+| トピック | 原典パス | 一行説明 |
+|---|---|---|
+| 規則と工程の本体 | skills/natural-japanese/SKILL.md | 足さない規則 → 実行モード → §1 書く前 → §2 原則 12 → §3 直すとき → §4 lint → §5 構造・読みやすさ → §6 収束 → §7 後片付け |
+| 診断モード | skills/natural-japanese/references/diagnose.md | quick/full/exp の深さ、スコア式、±15 調整、バンド、出力形式 |
+| lint が使えない環境の目視手順 | skills/natural-japanese/references/manual-checklist.md | 9 観点 (語・翻訳調・打ち消し回数・文長・段落・反復・体言止め・一般論・読みやすさ) |
+| 議事録 | skills/natural-japanese/references/doctypes/minutes.md | 決定・宿題・継続議題を冒頭に、発言録→議事録の直し例 |
+| 調査レポート | skills/natural-japanese/references/doctypes/report.md | ピラミッド構成、検証と選択肢の分離、記述で終わる文の対比例 |
+| 社内ガイド | skills/natural-japanese/references/doctypes/guide.md | 章の性質 4 型 (物語 / 逆引き / ハンズオン / リファレンス)、VPN ガイド雛形 |
+| リサーチメモ | skills/natural-japanese/references/doctypes/memo.md | 見立ての扱い、比較の軸、防災アプリの例 |
+| スライド構成 | skills/natural-japanese/references/doctypes/slide.md | タイトル・メッセージ・根拠の 3 要素、枚数の決め方 |
+| 文体プロファイル雛形 | skills/natural-japanese/assets/style-profile-template.md | 過去文章 3〜5 本から視点・文末・語彙を「傾向として」書く |
+| lint 本体 | skills/natural-japanese/scripts/lint.py | 辞書・閾値定数・`GENRE_PROFILES`・`EXPERIMENTAL_CATEGORIES`・`HINTS`。閾値の根拠は定数直上のコメント |
+| 共有基盤 | skills/natural-japanese/scripts/textcore.py | トークナイザ・Markdown マスク・文分割 |
+| 見出しと先頭文の抽出 | skills/natural-japanese/scripts/outline.py | 見出し統計も出すが判定はしない |
+| 用語の初出と説明の有無 | skills/natural-japanese/scripts/terms.py | 表記ゆれ・用語説明の点検用 |
+| 段落ごとの確かめ一覧 | skills/natural-japanese/scripts/paragraphs.py | lint 末尾と同じ一覧を単体で出す |
+| 足した事実の検出 | skills/natural-japanese/scripts/newfacts.py | 元⇔改稿 / `--git` 比較 |
+| 話題の平板さ (実験的) | skills/natural-japanese/scripts/semantic.py | 埋め込み、ジャンル別閾値と校正値 |
+| 閾値スイープ | skills/natural-japanese/scripts/calibrate.py | `report` / `sweep --detector` / `length-analysis` |
+| 回帰テスト | dev/check-fixtures.sh, skills/natural-japanese/scripts/fixtures/ | ai-smelly.md / natural.md |
+| コーパスの構成と規律 | corpus/README.md | FP<5% の規律、reports の 3 層 (直下 / archive 非コミット / research) |
+| 校正レポート | corpus/reports/*.md | antithesis / business ×2 / readability-sweep / reading-load / nn-detector / skill-eval |
+| 文長・リズムの研究 | corpus/reports/research/ | 文長系列分析、証拠表、文献レビュー |
+| 読者評定実験 | corpus/experiments/rhythm/reader-study/ | 事前登録・刺激・Worker 実装 |
+| description の発火精度評価 | evals/RESULTS.md, evals/evals.json | 正例 20 / 負例 10 の反復改善記録 |
+
+## 蒸留の範囲外
+
+- **各検出器の実装** (形態素パターン、マスク処理、baseline の同一性キー、モーラ計算): lint.py / textcore.py を直接読む。閾値を変えたい場合は定数直上のコメントに経緯がある。
+- **禁止語辞書・抽象名詞カタログの全語**: lint.py の `FORBIDDEN_PHRASES` と low_specificity 用カタログ。manual-checklist.md §1〜2 が人間向けの抜粋。
+- **`HINTS` (カテゴリごとの直し方文言)**: lint.py の `HINTS`。lint 出力の各指摘に付く。
+- **SKILL.md §5 読みやすさ点検 9 項目の全文と、§3 比喩の直し方の例**: 本蒸留版では要点のみ。否定の入れ子を畳んだあとの真偽確認 (「設定が無効でない限り」≠「設定が有効なら」) など具体例は原典で。
+- **doctypes の雛形と直し例の本文**: 各ファイル末尾。そのまま転記しない。
+- **corpus/reports/archive/** (deep-analysis.md, sweep_low_burstiness.md 等): 非コミットで clone に無い。lint.py のコメントに要旨だけ残る。
+- **skill-eval-findings.md**: 旧ファイル名 (writing-constitution.md) を原因に挙げる 5 件の評価で、現行構成と対応しない。参考程度。
+- **配布・導入** (.claude-plugin/, AGENTS.md, .github/workflows/, release-notes-v1.5.0.html): スキルの規則ではない。
+- **原典内の食い違い** (蒸留時点の実測): business-calibration.md は `high_bold_density` を business で無効化と書くが、lint.py は既定有効・無効化しない。lint.py の `GENRE_PROFILES["business"]` 直上コメントも 4 カテゴリと書くが実データは 3 カテゴリ。burstiness の閾値はコメント内に旧値 (−0.62 / −0.24) の説明が残るが、実効値は `BURSTINESS_THRESHOLD = -0.30`。いずれもコードを正とする。

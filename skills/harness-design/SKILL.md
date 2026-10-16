@@ -58,6 +58,7 @@ compatibility: Requires git and network access to clone/update the reference rep
 
 UI 生成のデザイン参照 (DESIGN.md 雛形・デザイントークン・アンチスロップ規律) はこのスキルの対象外。
 `ui-design` スキルを使う。
+日本語文章の表記規約・文書種別の構成・AI 臭規則の出所は `ja-writing` スキルを使う。
 
 ## 鮮度と更新
 

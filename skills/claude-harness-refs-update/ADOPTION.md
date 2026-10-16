@@ -27,6 +27,29 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-16 (ja-writing 新設時の初回蒸留)
+
+### natural-japanese / yomiyasu / stop-ai-slop-jp / meiseki / textlint 2 本 / smarthr-design-system から
+
+対象 `skill` の行はすべて `avoid-ai-slop-ja` (形式 2 の自作知識ベースで原典に従う義務は無い) で、主張は `avoid-ai-slop-ja/references/` を grep して該当行を確認済み。`運用` の行は textlint 導入と clone 容量の話。
+`natural-japanese` プラグインが無効な環境では `avoid-ai-slop-ja` が実働するので、ここでの食い違いはそのまま出力に出る。原典の規則と `avoid-ai-slop-ja` の対応は `ja-writing/MAPPING.md` にある (反映したら MAPPING.md も直す)。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | skill | **「直すとき足さない」制約が無い (最重要)**。`scoring.md` は 35/50 未満を全面書き直しにし、`rewrite-examples.md` D の fix はヘッジを元に無い数値 (「1 MR 約 0.5 ドル」) に置き換えている。`natural-japanese` は既存文書の修正で確信度の変更・元に無い事実 / 数値 / 見解の追加・要約節の新設を禁じ、仕上げに元文書と突き合わせる。`yomiyasu` も意味保持 4 点 (主張・比重・言い切りの強さ・文の働き) と文の種類 7 つの読み比べを最優先にする。Process に「新規執筆か修正か」の分岐と、修正時の意味検算ステップを足す | natural-japanese: `skills/natural-japanese/SKILL.md` 「いちばん大事な規則」§3・§6 / yomiyasu: `skills/yomiyasu/SKILL.md` § 1 最優先ルール・§ 情報の不増補 / meiseki: `.agents/skills/meiseki/SKILL.md` §4 Step 5・7 |
+| 未対応 | RECOMMENDED | skill | **ムラ処方が原典 3 本と逆向き**。`syntax-patterns.md` §8 / `variance.md` は体言止め・短文・問いを混ぜて文末を割るよう勧め、`rewrite-examples.md` E は敬体を常体に変えている。`natural-japanese` は「型を崩す手段として疑問形や体言止めを入れない」「文長がそろっていることだけを理由に直さない」とし、校正で文長変動の識別力はジャンル依存と結論。`yomiyasu` は語尾を散らすために文の働き・時制・敬体 / 常体を変えない。`ja-technical-writing` は技術文書で疑問符を使わず、文体を統一する (v10 以降は指定と違う文体もエラー)。少なくとも修正時と技術文書では処方を外す | natural-japanese: SKILL.md §2 原則 8、`corpus/reports/research/sentence-length-analysis.md` / yomiyasu: SKILL.md § 文書の立場と文末、`references/gemini-syntax.md` 原則 7・8 / ja-technical-writing: `README.md`、`CHANGELOG.md` 10.0.0 |
+| 未対応 | RECOMMENDED | skill | **banlist Tier 1 の一律禁止が原典より強すぎる**。「ここで重要なのは」「結論から言うと」「結局のところ」は、評価・方針転換・絞り込みを担うなら残す (`yomiyasu`)、「重要なのは」は人間側にも出る弱いシグナル (`natural-japanese` の実測)。メタ構造宣言も、数が合えば 1 文にまとめ、案内になっていれば残す。全角ダッシュは文書種別で線引きが違い、技術・業務文では挿入用法も置き換える。Tier 2 へ移し「削っても主張が変わらないときだけ削る」を付ける。Tier 2 には `stop-ai-slop-jp` の頻度上限 (「1〜2 回なら自然」) を添える | yomiyasu: `references/gemini-syntax.md` 原則 5・9・13 / natural-japanese: `skills/natural-japanese/scripts/lint.py` `FORBIDDEN_PHRASES_WEAK_SIGNAL` 直上コメント / stop-ai-slop-jp: `references/phrases.md` 冒頭 |
+| 未対応 | RECOMMENDED | skill | **false agency と否定対比の判定が無条件**。`syntax-patterns.md` §1 は非生物主語を一律に減点し、修正例は原文に無い動作主を足す。`yomiyasu` は感情・意志の擬人化と、人の判断を抽象名詞の作用として書いた文だけを直し、道具の客観的な働きと論文の「〜ことを示している」は残す。§3 の「A でない。B でもない。C だ → C だ」も、`natural-japanese` は打ち消しを 3 種に分け (先回り打ち消しは削る / 「A は B ではない。C だ」は肯定文につなぐ / 意味を絞る・注意は残す)、密度 2% / 3% の目安を持つ | yomiyasu: `gemini-syntax.md` 原則 1・3・5 / natural-japanese: SKILL.md §3、`corpus/reports/antithesis-recalibration.md` |
+| 未対応 | RECOMMENDED | skill | **構文・読解負荷の観点が丸ごと無い**: 二重否定を肯定へ畳むときに真偽を反転させない検算、長い連体修飾・「の」3 連以上・サ変名詞化の展開、段落内の言い換え反復、埋もれた列挙を開く (`avoid-ai-slop-ja` は 3 並列を減らす方向しか持たない)。あわせて `natural-japanese` の「読み手が取れない言い回し」7 分類 (擬人化・英語の逐語訳・動作の名詞化・中身の見えない比喩 等) と、英語に訳し戻して確かめる方法 | meiseki: `.agents/skills/meiseki/references/patterns.md` A–H / natural-japanese: SKILL.md §3 |
+| 未対応 | RECOMMENDED | skill | 修正の優先順位が出所と逆。`stop-ai-slop-jp` は「立場 → false agency → 構造 → 語彙 → 記号」で、「語彙・記号だけ直しても AI 臭は残る」とする。現 Process は banlist 走査 (語彙・記号) を構文チェックより前に置く。出所にある構造パターン 4 種 (体験の壮大化・劇的な断片化「シンプル。それだけ。」・体験→引用→抽象化の 3 連・全方位肯定) も欠けている。劇的な断片化は §8 の「短文を混ぜる」と衝突する | stop-ai-slop-jp: `SKILL.md` § 修正の優先順位、`references/structures.md` §1-2・2-3・4-3・6-1 |
+| 未対応 | FYI | skill | 書く側と直す側で規則の向きが変わる項目: 命題型 H2 (`natural-japanese` は新規なら結論見出しを推奨、修正なら 2〜3 か所まで)、装飾絵文字 (修正時は書き手の癖を残す)。`stop-ai-slop-jp` との意図的な差分 (ダッシュは緩く・絵文字は厳しく、誤字や毒の容認を formal 文書のために抑制) は戻さない | natural-japanese: SKILL.md §1・§2 原則 6・§3 / stop-ai-slop-jp: `SKILL.md` コアルール 6・14 |
+| 未対応 | FYI | skill | 数値の目安を出典付きで引ける: 技術文書は 1 文 100 字 (厳しめで 90)・読点 3 個・漢字連続 6 字。`avoid-ai-slop-ja` は定性記述だけなので食い違いではない。`〜することができます` は `ja-no-redundant-expression` と同じ例で一致するが、`natural-japanese` の 2026-10 測定では AI 以前の人間文書のほうが多く、AI らしさではなく冗長さの扱い | ja-technical-writing: `README.md` / natural-japanese: `skills/natural-japanese/scripts/lint.py` コメント |
+| 未対応 | FYI | skill | 語彙の追加材料: 大げさな役割名 (契約 / 正本 / ゲート / 台帳。CI・会計の正式な意味は除く)、チャット応答の名残、仮置きの残り (〇〇 / XXX)、英語直訳 (version→「版」 等)、太字が表示されない書き方 (CommonMark の flanking 規則) と直し方。`natural-japanese` が禁止語から外した「最後に」「まさに」は足さない | yomiyasu: `references/slop-catalog.md` §2・5・6、`gemini-syntax.md` 原則 14 / natural-japanese: `skills/natural-japanese/scripts/lint.py` |
+| 未対応 | FYI | 運用 | 和欧間スペースの流派: このリポジトリの和文は入れる側で統一 (和欧間・インラインコード前後・スラッシュ前後)。`ja-spacing` を既定のまま当てると、誤りではなく流派の不一致として大量に指摘される。textlint を導入するなら `space: "always"`、code / link の `before` / `after` を `true`、`ja-no-space-around-slash` を無効にし、「」の前後にスペースを置く箇所 (`ja-no-space-around-parentheses` に掛かる) は直すか無効にするかを決める。一般原則 (既定より対象文書の実測を先に数える) だけは `ja-writing/SKILL.md` に入れた。この行で未対応なのは textlint を実際に導入するかどうか。和文字間の半角スペース 1 件 (`skills/harness-design/SKILL.md` の「clone より古い を」) は `ja-no-space-between-full-width` に検出されるが、列挙の直後に助詞を続けた意図的な区切りなので直さない | ja-spacing: `packages/textlint-rule-ja-space-between-half-and-full-width/README.md` § Options、`packages/textlint-rule-ja-no-space-around-slash/src/index.js` |
+| 対応済 (2026-10-16) | FYI | skill | `avoid-ai-slop-ja/SKILL.md` § 鮮度の「出所 clone を持たない」が、`stop-ai-slop-jp` の SHA 追従開始で実態とずれた → 原典 STALE 時に対応表経由で見直す経路を追記 | stop-ai-slop-jp 蒸留版の frontmatter |
+| 未対応 | FYI | 運用 | `smarthr-design-system` の clone は画像込みで約 750MB と他の原典より 1 桁重い。参照するのは `src/content/articles/products/contents/` だけ。`install.sh` の sparse-checkout は全 repo 共通 (`/*` から `.claude/skills` を除く) なので、repo 別の絞り込みを入れるなら `install.sh` 側の改修が要る | `du -sh` 実測 |
+
+---
 ## 2026-10-16
 
 ### claude-code-best-practice 再蒸留から

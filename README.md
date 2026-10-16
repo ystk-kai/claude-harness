@@ -9,7 +9,8 @@ Claude Code の個人グローバル設定 — スキルと CLAUDE.md の常時�
 | スキル | 用途 | 起動 |
 |---|---|---|
 | `harness-design` | LLM ハーネス・プロンプト設計の参照資料集 (原典 8 本)。蒸留版 → 原典 clone の 2 層で読む。追従しない資料から採った手法は `PATTERNS.md` | 自動 |
-| `ui-design` | UI 生成のデザイン参照資料集 (原典 3 本: DESIGN.md 雛形 / アンチスロップ規律 / デザイントークン仕様)。同じ 2 層 | 自動 |
+| `ui-design` | UI 生成のデザイン参照資料集 (原典 4 本: DESIGN.md 雛形 / アンチスロップ規律 / デザイントークン仕様 / DESIGN.md 形式仕様)。同じ 2 層 | 自動 |
+| `ja-writing` | 日本語文章の参照資料集 (原典 7 本: AI 臭除去スキル / 構文・読解負荷 / textlint 規則 / 表記・文書種別ガイド)。同じ 2 層 | 自動 |
 | `avoid-ai-slop-ja` | 日本語文章から AI 臭 (slop) を除くレビュー・リライトの手法 | 自動 |
 | `avoid-ai-slop-design` | Web UI・スライド・図解・生成画像の AI 臭検出カタログと処方 (計測研究・学術ソースの出典付き) | 自動 |
 | `claude-harness-refs-update` | 参照資料 (蒸留版と原典 clone) の鮮度チェックと再蒸留。更新機構の所有者 | `/claude-harness-refs-update` |
@@ -25,7 +26,7 @@ git clone https://github.com/ystk-kai/claude-harness.git ~/claude-harness
 ~/claude-harness/install.sh --with-references
 ```
 
-`--with-references` を外すと原典 clone (合計数百 MB) を取らない。蒸留版だけでも参照スキルは動くが、索引から原典の該当ファイルを読む経路が使えなくなる。`~/.claude` 以外に展開する環境は `CLAUDE_CONFIG_DIR` を設定して実行する。
+`--with-references` を外すと原典 clone (合計 1GB 超。最大は `smarthr-design-system` の約 750MB) を取らない。蒸留版だけでも参照スキルは動くが、索引から原典の該当ファイルを読む経路が使えなくなる。`~/.claude` 以外に展開する環境は `CLAUDE_CONFIG_DIR` を設定して実行する。
 
 ### Claude Code に任せる
 
@@ -79,7 +80,7 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 
 原典リポジトリの実体はこのツリーに含めず、蒸留版 frontmatter の `source` URL から clone して復元する。
 
-- **蒸留版** — `skills/{harness-design,ui-design}/references/*.md`。要点と索引を 250 行以内にまとめたもの。`source` が repo リストの唯一の正、`distilled_commit` が蒸留時点の原典 SHA
+- **蒸留版** — `skills/{harness-design,ui-design,ja-writing}/references/*.md`。要点と索引を 250 行以内にまとめたもの。`source` が repo リストの唯一の正、`distilled_commit` が蒸留時点の原典 SHA
 - **原典** — `~/.claude/references/<repo>/`。全文。蒸留版と食い違ったら原典が正
 - **更新機構** — `skills/claude-harness-refs-update/` が一元所有する。`scripts/check-freshness.sh` が検出、`DISTILLING.md` が構成規約と再蒸留の手順、`ADOPTION.md` が「原典の変更を自分のハーネスに取り込むか」の判断台帳、`scripts/frontmatter.sh` は `install.sh` と共用のパーサ
 
@@ -117,7 +118,7 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 
 ## 設計メモ: 原典 clone をスキルディレクトリ内に置かない理由
 
-[Agent Skills 標準](https://agentskills.io/specification) の `references/` は、そのスキルのために書かれた focused な文書を置く場所と定義されている。一方ここで扱う原典は外部リポジトリの丸ごと clone (数百 MB・第三者ライセンス・`git pull` で独立に更新) で、性質が違う。そのため:
+[Agent Skills 標準](https://agentskills.io/specification) の `references/` は、そのスキルのために書かれた focused な文書を置く場所と定義されている。一方ここで扱う原典は外部リポジトリの丸ごと clone (合計 1GB 超・第三者ライセンス・`git pull` で独立に更新) で、性質が違う。そのため:
 
 - 外部 clone (生データ) は共有コーパスとして `~/.claude/references/` に外出しする。スキル配布時に第三者リポジトリを同梱せずに済み、CLAUDE.md ルールや他スキルからも共有できる
 - スキル外パスへの依存は SKILL.md の `compatibility` フィールド (標準仕様の宣言用フィールド) で明示する

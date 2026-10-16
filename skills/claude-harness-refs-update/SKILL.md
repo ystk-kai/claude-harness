@@ -3,12 +3,12 @@ name: claude-harness-refs-update
 description: claude-harness の参照資料 (蒸留版 skills/*/references/*.md と原典 clone ~/.claude/references/ の 2 層) の鮮度チェックと更新を実行する。check-freshness → BEHIND を git pull → STALE を DISTILLING.md の手順で再蒸留 → REVIEW (出所 clone を持たない知識ベース) を棚卸し → 実ハーネスへの取り込み候補を照合して ADOPTION.md に記録。明示起動専用 (/claude-harness-refs-update で呼ぶ)。
 disable-model-invocation: true
 argument-hint: "[repo-name ...] | --check"
-compatibility: Requires git and network access. Owns scripts/check-freshness.sh, DISTILLING.md and ADOPTION.md, and operates on every skill's references/*.md in this repo (harness-design, ui-design, ...) plus the clones at ~/.claude/references/ (external to this skill dir).
+compatibility: Requires git and network access. Owns scripts/check-freshness.sh, DISTILLING.md and ADOPTION.md, and operates on every skill's references/*.md in this repo (harness-design, ui-design, ja-writing, ...) plus the clones at ~/.claude/references/ (external to this skill dir).
 ---
 
 # claude-harness-refs-update: 参照資料の鮮度チェックと更新
 
-claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md`。`harness-design` と `ui-design` が持つ) と原典 clone (`~/.claude/references/<repo>/`)。このスキルは鮮度チェックから再蒸留までを 1 コマンドで回す。参照資料の更新機構はこのスキルが一元所有する: `scripts/check-freshness.sh` が検出、[DISTILLING.md](DISTILLING.md) が更新レシピと再蒸留プロンプト雛形、`scripts/frontmatter.sh` が `install.sh` と共用のパーサ、[ADOPTION.md](ADOPTION.md) が「原典の変更を自分のハーネスに取り込むか」の判断台帳。参照スキル側 (`harness-design` / `ui-design`) は蒸留版を持つだけで、判定も規約も持たない。更新の入口はこのスキルだけ (スラッシュコマンドを増やさない)。
+claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md`。`harness-design` / `ui-design` / `ja-writing` が持つ) と原典 clone (`~/.claude/references/<repo>/`)。このスキルは鮮度チェックから再蒸留までを 1 コマンドで回す。参照資料の更新機構はこのスキルが一元所有する: `scripts/check-freshness.sh` が検出、[DISTILLING.md](DISTILLING.md) が更新レシピと再蒸留プロンプト雛形、`scripts/frontmatter.sh` が `install.sh` と共用のパーサ、[ADOPTION.md](ADOPTION.md) が「原典の変更を自分のハーネスに取り込むか」の判断台帳。参照スキル側 (`harness-design` / `ui-design` / `ja-writing`) は蒸留版を持つだけで、判定も規約も持たない。更新の入口はこのスキルだけ (スラッシュコマンドを増やさない)。
 
 引数: repo 名 (例 `12-factor-agents`) を渡すとその repo だけを対象にする。`--check` で鮮度チェックのみ (更新に進まない)。無引数なら全 repo を対象に更新まで進む。
 
@@ -17,7 +17,7 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
 0. **前提を解決する。**
    - 当日日付を控える: `date +%F`。`distilled_at` に使う。**サブエージェントは当日日付を知らないので、後で必ずプロンプトに埋める。**
    - このスキルの実体パスを解決する: `SELF="$(readlink -f "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/claude-harness-refs-update")"`。以降 `$SELF/scripts/check-freshness.sh` / `$SELF/DISTILLING.md` を使う (skills/ は symlink なので実体パスを取るため `readlink -f`)。
-   - claude-harness リポジトリのルートを解決する: `ROOT="$(dirname "$(dirname "$SELF")")"`。蒸留版は `harness-design` と `ui-design` の各スキル配下にあるので、出力先は `$ROOT/skills/<skill>/references/<repo>.md` になる (どのスキルかは手順1の STALE 行に併記される)。
+   - claude-harness リポジトリのルートを解決する: `ROOT="$(dirname "$(dirname "$SELF")")"`。蒸留版は `harness-design` / `ui-design` / `ja-writing` の各スキル配下にあるので、出力先は `$ROOT/skills/<skill>/references/<repo>.md` になる (どのスキルかは手順1の STALE 行に併記される)。
    - 原典ルート: `REFS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/references"`。clone は `$REFS/<repo>`。
 
 1. **鮮度チェック** — `bash "$SELF/scripts/check-freshness.sh"` を実行 (fetch あり = 最新 upstream を反映)。**1 ファイル 1 行**で、行頭タグは「次にやること」を示す: `OK` / `BEHIND` (pull) / `STALE` (再蒸留) / `REVIEW` (知識ベースの棚卸し) / `MISS` / `ERR` / `NOTE`。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る (`/ 蒸留版も遅れ` が併記される)。`NOTE` は「判定できなかった」であって「最新」ではないので exit 1 側に数える — したがって exit 0 は全件検証済みを意味する。引数に repo 名があれば、その repo の行だけを対象にする (スクリプトに絞り込み機能はないので出力からフィルタ)。引数が `--check` なら結果を提示してここで終了。exit 0 (= 要対応なし) なら「更新不要」と伝えて終了。
@@ -35,6 +35,8 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
    - 構成規約は `DISTILLING.md` に従うこと (frontmatter 3 キー / `## Contents` / `## まず押さえる` / 索引テーブル / `## 蒸留の範囲外` / 250 行以内 / 実際に Read した事実だけ・推測で書かない)
 
    各サブエージェントは蒸留版 1 ファイルを Write し、frontmatter の `distilled_commit` を clone の新 HEAD・`distilled_at` を当日に更新、最後に **2 本立てで返す** — (a) 行数・使った SHA・内容の 3 行要約、(b) **取り込み候補** (`DISTILLING.md`「取り込み候補の抽出」の 4 点セット。該当なしなら「候補なし」と明示)。雛形にこの返却契約が入っているので、プロンプトから落とさない。
+
+   再蒸留した repo が `ja-writing/MAPPING.md` の対応表に載っているもの (`stop-ai-slop-jp` 等) なら、MAPPING.md の該当節と、そこが指す `avoid-ai-slop-ja` の references も見直す。自作スキルは原典の更新を自動では受け取らないので、ここで差分を取り込み候補 (手順6) に流す。
 
 5. **REVIEW を棚卸し** — `REVIEW` は出所 clone を持たない知識ベース (`avoid-ai-slop-*` 等) の期限切れ。SHA 差分がないので機械的な更新はできない。該当ファイルの主張を読み、**出典 URL の生存と撤回、記述が前提にしているモデル世代・流行の変化**を確認して本文を直す。委譲するなら `general-purpose` サブエージェント (WebFetch/WebSearch が要る)。直したら `reviewed_at` を当日に更新する。中身を見ずに日付だけ進めるのは禁止 (SHA の無言 bump と同じ)。見直した結果「変更不要」なら、その判断理由を commit message に書いて日付を進める。棚卸しで出典の撤回や前提の陳腐化が見つかったら、それも手順6の取り込み候補として扱う (知識ベースは自作なので、影響先は蒸留版ではなく自分のハーネスや文書規約になりやすい)。
 
