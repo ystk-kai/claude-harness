@@ -27,6 +27,34 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-16
+
+### claude-code-best-practice 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | BREAKING | settings | Opus 5.5 以降の 5.x はユーザー設定のトップレベル `effortLevel` を**無視する**。環境側 `settings.json` にトップレベル `effortLevel` が実在し `modelSettings` は無い (grep 済) ので、Opus 5.5 では意図した値が効かずモデル既定 (`high`) で動いている。`modelSettings` のモデル別エントリへ移す。原典自身は LOW / confidence 0.85 の追記なので、直す前に公式 `settings-reference` で裏を取る。2026-09-01 の `effortLevel` fallback 項目 (RECOMMENDED) はこれで格上げ | ccbp: `best-practice/claude-settings.md` の `effortLevel` 行、`3a30a81` (changelog #32) |
+| 未対応 | RECOMMENDED | settings | `alwaysThinkingEnabled: true` は no-op (思考は既定 ON。Opus/Sonnet/Haiku 5.5 と Fable は `false` でも切れない)。環境側 `settings.json` に `true` で実在 (grep 済) — 削ってよい。`enableArtifact: true` も no-op だが未使用 | ccbp: 同ファイル `alwaysThinkingEnabled` 行、`3a30a81` (#5・#6) |
+| 未対応 | FYI | settings | 旧記述どおり書くと壊れるキー: `feedbackDrafts` は `"notify"`/`"quiet"`/`"off"` (boolean ではない)、`strictKnownMarketplaces` は source object 配列 (空配列で全ブロック)、`USE_BUILTIN_RIPGREP` は `0` がシステム `rg`、`CLAUDE_CODE_ENABLE_OPUS_4_7_FAST_MODE` は v2.1.142 から no-op、`askUserQuestionTimeout` は user / managed からしか読まれない。いずれも環境側・この repo で未使用 (grep 済) | ccbp: `3a30a81` (#2・#3・#7・#20・#21) |
+| 未対応 | FYI | settings | 新しい制御キー: `permissions.blockReadsOutsideWorkingDirectories` (v2.1.257+。任意スコープの `true` が managed の `false` に勝つ) で Read を作業ディレクトリ + `additionalDirectories` に閉じる、`bashOutputMaxChars` (v2.1.261+、`BASH_MAX_OUTPUT_LENGTH` より優先) で Bash 出力取り込み上限。未使用 (grep 済)、必要になったら使う | ccbp: `best-practice/claude-settings.md` Permissions 表・`bashOutputMaxChars` 行 |
+| 未対応 | FYI | hook / subagent | hook イベントは 33 件 (原典 CLAUDE.md の列挙は 30 件なので正は claude-code-hooks / 公式)。dynamic workflow 内 subagent は `CLAUDE_CODE_WORKFLOW_SUBAGENT_MODEL` (v2.1.296) が `CLAUDE_CODE_SUBAGENT_MODEL` より優先。subagent frontmatter の `autoCompactWindow` は 10-15 時点でも ON HOLD → 確定情報として使わない | ccbp: `11cdc15`、`3a30a81`、`changelog/best-practice/claude-subagents/changelog.md` 10-15 entry |
+
+### claude-cookbooks 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | Managed Agents の `multiagent_20261001` ではオーケストレータ自身の inline agents と workflow runs が**既定で on**。委譲先を固定したいなら `subagents.inline_agents` / `workflows` を `{"type": "disabled"}` にする。自動付与 tool は `create_agent` / `send_to_agent` / `list_agents` / `send_to_parent` に変わった (旧 `coordinator` 型の `wait_for_agents` / `submit_result` 前提のプロンプトは要書き換え)。このハーネスは Managed Agents 未使用 (grep 済) | cookbooks: `39cd5a7`、`managed_agents/CMA_plan_big_execute_small.ipynb` |
+| 未対応 | FYI | subagent | オーケストレータはワーカーの system prompt を見られない — ワーカーについて知っているのは自分のプロンプトに書かれたことだけで、記述と実プロンプトの一致はサーバが強制しない。`predefined_agents` は作成・更新時に snapshot されるので、ワーカー定義を変えたらオーケストレータも update する。Managed Agents 固有だが、Claude Code の orchestrator 系プロンプトに subagent の振る舞いを書くときも同じ同期問題がある | cookbooks: 同上 |
+| 未対応 | FYI | 運用 | SDK / API 利用の可観測性: 処理単位を自前 span で包み SDK span と API span を `traceparent` で 1 trace に繋ぐ。トークン合計は `CLIENT`・`SERVER`・`model_request` を重ねて数えない。課金は span でなく Usage & Cost API で照合。`content_mode` は既定 `metadata_only` で運用し、それでも外へ出る tool description・agent 名・MCP サーバ名に機密を書かない。未使用 (grep 済) | cookbooks: `b2b0aa1`、`observability/opentelemetry_tracing.ipynb` |
+
+### awesome-harness-engineering 再蒸留から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | FYI | 運用 | compaction を既定にしない根拠の実測 (本番 AI tutor 660 turn): 全履歴保持 recall 100% / $0.11/turn に対し compaction 構成 58% / $0.24/turn。要約が cache 済み prefix を書き換えて cache hit を壊すのが原因。先に真の制約 (window / 請求額 / 品質) を名指しし、cache を保つ truncation と tool 出力上限を優先する。README 注記のみが根拠で記事本文は未確認。agent loop を自作するときの判断材料 | ahe: `277feb4`、`README.md` の `Context Delivery & Compaction` |
+| 対応済 (2026-10-16) | FYI | 運用 | upstream が履歴を書き換え (旧 13 commit を同内容で再作成)、`distilled_commit` `2bcb329` が上流履歴から消えた。ツリー一致を確認のうえ clone を `origin/main` に揃え、同一ツリーの `809d878` に付け替えた。`check-freshness.sh` は diverged clone を `BEHIND` としか出さず `pull --ff-only` 案内が失敗する — 再発したら同手順 (tree 比較 → reset → SHA 付け替え) で直す | ahe: `809d878` (旧 `2bcb329` と tree `1b7089a` 一致) |
+
+---
 ## 2026-10-13
 
 ### avoid-ai-slop-design 棚卸しから
