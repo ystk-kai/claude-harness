@@ -42,22 +42,31 @@ text worse. Skip when:
 
 ## Process (run in order)
 
+0. **Decide the mode: writing new, or revising existing text.** Revising (someone's draft, a published doc, text the user pasted) adds hard limits that override everything below:
+   - Don't add facts, numbers, examples, causes, or opinions that aren't in the material (the original, the request, provided documents, or facts stated in this conversation). Your own or another AI's earlier output and general knowledge are not material.
+   - Don't change confidence in either direction (no hardening a hedge, no softening an assertion), and don't add a summary section.
+   - Where a fix would need information the material lacks, leave it and ask (mark it 【要確認】) instead of inventing.
 1. **Decide the document type** — it sets how much variation / bluntness is allowed. See `references/document-types.md`.
-2. **Score 5 axes** (立場・リズム・主体性・具体性・削減), 1–10 each. Below 35/50 → rewrite; at 35+ still fix any critical syntax slop. See `references/scoring.md`.
-3. **Scan the banlist** (3 tiers: always-ban / avoid-by-default / context-OK). See `references/banlist.md`.
-4. **Check syntax patterns** (false agency, propositional H2, false contrast "XではなくY", hook-then-reversal, meta-structure announcements, ❌/✅ slides, triple-parallels, monotone sentence endings). See `references/syntax-patterns.md`.
-5. **Keep deliberate ムラ** (variation in length / density / tone / conclusion / detail) within what the doc type allows. See `references/variance.md`.
-6. **Rewrite**, then re-check 削減 (cut filler) and 具体性 (names/numbers/examples). Study `references/rewrite-examples.md` — including the over-corrected examples.
+2. **Score 5 axes** (立場・リズム・主体性・具体性・削減), 1–10 each. Below 35/50 → rewrite when writing new; when revising, fix the low axes locally. At 35+ still fix any critical syntax slop. See `references/scoring.md`.
+3. **Check syntax patterns**, fixing in this order: 立場 → false agency → 構造 → 語彙 → 記号. Vocabulary and symbol fixes alone leave the smell. Covers false agency, thesis headings, negation / false contrast, meta announcements, parallel shapes, sentence endings, template structures, reading-load syntax, and phrases readers can't parse. See `references/syntax-patterns.md`.
+4. **Scan the banlist** (3 tiers: always-ban / avoid-by-default, judged by frequency / context-OK). See `references/banlist.md`.
+5. **Keep deliberate ムラ** within what the doc type allows — when writing new. When revising, variance alone is not a reason to edit. See `references/variance.md`.
+6. **Rewrite**, then re-check 削減 (cut filler) and 具体性 (names/numbers/examples from the material). Study `references/rewrite-examples.md` — including the over-corrected examples.
+7. **Meaning check (revising).** Compare every changed sentence with the original on four points: claim, weight, strength of assertion, and the sentence's job (fact / opinion / request or rule / metaphor / irony / hypothesis or prediction / quote or hearsay — hearsay must not become assertion, opinion must not become fact). If any point changed, restore the original sentence rather than patching the rewrite. Also check that no fact or number appears that the material doesn't contain.
 
 ## Quick checklist
 
+- [ ] Mode decided; if revising, nothing added beyond the material and confidence unchanged.
 - [ ] Document type identified; bluntness/variation budget set accordingly.
-- [ ] No always-ban items (装飾絵文字 / 全角ダッシュ乱用 / `**` residue / 根拠なし強評価).
-- [ ] No inanimate subject performing judgment/intent (false agency).
-- [ ] No empty "XではなくY" / propositional-heading pile-up / meta-structure openers.
-- [ ] Sentence length and endings vary; not every paragraph lands the same way.
-- [ ] Every key claim is anchored to a name / number / example; a stance is taken with a stated basis (≠ unfounded assertion).
+- [ ] Fixed in order: stance → false agency → structure → vocabulary → symbols.
+- [ ] No always-ban items (装飾絵文字 / 説明文の全角ダッシュ / `**` residue / 根拠なし強評価).
+- [ ] No inanimate subject given feelings or intent; no human judgment written as an abstract noun's action (tools and cited papers may keep their subjects).
+- [ ] No pre-emptive denials / empty "XではなくY" / identical thesis headings in a row / content-free meta openers.
+- [ ] One style (敬体 or 常体) throughout; variety comes from length and construction, not inserted questions or fragments.
+- [ ] Double negatives folded without flipping truth; long modifiers and nominalizations opened up.
+- [ ] Every key claim is anchored to a name / number / example from the material; a stance is taken with a stated basis (≠ unfounded assertion).
 - [ ] 5-axis self-score ≥ 35/50 and no critical syntax slop remains.
+- [ ] If revising: meaning check passed on every changed sentence.
 
 ## 鮮度
 

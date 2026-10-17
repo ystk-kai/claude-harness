@@ -1,12 +1,12 @@
 ---
 source: https://github.com/textlint-ja/textlint-rule-preset-ja-spacing
-distilled_commit: 080e6e23c872a62becb7c67eebce974d383f2fa6
-distilled_at: 2026-10-16
+distilled_commit: 5d1e2130d3f5fc668353fc2228411efb28bb24dc
+distilled_at: 2026-10-17
 ---
 
 # textlint-rule-preset-ja-spacing 蒸留版
 
-日本語文中の「スペースを入れるか入れないか」だけを扱う textlint ルール 11 本と、それを束ねるプリセットの monorepo (textlint-ja 製、各パッケージ v3.0.3)。原典の自己規定は「日本語周りにおけるスペースの有無を決定するtextlintルールプリセット」(README.md)。**この蒸留版は「和欧間・全角同士・記号まわり・Markdown 要素まわりのスペース規則と、その選び方」の索引**であり、textlint の導入手順やルール実装の書き方は扱わない。
+日本語文中の「スペースを入れるか入れないか」だけを扱う textlint ルール 11 本と、それを束ねるプリセットの monorepo (textlint-ja 製、各パッケージ v3.0.4)。原典の自己規定は「日本語周りにおけるスペースの有無を決定するtextlintルールプリセット」(README.md)。**この蒸留版は「和欧間・全角同士・記号まわり・Markdown 要素まわりのスペース規則と、その選び方」の索引**であり、textlint の導入手順やルール実装の書き方は扱わない。
 
 ルールは README だけでなく `src/index.js` も読んで確認した。README の説明より実装の判定範囲が狭いルールがあるので、そうしたルールには「実装上」と書いてある。
 
@@ -37,7 +37,7 @@ distilled_at: 2026-10-16
 
 9. **カタカナ語の区切りは中黒か半角スペース。全角スペースは不可**。`OK: インターフェース・ブラウザ` / `NG: インターフェース　ブラウザ`。このルールだけは自動修正 (`--fix`) に対応していない (packages/textlint-rule-ja-nakaguro-or-halfwidth-space-between-katakana/README.md, src/index.js)。
 
-10. **かっこの内側にも外側にもスペースを入れない。対象は全角かっこと半角 `[]`**。README は対象として `[]（）［］「」『』` を挙げ、実装も同じ 10 文字だけを見る。**半角の `(` `)` は対象外**なので、`foo (bar)` 型の半角丸かっこ表記はこのルールでは咎められない (packages/textlint-rule-ja-no-space-around-parentheses/README.md, src/index.js)。
+10. **かっこの内側にも外側にもスペースを入れない。対象は全角かっこと半角 `[]`**。README は対象として `[]（）［］「」『』` を挙げ、実装も同じ 10 文字だけを見る。**半角の `(` `)` は対象外**なので、`foo (bar)` 型の半角丸かっこ表記はこのルールでは咎められない。v3.0.4 から、リスト項目の継続行の行頭インデント (半角スペース・タブ) は開きかっこ前のスペースとみなさない (`- 箇条書きの文を\n  （括弧）で続ける。` が valid)。継続行でも文中の `続けて （括弧）` や閉じかっこ後の `（括弧） で` は従来どおり報告する (packages/textlint-rule-ja-no-space-around-parentheses/README.md, src/index.js の `isIndentation`, test/index-test.js)。
 
 11. **スラッシュの前後にはスペースを入れない**。`OK: struct/enum` / `NG: struct / enum`。和文・英文を問わず、プレーン文字列中の `/` の前後にある半角・全角スペースをすべて報告する (packages/textlint-rule-ja-no-space-around-slash/README.md, src/index.js)。
 
@@ -58,7 +58,7 @@ distilled_at: 2026-10-16
 | `ja-space-between-half-and-full-width` | 英数字と和文の間。既定は入れない (`これはUnicode` / `これは Unicode`) | `space`: `"never"` (既定) / `"always"` / 配列。`lintStyledNode`: `false`。`allows`: `[]`。`exceptPunctuation`: `true` (非推奨) | 有効 (`space: "never"`) | 可 |
 | `ja-no-space-between-full-width` | 和文同士の間に半角スペースを入れない (`これは大丈夫。` / `これは ダメ`)。カタカナ同士は除外 | なし | 有効 | 可 |
 | `ja-nakaguro-or-halfwidth-space-between-katakana` | カタカナ語間は中黒か半角スペース (`インターフェース・ブラウザ` / 全角スペース区切り) | なし | 有効 | 不可 |
-| `ja-no-space-around-parentheses` | `[]（）［］「」『』` の内外にスペースを入れない (`「良いですね」` / `「 ダメですね 」`) | なし | 有効 | 可 |
+| `ja-no-space-around-parentheses` | `[]（）［］「」『』` の内外にスペースを入れない (`「良いですね」` / `「 ダメですね 」`)。リスト継続行の行頭インデントは除外 (v3.0.4〜) | なし | 有効 | 可 |
 | `ja-no-space-around-slash` | `/` の前後にスペースを入れない (`struct/enum` / `struct / enum`) | なし | 有効 | 可 |
 | `ja-space-after-exclamation` | 文末 `！` の後に文が続くなら全角スペース。文中は入れない | なし | 有効 | 可 |
 | `ja-space-after-question` | 文末 `？` の後に文が続くなら全角スペース。文中は入れない | なし | 有効 | 可 |
@@ -92,7 +92,7 @@ distilled_at: 2026-10-16
 | 和欧間のオプション別挙動の実例 | packages/textlint-rule-ja-space-between-half-and-full-width/test/index-test.js | valid / invalid の対。配列指定・`allows`・見出しの扱いが読める |
 | 全角同士・カタカナ複合語の例外 | packages/textlint-rule-ja-no-space-between-full-width/src/index.js | 和文字の正規表現とカタカナ除外 |
 | カタカナ語の区切り | packages/textlint-rule-ja-nakaguro-or-halfwidth-space-between-katakana/src/index.js | 全角スペースだけを報告。fixer なし |
-| かっこの対象文字 | packages/textlint-rule-ja-no-space-around-parentheses/src/index.js | `brackets` 配列 (半角 `()` を含まない) |
+| かっこの対象文字 | packages/textlint-rule-ja-no-space-around-parentheses/src/index.js | `brackets` 配列 (半角 `()` を含まない)、継続行インデント除外の `isIndentation` |
 | スラッシュ | packages/textlint-rule-ja-no-space-around-slash/src/index.js | `/` 前後の `[ 　]{0,10}` を除去 |
 | 感嘆符 / 疑問符 | packages/textlint-rule-ja-space-after-exclamation/README.md, packages/textlint-rule-ja-space-after-question/README.md | OK / NG 例。実装は各 src/index.js |
 | Markdown 要素 4 種 | packages/textlint-rule-ja-space-around-{code,link,emphasis,strong}/README.md | TxtAST の `Code` / `Link` / `Emphasis` / `Strong` node が対象。Options 節と強調の解析注意 |

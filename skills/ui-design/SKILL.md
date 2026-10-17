@@ -33,7 +33,7 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 | 雛形カタログ | `awesome-design-md/` | [references/awesome-design-md.md](references/awesome-design-md.md) | 実在サイトのデザイン言語を抽出した DESIGN.md 集 (74 件)。作りたい雰囲気から系統を選び、プロジェクトルートに置いて生成の制約にする |
 | 生成規律 | `hallmark/` | [references/hallmark.md](references/hallmark.md) | 生成物が既定値 (AI slop) に落ちるのを防ぐルールセット。テーマ選択・構造選択・出力前のゲート検査。既存 UI の audit / redesign / study にも使う |
 | 標準仕様 | `community-group/` (DTCG) | [references/community-group.md](references/community-group.md) | デザイントークンの標準語彙と形式 (`$value` / `$type` / alias / composite type)。トークンファイルや theme 定義を書くときの典拠 |
-| 形式仕様 | `design.md/` (Google Labs) | [references/design.md.md](references/design.md.md) | DESIGN.md 形式そのものの規範 (Apache-2.0)。frontmatter のトークン schema・8 セクションの固定順序・component プロパティ・未知内容の扱い。`PHILOSOPHY.md` が「具体的な参照物は形容詞の列挙に勝る」「否定制約は具体性から自動で付く」を規定。CLI に `lint` (WCAG contrast を含む 11 ルール) / `diff` / `export --format dtcg` / `spec` |
+| 形式仕様 | `design.md/` (Google Labs) | [references/design.md.md](references/design.md.md) | DESIGN.md 形式そのものの規範 (Apache-2.0)。YAML トークン (先頭 front matter と各セクション内の ```yaml ブロック。併用時は 1 つのトークン木に merge され、top-level キーの重複はエラー) の schema・8 セクションの固定順序・component プロパティ・未知内容の扱い。`PHILOSOPHY.md` が「具体的な参照物は形容詞の列挙に勝る」「否定制約は具体性から自動で付く」を規定。CLI に `lint` (WCAG contrast を含む 11 ルール) / `diff` / `export --format dtcg` / `spec` |
 | 日本語組版 | (なし: 自作の知識ベース) | [references/japanese-web-typography.md](references/japanese-web-typography.md) | 日本語を含む UI の書体・組版の補正。明朝化 / 合成斜体 / 偽ボールドの原因と対策、フォントスタック、禁則と折り返し、行高・字間の下限 (デジタル庁 DADS)、日本語 Web フォントの容量制約、英語圏の型が壊れる箇所の対応表 |
 | 日本語図解 | (なし: 自作の知識ベース) | [references/japanese-diagram-rendering.md](references/japanese-diagram-rendering.md) | 日本語ラベルを含む図を Mermaid / Graphviz / PlantUML / D2 / SVG で出すときの描出事故。括弧のパースエラー、ツール別フォント指定、SVG のフォント非埋め込み、ラベル幅の測り方、レンダリング検証ゲート |
 
@@ -50,7 +50,7 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
   こちらは上の「UI に表示されるテキスト」の判定を経由しない — README や仕様書に貼る図も対象で、
   UI かどうかは関係ない。壊れるのは組版ではなく描出 (フォント解決・パースエラー・ラベル寸法)
 - DESIGN.md の**形式**の可否 (キー名・セクション順・component プロパティ・未知内容の扱い) は **`design.md/` 仕様**を正とする。機械検査は `npx @google/design.md lint <file>` (error があれば exit 1)
-- トークンの**型・形式・命名**の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) と DESIGN.md の frontmatter はその写像として扱う (`design.md` 仕様は DTCG から typed token group と `{path.to.token}` 参照構文だけを採った関係なので、両者は同一ではない。相互変換は `export --format dtcg`)
+- トークンの**型・形式・命名**の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) と DESIGN.md の YAML トークン (front matter / セクション内の yaml ブロック) はその写像として扱う (`design.md` 仕様は DTCG から typed token group と `{path.to.token}` 参照構文だけを採った関係なので、両者は同一ではない。相互変換は `export --format dtcg`)
 - 生成時に「やっていいこと / いけないこと」が割れたら **`hallmark/`** を優先する (生成規律が本業)。DESIGN.md 側の Do's and Don'ts はそのサイト固有の制約として上乗せする。
   **例外は 1 点** — gate 38a が許す「本文中の italic 強調」は日本語では合成斜体になるので、日本語本文に限り使わない (`japanese-web-typography.md` 参照)
 - DESIGN.md を**書く**とき (既存のものを引くのではなく新規に起こすとき) は `design.md/` の `PHILOSOPHY.md` を先に読む。曖昧な形容詞の列挙に落ちると生成結果が既定値の中心に寄る。長い don't リストは、参照物の記述が曖昧すぎる兆候として扱う

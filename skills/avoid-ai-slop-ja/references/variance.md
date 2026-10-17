@@ -17,10 +17,12 @@ AI slop is uniform. The fix is deliberate unevenness — but **only within the d
 
 ## Also vary
 
-- **文末** — don't end every sentence with 〜です／〜である／〜できる. Mix 体言止め, 断定, 短文, question where natural.
+- **文末** — vary through sentence length and construction, keeping one style (敬体 or 常体) throughout. Don't insert 体言止め or questions as a device to break the pattern, and don't string together very short sentences (see syntax-patterns.md §8).
 - **段落の閉じ方** — drop the reflexive "〜だと感じました/〜が重要です" closer.
 
 ## Stop conditions (don't over-apply)
+
+- **Revising someone else's text**: variance is not a reason to edit. Don't change a natural sentence only because its length or ending matches its neighbors, and don't insert short sentences for rhythm. Whether uneven sentence length signals a human writer depends on genre, so it is not a quality rule.
 
 - If you find yourself adding typos, snark, or "まあそこそこ" to *seem* human in a briefing/technical/legal doc → stop; that's the wrong tool for the type.
 - If every paragraph now has a forced "blunt aside" → you've built a new template. Remove most.

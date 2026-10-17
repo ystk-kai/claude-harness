@@ -1,7 +1,7 @@
 ---
 source: https://github.com/google-labs-code/design.md
-distilled_commit: 9bf8eae67128b6cc55ad9bf86665767deb4c11cd
-distilled_at: 2026-08-26
+distilled_commit: 6e5da5382f41edbba9d73b2c62f33f32e9971f15
+distilled_at: 2026-10-17
 ---
 
 # design.md (DESIGN.md 形式仕様) 蒸留版
@@ -20,10 +20,13 @@ Google Labs が 2026-04 に Apache-2.0 で公開した **DESIGN.md 形式の規�
 
 ## まず押さえる
 
-1. **2 層構造**: YAML frontmatter (機械可読なトークン) + Markdown 本文 (人間可読な根拠)。
-   frontmatter は**任意**で、`---` だけの行で開き閉じる。トークンが normative な値、prose がその
-   適用文脈を与える。prose は "Midnight Forest Green" のような記述的な色名を使ってよく、それが
-   `primary` のような体系的トークン名に対応する。 → `docs/spec.md` の冒頭, `# Design Tokens`
+1. **2 層構造**: 機械可読な YAML トークン + 人間可読な Markdown prose (根拠)。トークンの置き方は 2 通り:
+   (a) ファイル先頭の YAML front matter (`---` だけの行で開き閉じる)、(b) 各 `##` セクション内に置く
+   fenced ` ```yaml ` コードブロック (interleaved)。**併用可** — 例: `name` / `description` は front matter、
+   `colors` / `typography` はそれぞれのセクション内のブロック。複数ブロックはすべて parse して 1 つの
+   トークン木に merge され、**同じ top-level キーを複数ブロックで定義するとエラー**。トークンが normative
+   な値、prose がその適用文脈を与える。prose は "Midnight Forest Green" のような記述的な色名を使ってよく、
+   それが `primary` のような体系的トークン名に対応する。 → `docs/spec.md` の冒頭, `# Design Tokens`
 
 2. **「prose がトークンより主」が明示された設計思想**。`PHILOSOPHY.md` の見出しがそのまま
    "Prose, not Tokens, is the focus of the specification"。**"The quality of a generated design is
@@ -69,7 +72,8 @@ Google Labs が 2026-04 に Apache-2.0 で公開した **DESIGN.md 形式の規�
 9. **未知の内容への consumer 挙動が表で規定されている**。未知のセクション見出し・未知の色トークン名・
    未知の typography トークン名は**受け入れる** (エラーにしない)、未知の component プロパティは
    **warning 付きで受け入れる**、未知の spacing 値は妥当な Dimension でなければ文字列として保持。
-   唯一の**エラーは重複セクション見出し** (`## Colors` が 2 つ → ファイルを reject)。
+   **エラーは 2 つだけ**: 重複セクション見出し (`## Colors` が 2 つ) と重複 top-level YAML キー
+   (`colors` を front matter とコードブロックの両方で定義)。どちらもファイルを reject。
    → `docs/spec.md` の `# Consumer Behavior for Unknown Content`
 
 10. **仕様は「最小限」だけを標準化し、残りはユーザーが伸ばす**。標準化するのは `name` と 5 カテゴリ
@@ -80,7 +84,7 @@ Google Labs が 2026-04 に Apache-2.0 で公開した **DESIGN.md 形式の規�
     **トークンが instruction ではなく context だから spec 変更なしで拡張できる**、という論理。
     → `PHILOSOPHY.md` の "The format grows through its users, not its spec"
 
-11. **`omitted` キーで「意図的に書かなかった」を宣言できる** (frontmatter の任意キー、
+11. **`omitted` キーで「意図的に書かなかった」を宣言できる** (トークン schema の任意キー、
     `string[]` または `OmittedSection[]`)。linter の `omitted-rules` が未知セクションや冗長指定を
     検証する。「書き漏らし」と「意図的な非規定」を区別する機構。 → `docs/spec.md` の `## Schema`
 
@@ -110,9 +114,9 @@ Google Labs が 2026-04 に Apache-2.0 で公開した **DESIGN.md 形式の規�
 
 | トピック | 原典パス | 内容 (一行) |
 |---|---|---|
-| **形式仕様 (規範)** | `docs/spec.md` (377 行) | トークン schema・8 セクションと順序・セクションごとの prose の役割・component プロパティ・推奨名 (非規範)・未知内容の consumer 挙動 |
+| **形式仕様 (規範)** | `docs/spec.md` (418 行) | トークンの置き方 (front matter / interleaved YAML ブロック、併用時の merge 規則)・トークン schema・8 セクションと順序・セクションごとの prose の役割・component プロパティ・推奨名 (非規範)・未知内容の consumer 挙動 |
 | **設計思想** | `PHILOSOPHY.md` (110 行) | prose 主導の理由、具体的参照物 vs 形容詞、negative constraints for free、spec を広げず利用者が伸ばす方針、motion の拡張例 |
-| 凝縮リファレンス + CLI | `README.md` (364 行) | 仕様の要約、token 型表、セクション順表、lint 11 ルール表、`lint`/`diff`/`export`/`spec` の全オプションと exit code、Windows の `designmd` alias |
+| 凝縮リファレンス + CLI | `README.md` (365 行) | 仕様の要約、token 型表、セクション順表、lint 11 ルール表、`lint`/`diff`/`export`/`spec` の全オプションと exit code、Windows の `designmd` alias |
 | 実例 (完全な DESIGN.md) | `examples/{atmospheric-glass,paws-and-paths,totality-festival}/` | 各 210〜219 行の DESIGN.md + `design_tokens.json` + `tailwind.config.js` + README。仕様準拠の分量感を掴む基準 |
 | linter 実装 | `packages/cli/src/linter/` | ルール実装と `dtcg/conformance.test.ts` (DTCG 出力の適合を機械検査)、`css-vars/`、`fixer/` |
 | lint の入力例 | `packages/cli/src/linter/fixtures/*.md` | `HERITAGE.md` / `MERIDIAN.md` / `NO_FRONTMATTER.md` 等。各ルールが何を拾うかを実物で確認できる |

@@ -37,7 +37,7 @@ compatibility: Requires git and network access to clone/update the reference rep
 | カテゴリ | 原典 | 蒸留版 | 使いどころ |
 |---|---|---|---|
 | AI 臭スキル (主) | `natural-japanese/` | [references/natural-japanese.md](references/natural-japanese.md) | 「足さない」を最上位に置く書き方・直し方の規律。文書種別 5 本 (議事録・調査レポート・社内ガイド・メモ・スライド) の必須要素と AI がやりがちな失敗。lint の閾値を人間コーパスで校正した結論 (どの検出が人間側にも発火するか) |
-| AI 臭スキル (主) | `yomiyasu/` | [references/yomiyasu.md](references/yomiyasu.md) | 意味の保持と情報の不増補を最優先にした推敲規律。研究を引いた原則 14 項、slop 語彙 7 分類、ドメイン別 (技術 / 業務 / エッセイ) の差、表記規則 (ダッシュ・括弧・和欧間スペース・コロン・太字が表示されない書き方) |
+| AI 臭スキル (主) | `yomiyasu/` | [references/yomiyasu.md](references/yomiyasu.md) | 意味の保持と情報の不増補を最優先にした推敲規律。研究を引いた原則 14 項、slop 語彙 9 分類、v2 の文脈からの事実の補い (6 条件付き)・書き手と読み手に合わせた直し方・言い直しテスト、ドメイン別 (技術 / 業務 / エッセイ) の差、表記規則 (ダッシュ・括弧・和欧間スペース・コロン・太字が表示されない書き方) |
 | AI 臭スキル (出所) | `stop-ai-slop-jp/` | [references/stop-ai-slop-jp.md](references/stop-ai-slop-jp.md) | `avoid-ai-slop-ja` の元になった手法。大原則・構造 / 語彙の分類と頻度上限・対比例 17 本。`avoid-ai-slop-ja` との対応表 (どこが原典由来で、どこが独自か) を持つ |
 | 構文・読解負荷 | `meiseki/` | [references/meiseki.md](references/meiseki.md) | 高負荷構文カタログ A–H (二重否定・係り受け・名詞化・段落の冗長)、やさしい日本語 YA–YH、読解負荷スコア。声を足さずに説明文を明晰化する側の規律。同梱の prh 辞書 2 本と textlint 設定の実例 |
 | 機械規則 | `textlint-rule-preset-ja-technical-writing/` | [references/textlint-rule-preset-ja-technical-writing.md](references/textlint-rule-preset-ja-technical-writing.md) | 技術文書の 23 ルールと既定値・理由・変更履歴。文長 100 字・読点 3 個・漢字連続 6 字などの数値の出典 |
@@ -52,9 +52,9 @@ compatibility: Requires git and network access to clone/update the reference rep
   和欧間・インラインコードの前後・スラッシュの前後にスペースを入れる側で統一されており、既定のまま当てると流派の不一致が大量に指摘される)
 - **原典を引くときは、新規執筆の規則か既存文書の修正の規則かを区別して読む**。`natural-japanese` と `yomiyasu` は
   修正時に元にない事実・数値・見解・確信度の変更を足さないことを最上位に置き、書く場合と直す場合で向きが変わる規則
-  (見出し・絵文字・文末) を持つ。`avoid-ai-slop-ja` の処方 (ムラ・言い切り・具体性) はこの区別を持たず、原典と逆向きの箇所がある。
-  どちらを実行するかはこのスキルでは決めない — 採否は `avoid-ai-slop-ja` 側の判断で、食い違いの一覧は
-  [../claude-harness-refs-update/ADOPTION.md](../claude-harness-refs-update/ADOPTION.md) の「2026-10-16 (ja-writing 新設時の初回蒸留)」節にある
+  (見出し・絵文字・文末) を持つ。`avoid-ai-slop-ja` も手順 0 で新規 / 修正を分け、修正時の不増補と意味検算を持つ (2026-10-17 反映)。
+  手順を実行するのは `avoid-ai-slop-ja` 側で、このスキルは規則の根拠を引くだけ。原典と `avoid-ai-slop-ja` の対応と
+  残っている差は [MAPPING.md](MAPPING.md)、採否の履歴は [../claude-harness-refs-update/ADOPTION.md](../claude-harness-refs-update/ADOPTION.md) にある
 - AI 臭の個別判定で原典が割れたら、**人間コーパスで閾値を校正した記録を持つ `natural-japanese` を優先**し、
   `yomiyasu` で文脈ごとの残す / 直すの線引きを補う。`stop-ai-slop-jp` は個人記事を想定した手法で文書種別の規定を持たないので、
   formal な文書の根拠にしない

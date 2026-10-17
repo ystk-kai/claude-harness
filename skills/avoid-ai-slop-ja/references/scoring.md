@@ -5,7 +5,7 @@ review_interval_days: 180
 ---
 # Scoring — 5 axes (diagnostic, not a gate)
 
-Rate each axis 1–10. Total below **35/50 → rewrite**. At 35+ you may still ship, but **fix any critical syntax slop** (false agency, propositional-heading pile-up, empty false contrast) regardless of score. Use the score to find *where* to work, not to pass/fail mechanically.
+Rate each axis 1–10. Total below **35/50 → rewrite** when you are the writer; when revising someone else's text it means "fix the low axes where they show", never a wholesale rewrite (revise-mode rules in SKILL.md). At 35+ you may still ship, but **fix any critical syntax slop** (false agency, propositional-heading pile-up, empty false contrast) regardless of score. Use the score to find *where* to work, not to pass/fail mechanically.
 
 | 軸 | 問い | 低い (slop) | 高い |
 |----|------|------------|------|
@@ -20,7 +20,7 @@ Rate each axis 1–10. Total below **35/50 → rewrite**. At 35+ you may still s
 - **立場 ≠ 無根拠な断言。** 望ましいのは「根拠を置いたうえで、判断を曖昧にしない」。根拠なしの「非常に有効」は立場ではなく slop。
 - リズムは「声に出して読む」で測る。息が続かない/広告に聞こえる/誰でも言える文は減点。
 - 主体性は「この文の主語は判断や意志を持てるか」で見る。「データが示す」「課題が浮き彫りになる」は減点。
-- 具体性は段落あたり最低 1 つの固有名・数値・例を目安に。
+- 具体性は段落あたり最低 1 つの固有名・数値・例を目安に。ただし具体は材料（原文・依頼・提供資料・会話で示された事実）から取る。材料に無い数値や例を足して点を上げない — 修正時なら空白のまま書き手に聞く。
 - 削減は「この一文を消して意味が変わるか」。変わらないなら消す。
 
 ## 例（簡易採点）
