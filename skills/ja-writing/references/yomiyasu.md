@@ -1,7 +1,7 @@
 ---
 source: https://github.com/nanaism/yomiyasu
-distilled_commit: 1bc21f9c8e6a55fc4ccd5a2c7dfe78a7b0d814c5
-distilled_at: 2026-10-17
+distilled_commit: 84e1f5b15e497538fcfe19ab7e9c6f6d138f19ff
+distilled_at: 2026-10-18
 ---
 
 # yomiyasu 蒸留版

@@ -27,6 +27,19 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-18
+
+### 再蒸留 (awesome-harness-engineering / claude-code-best-practice / yomiyasu) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | hook / 運用 | コーディング agent の失敗の大きなクラスタは change hygiene (`git add -A` で debug スクリプトや無関係な編集がコミットに混ざる) で、提出時の衛生 (`git status` の確認、raw `sed` より構造化編集) を強制するほうがモデルを替えるより効く。環境側の PreToolUse(Bash) hook (`commit-guard.sh`) はコミット文言と環境固有値の混入だけを見ており、ステージ内容の衛生は見ていない (grep 済)。README 注記ベースで記事本文は未読 | ahe: `626b647`、`README.md` の `Debugging & Developer Experience` (Faros AI) |
+| 未対応 | FYI | CLAUDE.md / skill | 最大の失敗クラスタは instruction conflict — 「DO NOT MODIFY: Tests」のような範囲を絞らない禁止文を字義どおりに守りすぎて必要な作業を拒む (最弱・最強モデルで同程度)。このハーネスの禁止文 (`~/.claude/CLAUDE.md` のコミットメッセージ規約、各 SKILL.md) は対象を限定しており、一律の禁止文は無い (grep 済)。禁止文を足すときの書き方の指針として残す | ahe: 同上 |
+| 未対応 | FYI | 運用 | agent 規模の開発で merge が 1 日約 2,500 → 30,000 件超、CI checkout が 1 日約 2,500 万回に増え、Git の分散 clone 前提が破綻した (Anthropic Scion)。並列 agent を大きくするとハーネスの下のインフラ (merge queue / lock / full clone) が先に壊れる。個人リポジトリのこのハーネスには当たらない | ahe: `8c7f4fc`、`README.md` の `Production Infrastructure & Operations` |
+
+claude-code-best-practice (`3433a39`、確定は plugin-authoring の導入版訂正と design-sync の 2026-12-14 終了告知の 2 件。このハーネスは design-sync を使っていない (grep 済)。他は ON HOLD の継続) と yomiyasu (`84e1f5b`、テスト隔離のみ) は候補なし。
+
+---
 ## 2026-10-17
 
 ### 再蒸留 (yomiyasu v2 / claude-cookbooks / awesome-harness-engineering / design.md) から
