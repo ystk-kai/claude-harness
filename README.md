@@ -84,7 +84,7 @@ https://github.com/ystk-kai/claude-harness を ~/claude-harness に clone し、
 - **原典** — `~/.claude/references/<repo>/`。全文。蒸留版と食い違ったら原典が正
 - **更新機構** — `skills/claude-harness-refs-update/` が一元所有する。`scripts/check-freshness.sh` が検出、`DISTILLING.md` が構成規約と再蒸留の手順、`ADOPTION.md` が「原典の変更を自分のハーネスに取り込むか」の判断台帳、`scripts/frontmatter.sh` は `install.sh` と共用のパーサ
 
-鮮度チェックは `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。1 ファイル 1 行で、行頭タグが次にやることを示す — `BEHIND` (clone を pull)、`STALE` (蒸留版を再蒸留)、`REVIEW` (出所 clone を持たない知識ベースの棚卸し期限切れ)、`OK`、`MISS` / `ERR` / `NOTE`。要対応があれば exit 1。`--offline` で fetch を省略できる。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る。
+鮮度チェックは `bash skills/claude-harness-refs-update/scripts/check-freshness.sh`。1 ファイル 1 行で、行頭タグが次にやることを示す — `BEHIND` (clone を pull)、`STALE` (蒸留版を再蒸留)、`REVIEW` (出所 clone を持たない知識ベースの棚卸し期限切れ)、`DEAD` (蒸留版の索引が指す原典ファイルが clone の HEAD に無い。索引を直す)、`OK`、`MISS` / `ERR` / `NOTE`。要対応があれば exit 1。`--offline` で fetch を省略できる。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る。
 
 `skills/*/references/*.md` の frontmatter は 3 形式のいずれかを取り、**どれでもないものは `ERR`** になる。frontmatter が無いだけで無言に対象外にはしない — 「意図的な非追従」と「壊れた蒸留版」が区別できなくなるため。
 

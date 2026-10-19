@@ -13,10 +13,11 @@ review_interval_days: 180
 - **brand context と design tokens を先に渡す** — palette 4-6 色、display/body などの type role、spacing scale、radius と shadow の用途を明文化してから生成する。shadcn を使うなら color token・radius・shadow depth を改造し、非デフォルト variant を使う
 - **明示的なネガティブ制約** — 「Inter/Roboto/Arial 禁止」「白背景に紫グラデ禁止」「3 boxes with icons 禁止」のように、避けたいデフォルトを prompt に書く
 - **アクセシビリティを明示** — 「WCAG AA を満たせ」(通常文字 4.5:1、大文字 3:1) を指示に含める
+- **plan → review の 2 パス** — 実装前に token 案 (色 4-6 個の hex・書体の役割・layout 案・原則) を書き、brief と突き合わせる。似た依頼でも同じ案になる部分は既定値なので直し、何をなぜ変えたかを書いてからコードに入る (Anthropic frontend-design 2026-09 改訂)
 
 ## 2. 設計中 — 判断を content に接続する
 
-- **書体は名前でなく役割で選ぶ** — 実コピーで display と body の組み合わせを比較し、サイズ・ウェイト・spacing の明確な階層を作る。Inter を禁止するのではなく body 用など意図した role に限定する
+- **書体は名前でなく役割で選ぶ** — 実コピーで display と body の組み合わせを比較し、サイズ・ウェイト・spacing の明確な階層を作る。Inter を禁止するのではなく body 用など意図した role に限定する。行長は既定で 80 文字未満 (欧文の目安。serif の本文は少し長くてよく、行送りを sans より広めに)
 - **色は少数の意味ある role へ** — dominant / secondary / accent に配分し、accent は主要 CTA 等に限定。decorative gradient text は外す
 - **layout は content から導く** — generic slogan ではなく「具体的 claim + proof」で hero を組む。情報の関係はまず proximity・余白・typography で示し、card は独立した操作/比較単位だけに使う (nested cards は平坦化)
 - **非対称を意図的に使う** — AI は均等・対称に寄るため、視覚重量を重要度に合わせて崩すだけで「意図」が出る。ただし 1 つの layout primitive にコミットして反復する (スタイル混在はしない)

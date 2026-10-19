@@ -128,7 +128,12 @@ if [ "${1:-}" = "--with-references" ]; then
     # 自動登録される (原典を読むだけで第三者の指示が発火し得る)。worktree から外す。
     # .claude/{agents,commands,hooks,settings.json,rules} は入れ子では自動ロードされず
     # 参照価値があるので残す。中身は git -C <clone> show HEAD:<path> で読める。
-    git -C "$dir" sparse-checkout set --no-cone '/*' '!/.claude/skills' >/dev/null
+    # smarthr-design-system は public/ (画像・約 300MB) を参照しないので外す。
+    extra=""
+    case "$(basename "$dir")" in
+      smarthr-design-system) extra='!/public' ;;
+    esac
+    git -C "$dir" sparse-checkout set --no-cone '/*' '!/.claude/skills' ${extra:+"$extra"} >/dev/null
   done
 fi
 

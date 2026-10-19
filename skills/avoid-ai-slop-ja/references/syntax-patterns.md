@@ -1,6 +1,6 @@
 ---
 tracking: review
-reviewed_at: 2026-07-12
+reviewed_at: 2026-10-19
 review_interval_days: 180
 ---
 # Syntax patterns — detect & fix
@@ -82,6 +82,8 @@ Three kinds, three treatments:
 
 - **二重否定**: fold into an affirmative **without flipping its truth value**. 「招かないとは言えない」=「招くことがある」, not「招かない」. Check the folded sentence against the original before keeping it.
 - **係り受け**: long pre-noun modifiers → split into a following clause. 「の」at most twice in a row. Make an ambiguous dependency unique with a comma or word order.
+- **間を作るだけの読点**: a comma right after a short subject / object / topic (「は」「が」「を」「も」「では」「とは」) that separates nothing (「回覧板は、木曜の朝に回します」) → remove the comma only; keep word order and predicate. Keep it after a long subject or clause, where another actor follows the topic, before an insertion, between listed items, and where removing it changes what the clause attaches to (「店長は、慌てて逃げた客を追いかけた」).
+- **数値の目安 (技術文書)**: 1 文 100 字 (厳しめなら 90)、読点 1 文 3 個、漢字の連続 6 字 (`textlint-rule-preset-ja-technical-writing` の既定値)。超えたら分割・語順・かな書きを検討する目安で、AI らしさの指標ではない。固有名詞の漢字連続は除く。
 - **名詞化**: verbal nouns doing the work of a verb (「〜の実施を行う」) → back to the verb.
 - **段落内の言い換え反復**: restating the same point, or re-summarizing right after describing → cut only the repeats that add no information. If unsure, keep.
 
@@ -89,4 +91,5 @@ Three kinds, three treatments:
 
 Signs: re-naming something already named, personification, word-for-word English, mismatched collocations, engineer slang, nominalized actions, metaphors whose content can't be seen.
 - Test by translating back to English, or by rewriting as a plain verb sentence; if the meaning won't come through, replace with ordinary words.
+- **成り立たない比喩**: a metaphor that reads smoothly but falls apart when you extract just subject and predicate (「眠気が定規になる」), or whose verb doesn't fit the subject (「嵐がそっと耳打ちした」). In technical and business docs, write what actually happens. In essays, keep a metaphor if a reader can guess what it means, or if the next sentence explains it. If your fix comes out as 「〜がただ黙って〜していた」, keep the original instead.
 - If you can't narrow it to one reading, don't guess — list the candidate readings and ask the writer.

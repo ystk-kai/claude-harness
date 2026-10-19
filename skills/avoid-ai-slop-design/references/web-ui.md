@@ -23,6 +23,7 @@ AI 生成 Web UI を「AI っぽい」と感じさせるパターン。単独で
 
 - **Inter everywhere** — 見出し・本文・ラベル・ボタンを Inter または system font 一書体で通す。「他に typographic な選択がなければ、意図的にスタイルされていない強いシグナル」 [計測+批評]
 - 流行書体の固定セットへの収束: Geist / Space Grotesk / Instrument Serif (+ Roboto)。「Inter の hero で 1 単語だけ serif italic」も定番 [計測]
+- **見出しの 1 語だけを強調** — serif italic に限らず、1 語・1 句だけ italic / bold / 別色にする。Anthropic frontend-design (2026-09) は、ラベルの全大文字、コンテンツ上の不要な typographic ラベルと並べて「生成ページで最もありふれた tell」とする [批評]
 - **平坦な階層** — 単一ファミリー + ウェイト差だけ。サイズ差が小さく全情報が同じ声量に見える [批評]
 - **tracking-tight の乱用** と **eyebrow ラベルの反復** (hero H1 直上と各セクションの tiny uppercase tracked label) [計測]
 - **テンプレート由来の小道具** — 中黒で連結したメタ情報 (`A · B · C`)、`WORD — fragment` 型のラベル、小さいデータラベルだけ monospace、リンク・ボタン文言の末尾に `→`。題材を問わず現れる [批評]

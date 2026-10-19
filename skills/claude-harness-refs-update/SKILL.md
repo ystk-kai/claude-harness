@@ -20,13 +20,13 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
    - claude-harness リポジトリのルートを解決する: `ROOT="$(dirname "$(dirname "$SELF")")"`。蒸留版は `harness-design` / `ui-design` / `ja-writing` の各スキル配下にあるので、出力先は `$ROOT/skills/<skill>/references/<repo>.md` になる (どのスキルかは手順1の STALE 行に併記される)。
    - 原典ルート: `REFS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/references"`。clone は `$REFS/<repo>`。
 
-1. **鮮度チェック** — `bash "$SELF/scripts/check-freshness.sh"` を実行 (fetch あり = 最新 upstream を反映)。**1 ファイル 1 行**で、行頭タグは「次にやること」を示す: `OK` / `BEHIND` (pull) / `STALE` (再蒸留) / `REVIEW` (知識ベースの棚卸し) / `MISS` / `ERR` / `NOTE`。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る (`/ 蒸留版も遅れ` が併記される)。`NOTE` は「判定できなかった」であって「最新」ではないので exit 1 側に数える — したがって exit 0 は全件検証済みを意味する。引数に repo 名があれば、その repo の行だけを対象にする (スクリプトに絞り込み機能はないので出力からフィルタ)。引数が `--check` なら結果を提示してここで終了。exit 0 (= 要対応なし) なら「更新不要」と伝えて終了。
+1. **鮮度チェック** — `bash "$SELF/scripts/check-freshness.sh"` を実行 (fetch あり = 最新 upstream を反映)。**1 ファイル 1 行**で、行頭タグは「次にやること」を示す: `OK` / `BEHIND` (pull) / `STALE` (再蒸留) / `REVIEW` (知識ベースの棚卸し) / `DEAD` (索引テーブルの原典パスが clone の HEAD に無い) / `MISS` / `ERR` / `NOTE`。BEHIND と STALE が同時に立つ repo は pull が先なので `BEHIND` 行だけが出る (`/ 蒸留版も遅れ` が併記される)。`NOTE` は「判定できなかった」であって「最新」ではないので exit 1 側に数える — したがって exit 0 は全件検証済みを意味する。引数に repo 名があれば、その repo の行だけを対象にする (スクリプトに絞り込み機能はないので出力からフィルタ)。引数が `--check` なら結果を提示してここで終了。exit 0 (= 要対応なし) なら「更新不要」と伝えて終了。
 
 2. **MISS / ERR を処理** — `MISS` (clone がない/壊れ) は `install.sh --with-references` を案内して中断する (clone がないと更新できない)。`ERR` は 2 種類: `distilled_commit` が履歴にない場合は行に併記された復旧コマンドに従う。**frontmatter が 3 形式のどれでもない**場合は `DISTILLING.md`「frontmatter の形式」を見て、その資料が蒸留版 (形式 1) / 知識ベース (形式 2) / 対象外 (形式 3) のどれなのかを決めて frontmatter を直す。
 
 3. **BEHIND を解消** — 各該当 clone を `git -C "$REFS/<repo>" pull --ff-only`。pull で新コミットが来ると STALE に変わるので、**pull 後に `check-freshness.sh` を取り直して STALE を再評価する** (順序を守る — 古い HEAD で蒸留しないため)。
 
-4. **STALE を再蒸留** — STALE の各リポジトリを `general-purpose` サブエージェントに**並列委譲**する (`Agent` tool。蒸留版を Write するので Explore 不可)。各プロンプトは `$SELF/DISTILLING.md` の「再蒸留プロンプト雛形」に次を埋めて作る:
+4. **STALE を再蒸留** — STALE と `DEAD` の各リポジトリを `general-purpose` サブエージェントに**並列委譲**する (`Agent` tool。蒸留版を Write するので Explore 不可)。各プロンプトは `$SELF/DISTILLING.md` の「再蒸留プロンプト雛形」に次を埋めて作る:
    - 原典 clone パス `$REFS/<repo>` と owner/repo
    - 出力ファイル `$ROOT/<STALE 行に併記された蒸留版パス>` (例 `skills/ui-design/references/hallmark.md`)。どのスキルの蒸留版かを取り違えないため、パスは推測せず STALE 行の記載を使う
    - 重点領域 — 既存蒸留版の索引が扱っている範囲を引き継ぐ
@@ -35,6 +35,10 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
    - 構成規約は `DISTILLING.md` に従うこと (frontmatter 3 キー / `## Contents` / `## まず押さえる` / 索引テーブル / `## 蒸留の範囲外` / 250 行以内 / 実際に Read した事実だけ・推測で書かない)
 
    各サブエージェントは蒸留版 1 ファイルを Write し、frontmatter の `distilled_commit` を clone の新 HEAD・`distilled_at` を当日に更新、最後に **2 本立てで返す** — (a) 行数・使った SHA・内容の 3 行要約、(b) **取り込み候補** (`DISTILLING.md`「取り込み候補の抽出」の 4 点セット。該当なしなら「候補なし」と明示)。雛形にこの返却契約が入っているので、プロンプトから落とさない。
+
+   `DEAD` は索引が指す原典ファイルが移動・削除された状態。同じ repo が STALE なら再蒸留のプロンプトに切れたパスを併記して直させる。STALE でない (`distilled_commit` が HEAD と一致) なら蒸留時の誤記なので、索引の該当行だけを直し SHA は動かさない。
+
+   1 つのサブエージェントが失敗・中断した、または返却契約を満たさなかった場合も、他の repo の作業は止めない。その repo は「未カバー」として手順7の集約に列挙し (蒸留版は STALE のまま残る)、黙って成功扱いにしない。
 
    再蒸留した repo が `ja-writing/MAPPING.md` の対応表に載っているもの (`stop-ai-slop-jp` 等) なら、MAPPING.md の該当節と、そこが指す `avoid-ai-slop-ja` の references も見直す。自作スキルは原典の更新を自動では受け取らないので、ここで差分を取り込み候補 (手順6) に流す。
 
@@ -47,7 +51,7 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
 
    「該当あり」と「該当なし (原典の記述としては正しいが、このハーネスには当たらない)」を分け、後者は深刻度を `FYI` に落とす。**grep せずに「影響あり」と言わない** — 推測での警告は台帳を腐らせる。確認できたものを `BREAKING` → `RECOMMENDED` → `FYI` の順に提示し、[ADOPTION.md](ADOPTION.md) へ追記する (書式は同ファイル冒頭)。台帳には**前回までの未対応項目も残っている**ので、それも併せて提示する。候補ゼロなら「今回は取り込み候補なし」と明示する (黙って省略しない)。
 
-7. **集約と確認** — 更新したファイル一覧と各 3 行要約、取り込み候補の件数 (深刻度別) を提示する。`bash "$SELF/scripts/check-freshness.sh" --offline` を再実行し、exit 0 に戻ったことを確認する。ここまでの変更は作業ツリーに残す。
+7. **集約と確認** — 更新したファイル一覧と各 3 行要約、取り込み候補の件数 (深刻度別)、未カバーの repo (あれば理由付き) を提示する。`bash "$SELF/scripts/check-freshness.sh" --offline` を再実行し、exit 0 に戻ったことを確認する。ここまでの変更は作業ツリーに残す。
 
 8. **commit (ユーザーが望むときのみ)** — 変更内容と、各リポジトリの差分 3 行要約を含む commit message 案を提示して承認を得てから commit する。**SHA だけの無言 bump をしない** (内容への影響なしと判断して SHA だけ進める場合も、その理由を message に書く)。`ADOPTION.md` の追記も同じ commit に含める。承認がなければ diff を残して終了。個人リポジトリなので main への直接 commit でよい。
 
@@ -67,5 +71,6 @@ claude-harness の参照資料は 2 層 — 蒸留版 (`skills/*/references/*.md
 - [ ] 各サブエージェントから取り込み候補を受け取った (該当なしの明示も受け取った)
 - [ ] 取り込み候補を実ハーネスに grep で当てて深刻度を確定し、`ADOPTION.md` に追記した
 - [ ] 台帳の未対応項目 (前回以前の分を含む) を提示した
+- [ ] 失敗したサブエージェントの repo を未カバーとして列挙した (成功扱いにしていない)
 - [ ] `check-freshness.sh` が exit 0 に戻った
 - [ ] commit する場合、message に差分 3 行要約を含め、`ADOPTION.md` の追記も同じ commit に入れた (SHA だけの無言 bump をしない)

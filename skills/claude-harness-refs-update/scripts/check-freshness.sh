@@ -3,6 +3,7 @@
 #   BEHIND: clone が upstream より遅れ → git pull --ff-only してから再実行 (STALE はその後に再判定)
 #   STALE : 蒸留版が clone の HEAD より古い → DISTILLING.md の手順で再蒸留
 #   REVIEW: 出所を追従しない知識ベースの棚卸し期限切れ → 内容を見直して reviewed_at を更新
+#   DEAD  : 蒸留版の索引テーブルが指す原典ファイルが clone の HEAD に無い (移動・削除) → 再蒸留で索引を直す
 #   OK    : 追従先と一致している / 棚卸し期限内
 #   MISS  : clone がない・壊れている / ERR: frontmatter か SHA が解決できない
 #   NOTE  : 判定を諦めた。「最新」ではないので exit 1 側に数える (未検証を緑に紛れ込ませない)
@@ -29,6 +30,21 @@ now_epoch="$(date +%s)"
 # YYYY-MM-DD → epoch 秒。GNU date と BSD date の両方を試し、どちらも駄目なら空を返す
 epoch_of_day() {
   date -d "$1" +%s 2>/dev/null || date -j -f %Y-%m-%d "$1" +%s 2>/dev/null || true
+}
+
+# 蒸留版の索引テーブル (行頭 `|`) に書かれた原典ファイルパスのうち、clone の HEAD に無いものを空白区切りで返す。
+# SHA 比較はファイル単位なので、原典側の移動・削除で索引だけが切れても STALE は「差分がある」としか言わない。
+# 誤検出を避けるため対象を絞る: `dir/file.ext` 形 (先頭セグメントが HEAD に実在し、末尾が / でなく、
+# glob・brace・<placeholder>・空白を含まない) だけを見る。作業ツリーでなく HEAD の tree を引くのは、
+# install.sh が sparse-checkout で .claude/skills を外しているため
+dead_index_paths() {
+  local doc="$1" clone="$2" p
+  grep '^|' "$doc" | grep -o '`[^`]*`' | tr -d '`' \
+    | grep -E '^[A-Za-z0-9._-]+/[^ <>{}*]*[^/]$' | sed -E 's/[:#].*$//' | sort -u \
+    | while IFS= read -r p; do
+        git -C "$clone" cat-file -e "HEAD:${p%%/*}" 2>/dev/null || continue
+        git -C "$clone" cat-file -e "HEAD:$p" 2>/dev/null || printf '%s ' "$p"
+      done
 }
 
 for doc in "$SKILLS_ROOT"/*/references/*.md; do
@@ -144,6 +160,15 @@ for doc in "$SKILLS_ROOT"/*/references/*.md; do
     echo "STALE  $name: 蒸留時 ${pinned_full:0:12} → 現在 ${head_sha:0:12} ($n commits) — 蒸留版: skills/$rel"
     git -C "$clone" log --oneline "$pinned_full..HEAD" 2>/dev/null | sed 's/^/         /' || true
     status=1
+  fi
+
+  # BEHIND のときは pull で HEAD が動くので判定しない
+  if [ -z "$behind" ]; then
+    dead="$(dead_index_paths "$doc" "$clone")"
+    if [ -n "$dead" ]; then
+      echo "DEAD   $name: 索引の原典パスが HEAD に無い (${dead% }) — 蒸留版: skills/$rel"
+      status=1
+    fi
   fi
 done
 

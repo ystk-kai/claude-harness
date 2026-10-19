@@ -40,9 +40,9 @@ Over-triggering costs more than under-triggering: 動いている UI に理由�
 
 ## Quick checklist
 
-- [ ] Palette/fonts chosen for a reason traceable to brand or content — not indigo/purple-blue gradient, cream-beige, or Inter-by-default. Text contrast ≥ 4.5:1 (3:1 for large text)
-- [ ] Real typographic hierarchy (role-based pairing, size + weight + spacing), not one family with weight changes; no single serif-italic accent word in the headline, no monospace or tiny-uppercase eyebrow labels by default
-- [ ] No identical icon-tile feature-card grids, badge-pill or pill-button reflexes, numbered "01/02/03" section labels that encode no real order, cardocalypse, or uniform radius/shadow everywhere; layout derived from actual content, visual weight matches importance
+- [ ] Palette/fonts chosen for a reason traceable to brand or content — not indigo/purple-blue gradient, cream-beige + terracotta (`#D97757`), near-black + a single acid-green / vermilion accent, tinted near-black (`#0B0B0B` / `#111`), or Inter-by-default. Text contrast ≥ 4.5:1 (3:1 for large text)
+- [ ] Real typographic hierarchy (role-based pairing, size + weight + spacing), not one family with weight changes; no single accented word in the headline (serif italic, bold, or another color), no monospace or tiny-uppercase eyebrow labels by default; body line length under ~80 characters
+- [ ] No identical icon-tile feature-card grids, badge-pill or pill-button reflexes, numbered "01/02/03" section labels that encode no real order, cardocalypse, broadsheet look (hairline rules, zero radius, dense columns) by default, template chrome (`A · B · C` meta strings, `WORD — fragment` labels, a trailing `→` on links and buttons), or uniform radius/shadow everywhere; layout derived from actual content, visual weight matches importance
 - [ ] Icons: one family, adopted for a reason; no emoji-as-icons; ✨ never means "AI" without a label
 - [ ] Motion explains state, continuity, or attention — otherwise deleted
 - [ ] Slides: type/color/icons unified across the deck, layout varies only at meaningful transitions; bullet rhythm broken on purpose
