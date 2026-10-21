@@ -44,7 +44,7 @@ text worse. Skip when:
 
 0. **Decide the mode: writing new, or revising existing text.** Revising (someone's draft, a published doc, text the user pasted) adds hard limits that override everything below:
    - Don't add facts, numbers, examples, causes, or opinions that aren't in the material (the original, the request, provided documents, or facts stated in this conversation). Your own or another AI's earlier output and general knowledge are not material.
-   - Don't change confidence in either direction (no hardening a hedge, no softening an assertion), and don't add a summary section.
+   - Don't change confidence in either direction (no hardening a hedge, no softening an assertion), and don't add a summary section. Permission (〜してよい), ability (〜できる), obligation (〜しなければならない), and guarantee (必ず〜する / 保証する) count as confidence too. Don't swap one for another or flatten it into a plain statement (「変更してよい」→「変更できる」, 「含めてよい」→「含める」), don't drop 「〜場合がある」 to assert, and don't add 「必ず」「保証する」 — in specs and design docs these differences are the spec. Rephrasing within the same kind (「〜することができる」→「〜できる」) is fine.
    - Where a fix would need information the material lacks, leave it and ask (mark it 【要確認】) instead of inventing.
 1. **Decide the document type** — it sets how much variation / bluntness is allowed. See `references/document-types.md`.
 2. **Score 5 axes** (立場・リズム・主体性・具体性・削減), 1–10 each. Below 35/50 → rewrite when writing new; when revising, fix the low axes locally. At 35+ still fix any critical syntax slop. See `references/scoring.md`.
@@ -52,7 +52,7 @@ text worse. Skip when:
 4. **Scan the banlist** (3 tiers: always-ban / avoid-by-default, judged by frequency / context-OK). See `references/banlist.md`.
 5. **Keep deliberate ムラ** within what the doc type allows — when writing new. When revising, variance alone is not a reason to edit. See `references/variance.md`.
 6. **Rewrite**, then re-check 削減 (cut filler) and 具体性 (names/numbers/examples from the material). Study `references/rewrite-examples.md` — including the over-corrected examples.
-7. **Meaning check (revising).** Compare every changed sentence with the original on four points: claim, weight, strength of assertion, and the sentence's job (fact / opinion / request or rule / metaphor / irony / hypothesis or prediction / quote or hearsay — hearsay must not become assertion, opinion must not become fact). If any point changed, restore the original sentence rather than patching the rewrite. Also check that no fact or number appears that the material doesn't contain.
+7. **Meaning check (revising).** Compare every changed sentence with the original on four points: claim, weight, strength of assertion, and the sentence's job (fact / opinion / request or rule / metaphor / irony / hypothesis or prediction / quote or hearsay — hearsay must not become assertion, opinion must not become fact). If any point changed, restore the original sentence rather than patching the rewrite. Also check that no fact or number appears that the material doesn't contain, and that these didn't shift: approximation marks on numbers (「約120人」→「120人」, 「以上」⇔「超」), one-of vs. all (「AまたはB」⇔「AとBの両方」), and correlation hardened into causation (「関連がある」→「原因になる」).
 
 ## Quick checklist
 

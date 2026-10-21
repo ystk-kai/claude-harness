@@ -27,6 +27,27 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-21
+
+### 再蒸留 (yomiyasu) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-21: avoid-ai-slop-ja/SKILL.md 手順 0 の確度の項に追記) | RECOMMENDED | skill | 修正時の「言い切りの強さ」に許可 (〜してよい)・能力 (〜できる)・義務・保証 (必ず / 保証する) を含め、仕様書・設計文書では互いに替えない・「〜場合がある」を消さない・「必ず」を足さない。avoid-ai-slop-ja の手順 0・7 は推量と断定の軸しか書いておらず、「変更してよい → 変更できる」を止められなかった (「許可\|保証」で grep 0 件) | yomiyasu: `8be3ef6`、`skills/yomiyasu/SKILL.md` § 最優先ルール 3、`CHANGELOG.md` § 2.1.0 |
+| 対応済 (2026-10-21: avoid-ai-slop-ja/references/syntax-patterns.md §12 に 3 項目を追加、MAPPING.md の行を更新) | RECOMMENDED | skill | 読み違いの型 3 つ — (a) 挟まった句で目的語が抜けて読める文、漢語 → 和語の言い換えは目的語が追えて意味の幅が同じときだけ、(b) 主題「は」「では」が後半の節まで掛かるか決まらない文は主体を足さずに問う、(c) 前置きのない「〜のは、A、B、C。」は述語の形に戻す (見出し・結び・スライドは残す)。syntax-patterns に該当の型が無かった (grep 済) | yomiyasu: `8be3ef6`、`SKILL.md` § 主語と目的語の明確化・§ コピー調の抑制、`CHANGELOG.md` § 2.1.0 |
+| 対応済 (2026-10-21: avoid-ai-slop-ja/SKILL.md 手順 7 に追記) | FYI | skill | 意味検算の「元に無い数値を足さない」は数値の追加しか見ていない。概数の印の増減 (約120人 → 120人、以上 ⇔ 超)、「AまたはB」⇔「両方」、相関の文への因果の語の追加も意味の変化として見る。1 文の追記で済むので入れた | yomiyasu: `fbe02c9`、`CHANGELOG.md` § 2.1.1 |
+| 対応済 (2026-10-21: ja-writing/SKILL.md の参照リポジトリ表の yomiyasu 行を更新) | FYI | skill | 参照リポジトリ表の yomiyasu 行の説明が v2.0 の内容で止まっていた | yomiyasu: `8be3ef6` |
+| 却下 (該当なし: yomiyasu はスキルとして入れておらず原典として読むだけ。自作の avoid-ai-slop-ja / ja-writing は名前を出さない日本語作業でも発火させるのが目的なので、同じ絞り込みは入れない (絞ると暗黙の利用が消える。yomiyasu 自身も名前を出さない推敲依頼で 18/18 → 0/18)。発火を絞る description の型は蒸留版 yomiyasu.md に索引済) | FYI | skill | v2.0.2 で description を「名前を出して頼んだときだけ使う」に絞り、名前の無い作業での誤発火が Claude Code で 10/72 → 0/72 に減った (`claude -p` での測定のみ) | yomiyasu: `5b7cacc`、`CHANGELOG.md` § 2.0.2 |
+
+### 再蒸留 (awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (既に実施: agent の失敗を 1 件ずつ恒久的に塞ぐ運用は、CLAUDE.md の規約、auto-memory の再発防止メモ、環境側の PreToolUse hook で回している。この台帳と refs-update は上流原典の変化を追う仕組みで別物。新たに直すものは無い。README の注記ベースで記事本文は未読) | FYI | 運用 | agent の失敗 1 件ごとに AGENTS.md の 1 行か専用 tool で恒久的に塞ぎ、同種の失敗を再発させない (Hashimoto "My AI Adoption Journey"。Ghostty で修正が要る commit が 3 か月で 40% → 3%) | ahe: `ec1e1b7`、`README.md` の Foundations 先頭 |
+
+claude-code-best-practice (`9f9f5d9`、drift は ON HOLD / INVALID の再掲と commands 表の description 4 件のみ)、meiseki (`9750d92`、rikai のダッシュボードと手動の卒業のみ)、smarthr-design-system (`170cea3`、`products/contents/` と textlint 設定に差分なし) は候補なし。
+
+---
 ## 2026-10-18
 
 ### 再蒸留 (awesome-harness-engineering / claude-code-best-practice / yomiyasu) から

@@ -1,7 +1,7 @@
 ---
 source: https://github.com/shanraisshan/claude-code-best-practice
-distilled_commit: 3433a39b2eec1f7caed96b1dde15b22e6845a753
-distilled_at: 2026-10-18
+distilled_commit: 9f9f5d9faec17b8646cceeb35ad9e4e0f5b85c56
+distilled_at: 2026-10-21
 ---
 
 # claude-code-best-practice 蒸留版
@@ -145,7 +145,7 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
       10-04 に row 24 `artifact-design` (根拠は v2.1.281 の CHANGELOG + 実行セッションの skill 一覧)、10-12 に row 25 `plugin-authoring` (mod = pane・prompt 上の band・status line・toast・slash command・tool call/prompt の hook を作る/直す。根拠は CHANGELOG v2.1.290/v2.1.295 の "the built-in `plugin-authoring` skill"。10-18 に公式 docs の "Requires Claude Code v2.1.287 or later" で導入版を「v2.1.290 から言及」→「v2.1.287+」へ訂正)。
       **row 24・25 は公式 docs の bundled 一覧に無い** — 10-13 run 自身が「report 25 vs official docs 24」と書き、commands 側は `/plugin-authoring` を「built-in plugin の skill」として 10-11・10-12 に INVALID (範囲外) 判定。artifact 系 4 つは Claude が自分で load する参照 skill。
       削除候補 3 件 — row 15 `review` (v2.1.223 で `/code-review` の alias、説明が旧挙動のまま)・row 16 `security-review` (公式は「Skill ツール経由で呼べる built-in command」)・row 18 `skill-doctor` (commands reference の `[Skill]` マークが run ごとに揺れる) —
-      は判定が**反転を繰り返している** (09-17 / 09-20 の INVALID が翌 run 以降に再 ON HOLD)。**1 run の INVALID を確定と見なさない**、bundled skill の個数は引用しない (公式 docs が明示列挙する数も run ごとに 24 / 12 / 11 と揺れる)。10-17 (v2.1.302) も 3 件とも ON HOLD 継続、加えて row 25 `plugin-authoring` が「built-in plugin 経由で bundled skill の仕組みではない」として NEW の削除候補 ON HOLD に入った (additive drift なし、20 フィールドは公式と同期)。10-18 も 4 件とも ON HOLD 継続。
+      は判定が**反転を繰り返している** (09-17 / 09-20 の INVALID が翌 run 以降に再 ON HOLD)。**1 run の INVALID を確定と見なさない**、bundled skill の個数は引用しない (公式 docs が明示列挙する数も run ごとに 24 / 12 / 11 と揺れる)。10-17 (v2.1.302) も 3 件とも ON HOLD 継続、加えて row 25 `plugin-authoring` が「built-in plugin 経由で bundled skill の仕組みではない」として NEW の削除候補 ON HOLD に入った (additive drift なし、20 フィールドは公式と同期)。10-18〜10-20 (v2.1.304) も 4 件とも ON HOLD 継続。
       **`review` という名前の自作 skill は `/review` から起動できない** (公式 docs の "typing the bundled alias `/review` never runs your skill")。
     - `allowed-tools` の型は commands 表が 09-16 に `string` → `string/list` へ訂正されたが、skills 表は `string` の
       ままで**原典内で食い違う** (`disallowed-tools` は両表とも `string/list`)。
@@ -161,12 +161,12 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
       `permissionMode` に公式の `manual` (`default` の alias、v2.1.200+) が無く、`Explore` の model は `haiku`
       (公式は「親から継承」、Claude API では Opus 上限)、`model` 例は `claude-opus-4-6` のまま (公式は `fable` /
       `claude-opus-5`)、`prompt` は公式の `--agents` CLI JSON 側にしか無い。
-    - 10-18 時点で skills・commands・subagents のバッジは揃って v2.1.302 だが subagents 側の ON HOLD 4 件と watch item、skills 側の削除候補 4 件は 1 つも解消していない — **バッジの更新は表本体が直ったことを意味しない**。
+    - 10-20 時点で skills・commands・subagents のバッジは揃って v2.1.304 だが subagents 側の ON HOLD 4 件と watch item、skills 側の削除候補 4 件は 1 つも解消していない — **バッジの更新は表本体が直ったことを意味しない**。
     - **ON HOLD は解消されずに静かに消えることがある**。commands 側の `/cost` (cache miss 表示)・`/reload-plugins`
       (headless 対応)・`/effort` (既定保存と `s` キー) は 09-05 を最後に changelog から落ちたが公式 docs 表には
       入っておらず、以降の run は「fully in sync」と宣言。**「最新 run に出ていない = 解決した」ではない**。
       v2.1.283 で入った `/doctor prompt-audit` サブコマンドも skills 側の changelog (09-26) が触れるだけで commands 表には無い。
-      CHANGELOG のみの変更は docs 反映まで ON HOLD (`/mcp reconnect all` は 09-29 → 10-03 適用、`/autocompact` のモデル別保存 (v2.1.288) は 10-05 から 10-18 まで毎日 ON HOLD で未適用)。
+      CHANGELOG のみの変更は docs 反映まで ON HOLD (`/mcp reconnect all` は 09-29 → 10-03 適用、`/autocompact` のモデル別保存 (v2.1.288) は 10-03 から ON HOLD が続き (10-19 の run では挙がらず、10-20 に再掲)、10-20 時点でも未適用)。
     - `claude-settings.md` は 6 週間止まった末 10-13 に v2.1.252 → v2.1.296 へ追いつき、33 項目を直した。**その大半が型・scope・意味の誤り** (`feedbackDrafts` boolean → `"notify"/"quiet"/"off"`、`strictKnownMarketplaces` boolean → source object 配列、`enableArtifact`・`alwaysThinkingEnabled` の `true` は no-op、`USE_BUILTIN_RIPGREP` の向きが逆、ほか項目 7・9・10) — **止まっていた表の値は追従後にも疑う**。`claude-memory.md` (2026-03)・`claude-mcp.md` (2026-03)・`claude-cli-startup-flags.md` (2026-06) は数か月動いていない。
     → `best-practice/claude-skills.md`, `claude-commands.md`, `claude-subagents.md`, `claude-settings.md`
 
@@ -180,7 +180,7 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
     `agent:` で subagent type を指定 (既定 `general-purpose`)、`background` (boolean、既定 `true`、v2.1.218+) を
     `false` にすると呼び出したターン内で結果を待つ。この 3 つは skill と command のみで subagent 側には無い。
     ユーザー側の入口は `/subtask` (親の会話を継承する forked subagent を background で回す。**v2.1.212+ が必要で
-    agent view を切っていると使えない**)。**`/resume` で走っている background セッションを選ぶと、v2.1.285 以降はこの端末がそれに attach し、今の会話が background に回る** (空プロンプトで `←` を押すと agent view へ戻る。旧版は再開不可で `claude agents` で attach するか先に停止が必要だった)。他の制約: `/insights` はローカルセッションのみ HTML 化、`/tasks` (alias `/bashes`) が見せるのは**現セッションの** background work。`/add-dir` は v2.1.234 からターン中に即確認を求め、成功時に `DirectoryAdded` hook が走る — 追加ディレクトリの `.claude/` 設定はほぼ読まれないので必要な副作用はこの hook で組む。
+    agent view を切っていると使えない**)。**`/resume` で走っている background セッションを選ぶと、v2.1.285 以降はこの端末がそれに attach し、今の会話が background に回る** (空プロンプトで `←` を押すと agent view へ戻る。旧版は再開不可で `claude agents` で attach するか先に停止が必要だった)。他の制約: `/insights` はローカルセッションのみ HTML 化、`/tasks` (alias `/bashes`) が見せるのは**現セッションの** background work、`/stop` は attach 中の background セッションか peek reply の送り先を停止 (transcript と worktree は残る。止めずに離れるなら `/exit` か `←`)。`/add-dir` は v2.1.234 からターン中に即確認を求め、成功時に `DirectoryAdded` hook が走る — 追加ディレクトリの `.claude/` 設定はほぼ読まれないので必要な副作用はこの hook で組む。
     → `best-practice/claude-skills.md`, `claude-commands.md` の Frontmatter Fields 表と各コマンド行
 
 ## 索引
@@ -226,7 +226,7 @@ Claude Code の実践知を集めたリポジトリ (shanraisshan) の蒸留。�
 - **公式 slash command・CLI フラグ・env vars の全リスト** — `best-practice/claude-commands.md` と `claude-cli-startup-flags.md` を引く。
 - **tips 全文** — カテゴリ別一覧は `README.md` の TIPS AND TRICKS 節。各 tip に一次ソースリンク付き。
 - **★ 数とバッジ日付** — 日次 refresh で書き換わる。蒸留版は数値を持たない。バッジは「その表がまだ追われているか」の
-  指標としてのみ使う (項目 12)。2026-10-18 時点で skills / commands / subagents が v2.1.302、settings は v2.1.296 (10-13)。
+  指標としてのみ使う (項目 12)。2026-10-20 時点で skills / commands / subagents が v2.1.304、settings は v2.1.296 (10-13)。
 - **コミュニティワークフローの詳細比較・skill/agent コレクション集** — `README.md` の
   DEVELOPMENT WORKFLOWS / SKILL COLLECTIONS / AGENT COLLECTIONS 表。★ 数だけでなく**ステップ列も行の並び順も
   個数も日次で書き換わる** (gstack skills は 53/48/65/32/58/54/55 と揺れ、BMAD agents は 0 と 5 を往復、10-17 run は 11 workflow 中 9 個、10-18 run は 8 個のステップ列が前回と食い違い chain reset で ON HOLD) ため蒸留版は

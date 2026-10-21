@@ -1,18 +1,18 @@
 ---
 source: https://github.com/nanaism/yomiyasu
-distilled_commit: 84e1f5b15e497538fcfe19ab7e9c6f6d138f19ff
-distilled_at: 2026-10-18
+distilled_commit: fbe02c93877d697cc53d9377b7a45dd8a1dd99b3
+distilled_at: 2026-10-21
 ---
 
 # yomiyasu 蒸留版
 
-AI が生成した日本語を推敲するスキル (v2.0.1、ALGO ARTIS の大賀氏作、MIT)。狙いは「不自然な比喩、曖昧な主述関係、偏った構文を直し、読みやすく自然な日本語に整える」こと (skills/yomiyasu/SKILL.md)。禁止語の置き換えだけでは「別の曖昧な語へ置き換わるだけ」という反省から作られている (README.md § 背景と課題)。**この蒸留版は「推敲で何を変えてはいけないか」の規則と、その根拠になった研究・調査の索引**。`avoid-ai-slop-ja` が「何を直すか」の診断手順を持つのに対し、yomiyasu の中心は意味保持と不増補の制約にある。
+AI が生成した日本語を推敲するスキル (v2.1.1、ALGO ARTIS の大賀氏作、MIT)。狙いは「不自然な比喩、曖昧な主述関係、偏った構文を直し、読みやすく自然な日本語に整える」こと (skills/yomiyasu/SKILL.md)。禁止語の置き換えだけでは「別の曖昧な語へ置き換わるだけ」という反省から作られている (README.md § 背景と課題)。**この蒸留版は「推敲で何を変えてはいけないか」の規則と、その根拠になった研究・調査の索引**。`avoid-ai-slop-ja` が「何を直すか」の診断手順を持つのに対し、yomiyasu の中心は意味保持と不増補の制約にある。
 
-v2.0.0 (2026-10-16) で 3 つの仕組みが加わった。(a) 文脈からの事実の補い (fact-recovery)、(b) 書き手と読み手に合わせた直し方 (文書の種類 12 / 読者 3 段階 / ペルソナ)、(c) 検査の記録 (`yomiyasu_check.py` の run / verify と記録)。v2.0.1 は diff の高速化だけで、出力は 2.0.0 と同じ (CHANGELOG.md § 2.0.1)。
+v2.0.0 (2026-10-16) で 3 つの仕組みが加わった。(a) 文脈からの事実の補い (fact-recovery)、(b) 書き手と読み手に合わせた直し方 (文書の種類 12 / 読者 3 段階 / ペルソナ)、(c) 検査の記録 (`yomiyasu_check.py` の run / verify と記録)。v2.0.1 は diff の高速化だけ。v2.0.2 (10-19) は発火条件を「名前を出して頼んだときだけ」に絞った (書き直し方と出力は 2.0.1 と同じ)。v2.1.0 (10-20) は推敲の結果が変わる版で、語順・省略・助詞による読み違い (目的語の抜け、主題の掛かる範囲、前置きのない強調) と、仕様書での許可・能力・保証の言い方のずれを扱い、「書き手に確かめたい点」を 2 点から 3 点にした。v2.1.1 (10-21) は検査とフックの不具合直しで、SKILL.md は版の行だけ、references は無変更 (CHANGELOG.md § 2.0.2・2.1.0・2.1.1)。
 
 ## Contents
 
-- まず押さえる (1〜18)
+- まず押さえる (1〜19)
 - 表記規則の具体 (ダッシュ・括弧・空白・コロン・太字・読点)
 - 文書の種類 12 とドメイン 3 種
 - 索引テーブル
@@ -20,7 +20,8 @@ v2.0.0 (2026-10-16) で 3 つの仕組みが加わった。(a) 文脈からの�
 
 ## まず押さえる
 
-1. **最優先は「意味の保持」と「情報の不増補」の 2 つで、ほかの原則はすべてその範囲内でだけ使う** (v2 でも同じ)。意味は 4 点で確かめる。**主張** (論点を「本質」から「目的」へすり替えない)、**比重** (否定していた A を「A に加えて B」と並べない。差や食い違いを述べる文で「何と何の差か」を削らない)、**言い切りの強さ** (「おそれがあります」と弱めない。「〜と言えるでしょう」を断定に強めない)、**文の働き** (完了した変更を予定の「〜します」にしない) (skills/yomiyasu/SKILL.md § 最優先ルール)。
+1. **最優先は「意味の保持」と「情報の不増補」の 2 つで、ほかの原則はすべてその範囲内でだけ使う** (v2 でも同じ)。意味は 4 点で確かめる。**主張** (論点を「本質」から「目的」へすり替えない)、**比重** (否定していた A を「A に加えて B」と並べない。差や食い違いを述べる文で「何と何の差か」を削らない)、**言い切りの強さ** (「おそれがあります」と弱めない。「〜と言えるでしょう」を断定に強めない。v2.1 で許可・能力・義務・保証もここに入った。下記)、**文の働き** (完了した変更を予定の「〜します」にしない) (skills/yomiyasu/SKILL.md § 最優先ルール)。
+   v2.1 の言い切りの強さ: 許可 (〜してよい)・能力/権限 (〜できる)・義務 (〜しなければならない)・保証 (必ず〜する、〜を保証する) を互いに替えない。仕様書や設計文書では違いがそのまま仕様の違いになるので、「含めてよい」を「含められる」「含める」にしない、「〜場合がある」を消して言い切らない、説明に「必ず」「保証する」を足さない。diff は許可の消失・追加をどの文書の種類でも数え、常体の「保証する」「担保する」の足しと、否定を増やす「〜ことはない」の足しを原文にない保証として数える。「場合がある」の削除と「必ず」の足しを数えるのは `--doc-type` が pr / article / incident / proposal / manual / formal / paper のときだけ。拾わない形: 名詞のあとの「〜で構わない」「〜でよい」、能力だけ消えた「お届けできます → お届けいたします」は `--fail-on` で止まらない (SKILL.md § 最優先ルール 3, doc-types/formal.md, review-points.md, CHANGELOG.md § 2.1.0 限界)。
 
 2. **文の働きは 7 種類で文ごとに内部メモし、書き直し後に読み比べる**。事実 / 意見・評価 / 依頼・決まり / 例え・比喩 / 皮肉・冗談・反語 / 仮定・予測 / 引用・伝聞。比喩動詞を含む文 (「休日を溶かした」) は事実の文として扱う。種類を決めきれない文は候補を残したまま扱う。書き手の評価や実感を述べる「〜ことができました」は外枠を外さず残す (v2 で追加) (SKILL.md § 最優先ルール, references/gemini-syntax.md 原則 6)。
 
@@ -50,11 +51,13 @@ v2.0.0 (2026-10-16) で 3 つの仕組みが加わった。(a) 文脈からの�
 
 15. **検査は「実行したこと」を記録で示すだけで、意味保持や読みやすさの合格を示さない**。v2 の手順は Step 2 前に原文へ lint → 書き直し → Step 3 で `yomiyasu_check.py run` (最終稿に lint、原文と最終稿に diff) → Step 4 で修正 1 回だけ → Step 5 で提出直前に `verify` (最終稿のハッシュを記録と照合)。verify のあとに 1 字でも変えたら run と verify をやり直す。記録は git 最上位の `.yomiyasu/` に置き、原稿の写しが入る。原典は「この記録は検査を実行したことを示すだけで、意味が保たれたことや読みやすさの合格を示すものではありません」「同じ権限で原稿と記録の両方を書き換えられる」とし、改ざん防止にはならないと書く (SKILL.md Step 3〜5, docs/tools.md § 3・4)。
 
-16. **v2 の diff は「意味が変わる恐れ」を出すが、拾えない形が多い**。対象は数値、否定、主語と目的語の入れ替え、文の種類の印、引用の印、確度を強めた書き換え、状態の語 (未定・調査中) が消えた書き換え、原文にない約束・保証・再発防止の誓い、因果の足し、否定対比の逆転、元にない気持ちの語。ほかに文体の硬化 (漢字率・文長・名詞化の増加) と勢いの喪失。**原文にない評価の語 (改善、向上、大切) と一般化・勧めの足しは diff では拾わない** (合成の組で評価の足しは 14 組中 0 組しか出せなかったため)。原文にない担当者や動作主の足しも「意味が変わる恐れ」には出ない (CHANGELOG.md § 2.0.0, docs/limitations.md § 状態の語・約束・因果・評価と一般化, skills/yomiyasu/references/review-points.md § 3)。
+16. **v2 の diff は「意味が変わる恐れ」を出すが、拾えない形が多い**。対象は数値、否定、主語と目的語の入れ替え、文の種類の印、引用の印、確度を強めた書き換え、状態の語 (未定・調査中) が消えた書き換え、原文にない約束・保証・再発防止の誓い、因果の足し、否定対比の逆転、元にない気持ちの語。ほかに文体の硬化 (漢字率・文長・名詞化の増加) と勢いの喪失。**原文にない評価の語 (改善、向上、大切) と一般化・勧めの足しは diff では拾わない** (合成の組で評価の足しは 14 組中 0 組しか出せなかったため)。原文にない担当者や動作主の足しも「意味が変わる恐れ」には出ない。v2.1.0 で `modality` (許可の消失・追加は数える、能力の消失は `modality_review` で数えない)、v2.1.1 で `choice` (「AまたはB」⇔「両方」の入れ替え)、`causality` (関連・相関の文に原文にない因果の語を足す)、`number_qualifier` (「約120人」→「120人」のような概数・範囲の印の増減、以上⇔超 などの入れ替え) が加わり、いずれも `--fail-on=meaning-risk` に数える。見出しの数・段の変化も「構造」の見直し候補に出る (終了コードは変えない) (CHANGELOG.md § 2.0.0・2.1.0・2.1.1, docs/limitations.md § 状態の語・約束・因果・評価と一般化, skills/yomiyasu/references/review-points.md § 3)。
 
 17. **lint の点数は v2 で通常出力から外れた。v1 の「人の文章 16 本の平均 98.7、AUC 0.56」は原典が訂正した**。16 本のうち 8 本 (`tests/corpus/human/human_doc_*.md`) は人が書いた文ではなく `scripts/setup_corpus_static.py` 内の AI の例文で、AUC 0.56 は AI の例文 8 本を人の文として数えた値だった。人が書いたのは作者の記事 1 本を 8 分割した抜粋だけなので、数え直した値は載せない。結論 (点数で人と AI を見分けられない、高得点は人が書いた証拠にならない) は変わらない。JSON の `score` は `rule_penalty_score` (地の文 1,000 字あたりの重み付き件数 x で 100×40÷(40+x)) に改名・再定義された。「合否やしきい値には使わず」、前後比較は run の「見直し候補: 原文 N件 → 最終稿 M件」と直した箇所の元と後を読む (CHANGELOG.md § 2.0.0 訂正, docs/tools.md § 点数が出なくなった理由・§ rule_penalty_score の式)。
 
-18. **v2 自身の評価は割れている**。手順の試験では、提出した最終稿に必要な検査をかけなかった回が Claude Code で 1.1.2 の 60 回中 31 回 → 2.0.0 の 67 回中 0 回。一方、開発途中の 2.0.0 と 1.1.2 の本文を作者が版名を隠して読み比べた 7 組では、好みは 1.1.2 が 6 組・途中の版 0 組だった (1 人・各 1 回の小さな比べ)。「書く前に読ませる」使い方の外部検証 (ai-garage、v1.1.1) では、書き足しの指摘は 60 回 → 2 回に減ったが、文章は依頼 500 字に対し平均 356 字、読みやすさ評価は 4 通り中最低、時間と費用は約 4 倍だった (docs/limitations.md § 確かめた範囲, README.md § 書く前に読ませる使い方)。
+18. **v2 自身の評価は割れている**。手順の試験では、提出した最終稿に必要な検査をかけなかった回が Claude Code で 1.1.2 の 60 回中 31 回 → 2.0.0 の 67 回中 0 回。一方、開発途中の 2.0.0 と 1.1.2 の本文を作者が版名を隠して読み比べた 7 組では、好みは 1.1.2 が 6 組・途中の版 0 組だった (1 人・各 1 回の小さな比べ)。「書く前に読ませる」使い方の外部検証 (ai-garage、v1.1.1) では、書き足しの指摘は 60 回 → 2 回に減ったが、文章は依頼 500 字に対し平均 356 字、読みやすさ評価は 4 通り中最低、時間と費用は約 4 倍だった。v2.1.0 の新規則は合成文書 4 本を Claude Code と Codex で 3 回ずつ推敲させ、目的語の抜け 0/6 → 6/6、前提のない「〜のは、A、B、C。」0/6 → 6/6、主題の範囲 0/6 → 5/6。測ったのは規則に入れた例と同じ形の文だけと原典が断る (docs/limitations.md § 確かめた範囲, README.md § 書く前に読ませる使い方, CHANGELOG.md § 2.1.0 確かめたこと)。
+
+19. **v2.1 の読み違い対策 3 つ (手順だけで、目的語と主題は lint/diff の検査にしていない)**。(a) 目的語を書かない他動詞の前に比較や条件の句が挟まり、前の名詞が目的語に読める文 (「設定の一覧を渡して比べさせると、Aは残りの2つの案より多く削った。」) は、対象が原文・依頼・資料・文脈にあれば目的語に書き、なければ動作を名詞にして主語に立てる (「〜を行う」にはしない)。決まらなければ書き手に確かめる。漢語を和語の動詞に替えるのは目的語が追え、意味の幅が同じときだけ (「確認する」→「見る」はしない)。(b) 主題の「〜は」「〜では」は文末まで掛かって読まれる。主題が部品や処理の名前で、後半に別の名前 (設定、マクロ、ファイル、ライブラリ) を扱う動作が出る文は、後半も主題の話かを確かめ、確かめられなければ主体を足さずに問う。後半が別の主体の話だと原文から言えるときは後半の頭にその主体を書き、後半に主体が書いてある文と主題の性質・状態の続きは残す。問う場面をこの形に絞るのは、条件を広げるとほかの文書でも念のための問いが増える恐れがあるため。(c) 前置きのない「〜で変わったのは、A、B、C。」は「〜では、A、B、Cが変わった」に戻す。前提が直前にある・見出し・結び・スライドの箇条なら残す (lint `cleft_list_ending`、info、slides では外す) (SKILL.md § 主語と目的語の明確化・§ コピー調の抑制, rephrase-test.md, gemini-syntax.md, CHANGELOG.md § 2.1.0 限界)。
 
 ## 表記規則の具体 (ダッシュ・括弧・空白・コロン・太字・読点)
 
@@ -92,31 +95,32 @@ v2 で文書の種類 (`--doc-type`) が加わった。種類を決めたら `re
 
 | トピック | 原典パス | 一行説明 |
 |---|---|---|
-| ルール本体・手順・出力形式 | skills/yomiyasu/SKILL.md | 363 行。§1 基本原則、§2 Step 1〜5 (把握 / 書き直し / check run / 修正 1 回 / verify)、§3 出力 (書き直した本文 / 変えたところ 5 点 / 残した AI っぽいところ / 書き手に確かめたい点 2 点 / 事実の確かめ / 確認の記録) |
-| 言い直しテスト (6 点) と否定対比 | skills/yomiyasu/references/rephrase-test.md | 73 行。6 点の「同じといえるとき / 変わる案の例」表、否定対比の残す例・直す例・直し方を誤った例 |
+| ルール本体・手順・出力形式 | skills/yomiyasu/SKILL.md | 367 行 (41,445 字)。§1 基本原則、§2 Step 1〜5 (把握 / 書き直し / check run / 修正 1 回 / verify)、§3 出力 (書き直した本文 / 変えたところ 5 点 / 残した AI っぽいところ / 書き手に確かめたい点 3 点 / 事実の確かめ / 確認の記録)。確かめたい点は v2.1 で 3 点まで、選ぶ順は読み違えると働きが変わる所 → 読み手が動く値や手順 → 語の指す先 → 出典や用途、選ばなかった所は「- ほかに N か所」、ほかの上限 (説明が必要 3 点・ペルソナ 2 点・材料と違う値 2 点) は別枠 |
+| 言い直しテスト (6 点) と否定対比 | skills/yomiyasu/references/rephrase-test.md | 73 行。6 点の「同じといえるとき / 変わる案の例」表、否定対比の残す例・直す例・直し方を誤った例。v2.1 で名詞化・漢語の案は和語で書けるなら和語に、ただし目的語が追えなくなる・幅が広がるときは除く |
 | 文脈からの事実の補い (本体) | skills/yomiyasu/references/fact-recovery.md | 93 行。いつ読むか、材料の決め方、補ってよい 6 条件、補足と訂正、「事実の確かめ」節の形 |
 | 事実の補いの細部 | skills/yomiyasu/references/fact-recovery-details.md | 169 行。§5 問いの形と例、§6 種類と宛先・入れてはいけない事実の表・意図した省略の印、§7 穴の種類、§8 check への渡し方、§9 ほかの場面 (子エージェント、本文だけの指定、答えが返ってきたとき) |
 | 書き手と読み手 (ペルソナ) | skills/yomiyasu/references/persona.md | 128 行。関係 7 区分、推定のときの範囲表、誰が / 誰にの扱い、敬語の度合いの合わせ方、知らせ方 |
 | 文書の種類と読者 | skills/yomiyasu/references/audience.md | 168 行。種類と読者の手がかり、確かめるか決めずに進むか、読者 3 段階、用語の扱い、種類と外す規則の全体の表 |
-| 文書の種類ごとの注意 | skills/yomiyasu/references/doc-types/*.md | 12 本 (article, essay, formal, incident, mail, manual, minutes, paper, pr, promo, proposal, slides)。各 27〜47 行 |
-| 検査の出力の見方 | skills/yomiyasu/references/review-points.md | 114 行。run の節ごと (意味が変わる恐れ / 硬化 / 勢い / 慎重な言い方 / 敬語の度合い / 資料との照合 / 全文差分) の見方、候補に出なくても確かめること、Python がないときの目視点検 |
-| 構文変換原則 14 項と根拠研究 | skills/yomiyasu/references/gemini-syntax.md | 263 行。研究 7 件と原則 1〜14 (対照表つき)。v2 の変更は使役の主語を「〜には」に直す、promo の絵文字、ラベルとコロンの線引きの 3 点だけ |
-| 語彙・構文カタログ 9 分類 | skills/yomiyasu/references/slop-catalog.md | 155 行。v2 で § 8 成り立たない比喩、§ 9 間を作るだけの読点を追加 |
+| 文書の種類ごとの注意 | skills/yomiyasu/references/doc-types/*.md | 12 本 (article, essay, formal, incident, mail, manual, minutes, paper, pr, promo, proposal, slides)。各 27〜47 行。v2.1 で formal に許可・能力・説明・保証を替えない規則、slides の外す規則に `cleft_list_ending` |
+| 検査の出力の見方 | skills/yomiyasu/references/review-points.md | 115 行。run の節ごと (意味が変わる恐れ / 硬化 / 勢い / 慎重な言い方 / 敬語の度合い / 資料との照合 / 全文差分) の見方、候補に出なくても確かめること、Python がないときの目視点検 |
+| 構文変換原則 14 項と根拠研究 | skills/yomiyasu/references/gemini-syntax.md | 275 行。研究 7 件と原則 1〜14 (対照表つき)。v2.1 で目的語の抜け・主題の範囲の対照表 (残す例つき) と、和語化の条件を追加 |
+| 語彙・構文カタログ 9 分類 | skills/yomiyasu/references/slop-catalog.md | 156 行。v2 で § 8 成り立たない比喩、§ 9 間を作るだけの読点を追加。v2.1 で強調の分裂文 (「〜のは、A、B、C。」) の行と、名詞化を増やさない規則への例外 (目的語の抜けを直すときは動作の名詞を主語にしてよい。「〜を行う」は不可) |
 | ドメイン別仕様 | skills/yomiyasu/references/domains/tech.md, business.md, essay.md | 41 / 54 / 39 行 |
 | 検査に使う語の一覧 | skills/yomiyasu/references/lists/*.txt | nominalization / intensifiers / feelings / hedges / fact-gaps。足し引きでき、ハッシュが記録に残る |
 | 使い方の詳細 (README から移設) | docs/usage.md | 「/yomiyasu」だけ送ったとき、種類と読者、書き手と読み手、事実を補うとき、完了報告、プラグインでのスキル名 (`yomiyasu:yomiyasu`) |
 | 付属ツールの詳細 (README から移設) | docs/tools.md | check で前後を比べる読み方、点数をやめた理由と `rule_penalty_score` の式、lint / diff / check のオプションと終了コード、`--material` と `--fact-gaps`、任意のフックの入れ方と限界 |
 | 限界と確かめた範囲 (README から移設) | docs/limitations.md | 確かめたホストと版、手順の試験と読み比べの数、diff が拾わない形 (数値・否定・状態・約束・因果・評価)、事実の補いと照合の限界 |
-| 変更履歴 (2.0.0 から) | CHANGELOG.md | 互換性のない変更の表 (lint の JSON 改名、終了コード、diff の状態 3 分類)、追加、訂正 (人の文章 16 本・AUC の訂正) |
-| 概要・7 変換原則・2.0.0 の要約・Before/After | README.md § 本スキルのアプローチ・§ 2.0.0 で加わったこと・§ Before → After 例 | 1.1.2 のころの構成に戻され、詳しい説明は docs/ へ移った (68075be) |
+| 変更履歴 (2.0.0 から) | CHANGELOG.md | 2.0.0 の互換性のない変更 (lint の JSON 改名、終了コード、diff の状態 3 分類) と訂正 (人の文章 16 本・AUC)、2.0.2 の発火条件と選ばれ方の測定表、2.1.0 の手順と diff の追加・測定、2.1.1 の不具合直しと終了コードが変わる場合 |
+| 概要・7 変換原則・2.0.0 / 2.1.0 の要約・Before/After | README.md § 本スキルのアプローチ・§ 2.0.0 で加わったこと・§ 2.1.0 で加わったこと・§ Before → After 例 | 詳しい説明は docs/ にある。英語の短い紹介は README.en.md |
+| 毎回使いたいときの 1 行 | README.md § 毎回 yomiyasu を使いたいとき | 入れ方ごと (Claude Code / Codex / openskills / Claude.ai) の CLAUDE.md・AGENTS.md・指示に足す文と、スキル名 `yomiyasu` / `yomiyasu:yomiyasu` の違い。v2.0.2 で発火を「名前を出して頼んだときだけ」に絞り (CLAUDE.md 等で求められていれば名前を出したものとして扱う)、名前を出さない作業での発火は Claude Code 10/72 → 0/72、Codex 27/36 → 0/36、名前を出さない推敲依頼も 18/18 → 0/18 (`claude -p` / `codex exec` のみの測定、CHANGELOG.md § 2.0.2) |
 | 「書く前に読ませる」検証 | README.md § 書く前に読ませる使い方 | 外部記事 (ai-garage、v1.1.1) の数値。上の項目 18 |
 | 参考文献 | README.md § 謝辞・参考文献 | 5 区分 (コミュニティ調査 / 学術研究 / 先行スキル / 書籍『悪文の構造』/ 利用者による検証)。研究の正は gemini-syntax.md 冒頭 |
-| 検査をまとめて記録する CLI | skills/yomiyasu/scripts/yomiyasu_check.py | 4,681 行。`run` (`--source` / `--final` / `--stdin` / `--material` / `--doc-type` / `--reader` / `--stance` / `--fact-gaps` / `--no-record`)、`verify` (`--replay` ほか)、`start` / `end` / `export` |
-| 静的検査リンター | skills/yomiyasu/scripts/yomiyasu_lint.py | v2 で `instruction_residue`、`pause_comma`、`meta_filler` の「過言」の型などを追加。`--fail-on`、`--doc-type`、`--reader` |
-| 推敲差分チェッカー | skills/yomiyasu/scripts/yomiyasu_diff.py | 9,082 行。全文差分と「意味が変わる恐れ」、硬化、勢い、確度、引用、文体の切り替え。`--fail-on=meaning-risk` |
-| 任意のフック | skills/yomiyasu/scripts/yomiyasu_hook.py | Claude Code / Codex の設定に貼ったときだけ動く。登録した原稿の最終稿が記録と合うかを返答終了時と `gh` 投稿前に確かめる。`--print-config claude-code` |
+| 検査をまとめて記録する CLI | skills/yomiyasu/scripts/yomiyasu_check.py | 4,864 行。`run` (`--source` / `--final` / `--stdin` / `--material` / `--doc-type` / `--reader` / `--stance` / `--fact-gaps` / `--no-record`)、`verify` (`--replay` ほか)、`start` / `end` / `export`。v2.1.1 で候補があるとき出力 3 行目のあとに候補の短い一覧が入る (記録のパスは行位置でなく「記録: 」で始まる行で探す) |
+| 静的検査リンター | skills/yomiyasu/scripts/yomiyasu_lint.py | 4,018 行。v2 で `instruction_residue`、`pause_comma`、`meta_filler` の「過言」の型など、v2.1.0 で `cleft_list_ending` を追加。v2.1.1 で文末の後ろの絵文字・記号を読み飛ばして文末規則を当てる。`--fail-on`、`--doc-type`、`--reader` |
+| 推敲差分チェッカー | skills/yomiyasu/scripts/yomiyasu_diff.py | 10,616 行。全文差分と「意味が変わる恐れ」、硬化、勢い、確度、引用、文体の切り替え、構造 (見出し)。kind に `modality` / `choice` / `causality` / `number_qualifier` (v2.1)。`--fail-on=meaning-risk`、`--doc-type` で確度の数え方が変わる |
+| 任意のフック | skills/yomiyasu/scripts/yomiyasu_hook.py | Claude Code / Codex の設定に貼ったときだけ動く。登録した原稿の最終稿が記録と合うかを返答終了時と `gh` 投稿前に確かめる。`--print-config claude-code`。v2.1.1 で本文欄に対のないサロゲートがあると判定を出さず素通りしていた不具合 (#28) を修正。v2.0.2 で `--state-dir` / `YOMIYASU_STATE_DIR` の頭の `~` を展開 (更新後は設定例を出し直す) |
 | Markdown の構造と表示を判定する共有モジュール | skills/yomiyasu/scripts/markdown_visibility.py | lint と diff が共用。完全な CommonMark レンダラーではない |
-| 回帰テスト | tests/test_*.py | 63 本 (v2.0.0 用の `test_v200_*`、`test_v201_fast_match.py` を含む) |
+| 回帰テスト | tests/test_*.py | 75 本 (`test_v200_*` から `test_v211_*` まで)。CI は .github/workflows/ci.yml (Python 3.9 / 3.14、直下と skills/yomiyasu/ の scripts・references の一致も確かめる) |
 | 評価コーパス | tests/corpus/ | human / raw_ai / blacklist_ai / yomiyasu_rewritten / edge_cases。human 16 本のうち 8 本は AI の例文 (CHANGELOG 訂正) |
 | 比較検証の記録 | evals/comparison_benchmark.md | 過去の記録。v2 でセット B の「人間が書いた元文章」の表記を訂正 |
 
@@ -127,10 +131,13 @@ v2 で文書の種類 (`--doc-type`) が加わった。種類を決めたら `re
 - **ペルソナの敬語の具体形** (同じ動詞に「お・ご」を付けた形、場面ごとの注意、知らせの 3 種の文面): persona.md § 7〜9。
 - **検査の出力の各節の読み方と JSON のキー**: review-points.md と docs/tools.md。lint・diff の閾値と語の表は各スクリプトの定数と references/lists/。
 - **diff の数値・否定・確度などの判定の細かい形** (漢数字の扱い、拾わない言い回し): CHANGELOG.md § 2.0.0 と docs/limitations.md の `<details>`。
-- **v2.0.1 の照合アルゴリズム** (difflib と同じ答えを速く求める手): CHANGELOG.md § 2.0.1。
-- **インストール手順とスキル名の違い** (npx skills / gh / openskills / プラグインの `yomiyasu:yomiyasu` / Codex の `.agents/skills/`): README.md § インストール, docs/usage.md § スキルの名前。
-- **重複の扱い**: リポジトリ直下の references/ と scripts/ は skills/yomiyasu/ 以下と同じ内容 (蒸留時点で `diff -r` は空。直下の scripts/ にはコーパス作成用スクリプトが別にある)。
+- **v2.0.1 の照合アルゴリズムと v2.0.2 の太字検査の高速化** (difflib と同じ答えを速く求める手、崩れた太字の数の 2 乗で伸びた解析の直し): CHANGELOG.md § 2.0.1・2.0.2。
+- **v2.1.1 の lint 誤警告の直しの細部** (「真理値」「装置」、「〜した瞬間に」、出版物の「版」、比喩の「効く」) と、`choice` / `causality` / `number_qualifier` の出す・出さない形の一覧: CHANGELOG.md § 2.1.1。
+- **JSON に足した値** (`meaning_risks[].kind` の subkind と detail、`LOGIC_MARKERS`、`FAIL_ON_KINDS` の並び): CHANGELOG.md § 2.1.0・2.1.1 の「足した JSON の値」。
+- **インストール手順とスキル名の違い** (npx skills / gh / openskills / プラグインの `yomiyasu:yomiyasu` / Codex の `.agents/skills/`。v2.0.2 で skills/yomiyasu/.claude-plugin/ を消し、Codex 用の名前は skills/yomiyasu/.codex-plugin/plugin.json に移った): README.md § インストール, docs/usage.md § スキルの名前。
+- **重複の扱い**: リポジトリ直下の references/ と scripts/ は skills/yomiyasu/ 以下と同じ内容 (蒸留時点で references/ の `diff -r` は空。直下の scripts/ にはコーパス作成用スクリプトが別にある)。
 - **蒸留時点の注意**:
   - README の「7 つの変換原則」と gemini-syntax.md の「原則 1〜14」は番号が対応しない。番号で参照するときは gemini-syntax.md を正とする。
   - ファイル名 gemini-syntax.md の由来は原典に明記がない。中身は特定モデルに依存しない構文原則。
+  - SKILL.md は 41,445 字で、指示の字数に上限があるサービス (Microsoft 365 Copilot の Agent Builder は 30,000 字) にはそのまま入らないと原典が書く (docs/limitations.md)。
   - 確かめたホストは macOS の Claude Code と Codex を非対話コマンド (`claude -p` / `codex exec`) で動かした範囲だけで、対話画面・Windows・Cursor・Claude.ai の ZIP は未確認と原典が書く (docs/limitations.md § 確かめた範囲)。

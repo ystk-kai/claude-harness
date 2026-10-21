@@ -1,12 +1,12 @@
 ---
 source: https://github.com/bamboo-nova/meiseki
-distilled_commit: a6cac6e2cabe1d39a0c079a898749311c7fadbf5
-distilled_at: 2026-10-16
+distilled_commit: 9750d9262c949aa3919b05b9dff1ba9ef502da03
+distilled_at: 2026-10-21
 ---
 
 # meiseki 蒸留版
 
-日本語文章の Agent Skill / Claude Code・Codex プラグイン (bamboo-nova 製、package.json 上は v0.9.0)。狙いは「明晰さ (clarity) = 内容を知らない読者が一度読んで正しく理解できること」だけ (.agents/skills/meiseki/SKILL.md §1)。**この蒸留版は「読解負荷を生む構文」と「やさしい日本語」の検出・書き換え規則の索引**として読む。AI 臭の診断と声の回復は姉妹スキル `avoid-ai-slop-ja` の領域で、meiseki は原典自身が「声を足さない」逆方向だと宣言している (README.md 冒頭)。
+日本語文章の Agent Skill / Claude Code・Codex プラグイン (bamboo-nova 製、package.json 上は v0.10.0)。狙いは「明晰さ (clarity) = 内容を知らない読者が一度読んで正しく理解できること」だけ (.agents/skills/meiseki/SKILL.md §1)。**この蒸留版は「読解負荷を生む構文」と「やさしい日本語」の検出・書き換え規則の索引**として読む。AI 臭の診断と声の回復は姉妹スキル `avoid-ai-slop-ja` の領域で、meiseki は原典自身が「声を足さない」逆方向だと宣言している (README.md 冒頭)。
 
 ## Contents
 
@@ -152,7 +152,7 @@ distilled_at: 2026-10-16
 
 | トピック | 原典パス | 一行説明 |
 |---|---|---|
-| 全体像・3 層構成・RLS・hook・Jev | README.md | 554 行。英語版は README.en.md |
+| 全体像・3 層構成・RLS・hook・Jev | README.md | 560 行。英語版は README.en.md |
 | meiseki 本体の手順 | .agents/skills/meiseki/SKILL.md | §4 の 8 ステップ、§5 ガードレール、§7 RLS、§8 textlint が拾える／拾えないもの |
 | 高負荷構文カタログ A–H | .agents/skills/meiseki/references/patterns.md | 267 行。各項目に Before／After と注意、末尾に全体の検算 |
 | meiseki の textlint 設定 | .agents/skills/meiseki/references/textlint.config.json | 3 プリセットで有効・無効にしたルールの実体 |
@@ -164,21 +164,21 @@ distilled_at: 2026-10-16
 | yorisoi の textlint 設定と prh 辞書 | .agents/skills/yorisoi/references/textlint-yorisoi.config.json, .agents/skills/yorisoi/references/prh-yorisoi.yml | 文長 50、漢字連続 4、ですます統一。YC/YD/YE/YG の検出パターン |
 | 語彙レベル判定 | .agents/skills/yorisoi/scripts/vocab-check.js, .agents/skills/yorisoi/references/vocab/README.md | kuromoji で形態素に分けて同梱リストと照合。jReadability 近似の帯ラベル。JEV の置き方 |
 | yorisoi の適用例 | examples/yorisoi/README.md | 3 ペア (お知らせ／表記／語彙) と実測 YLS |
-| rikai の手順 | .agents/skills/rikai/SKILL.md | 7 ステップ。`.rikai/` の配置、卒業判定 (三回挑戦法)、ガードレール |
+| rikai の手順 | .agents/skills/rikai/SKILL.md | 7 ステップ。`.rikai/` の配置、卒業判定 (三回挑戦法)、出題を伴わない依頼 (進捗表示・手動の卒業と取り消し)、ガードレール |
 | 問題とディストラクタの設計 | .agents/skills/rikai/references/question-design.md | 論点抽出、原文アンカー、誤読の型、別角度での再出題の規則 |
-| 還流レポートの形式 | .agents/skills/rikai/references/study-format.md | study.md の frontmatter の状態と、書き手向けレポート |
+| 還流レポートの形式 | .agents/skills/rikai/references/study-format.md | study.md の frontmatter の状態、`manual_graduation`、§2.1 frontmatter に書ける YAML の範囲、書き手向けレポート |
 | hook の判定コア | scripts/meiseki-lint-core.sh, scripts/meiseki-check.sh | マスキング、閾値、再実行ガード、上書きできる環境変数 |
 | Jev ベンチ | experiments/jev-benchmark/README.md | 判定セット、再現手順、2026-10-11 と 10-12 の生データ |
 
 ## 蒸留の範囲外
 
 - **Jev 層の運用全般**: キーの解決 4 経路、OS のセキュアストアへのキャッシュ、`.meiseki.json` のポリシー、`.meiseki-no-jev` マーカー、送信データと ZDR の扱いが該当する。いずれも外部 API (TypeSafe) 固有の話なので、README.md「Jev 高速判定層」と scripts/jev-judge.js を直接読む。
-- **rikai の出題・採点の実装**: quiz-format.md、explainer-html.md、explainer-textbook.md、scripts/build_quiz.py、quiz_server.py、build_textbook.py が該当する。文章規範ではなくクイズアプリの仕様。
+- **rikai の出題・採点・進捗表示の実装**: quiz-format.md、explainer-html.md、explainer-textbook.md、dashboard.md、scripts/build_quiz.py、quiz_server.py、build_textbook.py、build_dashboard.py が該当する。文章規範ではなくクイズアプリの仕様。v0.10.0 で足された進捗ダッシュボード (`.rikai/dashboard.html`、study.md から決定的に生成する読み取り専用 HTML) と手動の卒業 (`manual_graduation`。挑戦履歴には書かない) もここに含める。
 - **jp-pdf**: .agents/skills/jp-pdf/。PDF の組版であり、文章の規則ではない。
 - **プラグインの配布と install 手順**: .claude-plugin/、.codex-plugin/、hooks/、README.md「インストール」。
 - **語彙リストの中身**: jlpt-tanos.csv (7973 行) と kokugoken-basic.csv (5540 行)。照合規則は vocab/README.md に書かれている。国語研の基本語二千は常に許容し、基本語彙六千の残りは目標が N4 より難しい側 (N4〜N1) のときに許容する。
 - **原典内の食い違い** (蒸留時点の実測):
   - README.md の textlint 設定の節は `no-nfd` を無効化したルールに挙げている。しかし textlint.config.json では `no-nfd` が `true` で、カテゴリ I の検出に使われている。設定ファイルの値を正とする。
   - README.md「アーキテクチャ」が参照する `docs/diagrams/` は、この commit には存在しない。
-  - README.md の見出しには「v0.6.0 から」等の版表記が残っている。package.json の版は 0.9.0。
+  - README.md の見出しには「v0.6.0 から」等の版表記が残っている。package.json の版は 0.10.0。
   - vocab/README.md は基本語彙六千の残りを「目標レベルが N3 以上のとき」に許容すると書く。一方 vocab-check.js の実装 (`targetIdx >= LEVELS.indexOf('N4')`) は N4 から許容する。実装を正とした。
