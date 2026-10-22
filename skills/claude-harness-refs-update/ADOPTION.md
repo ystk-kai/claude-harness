@@ -27,6 +27,30 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-22
+
+### 再蒸留 (natural-japanese) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-22: avoid-ai-slop-ja/references/syntax-patterns.md §13 に追記、MAPPING.md を更新) | RECOMMENDED | skill | 物の呼び名を読み手の分野の呼び名にそろえる (公開エンドポイントを「入口」、リクエストを「要求」と 1 語に置かない)、「効く」「拾う」で済ませず起きることを書く。§13 は word-for-word English を挙げるだけで、呼び名と動詞の判定の問いが無かった | skills/natural-japanese/SKILL.md §2 原則 4・§6 (`70e6e6a`) |
+| 対応済 (2026-10-22: avoid-ai-slop-ja/SKILL.md 手順 6 に追記、syntax-patterns §10 の例を差し替え) | RECOMMENDED | skill | 逐語置換の語は書いたモデルが読み返しても気づけないので、本文だけを別コンテキストの読み手に渡し A (分野の呼び名と違う語) / B (英語の決まった言い方の逐語置換) の 2 種だけ挙げさせる。問いを広げると 30 行で 50 件以上挙がる。§10 の良い例「この環境では効く」は直す対象の動詞そのものだった | skills/natural-japanese/references/reader-check.md (`b2d1d34`) |
+| 却下 (語のリストで網羅しない方針の材料にとどまり、直す箇所が無い) | FYI | skill | calques.py が拾うのは助詞に続く和語動詞と場所の比喩名詞だけで、分野の呼び名からずれた漢語は対象外。banlist のような語リストで calque を網羅しようとしない | skills/natural-japanese/scripts/calques.py |
+
+### 再蒸留 (awesome-harness-engineering / claude-code-best-practice / yomiyasu) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (このハーネスは記憶基盤を自前で持たず、auto memory の方式は選べない) | FYI | 運用 | memory substrate を同一ハーネスで比べると一貫した優位は無く、広い retrieval は逐次意思決定で害になる。方式を固定せず振り分ける。README の注記のみで論文本文は未読 | README.md Memory & State (`c586328`) |
+
+claude-code-best-practice (badge・star 数・commands 説明 4 件・ON HOLD 再掲) と yomiyasu v2.1.2 (check / diff の不具合修正) は候補なし。
+
+### ui-design の見直しから (原典の更新ではなく利用時の偏りの調査)
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-22: ui-design/references/color-chroma.md と scripts/chroma-check.py を新設、SKILL.md の hallmark 優先に例外 (2) を追加し gate 7・22・23 と genre の彩度上限を上書き) | RECOMMENDED | skill | ui-design は生成規律の衝突で hallmark を優先させていたが、hallmark の配色規則はライト地色 17 個中 8 個が暖色クリーム、custom の accent を C 0.12〜0.16 に置き、accent を 3% 以下・gate 23 で 5% 超を禁じ、gate 7 で `#fff` 地を禁じる。結果がくすみ・ベージュに寄り、avoid-ai-slop-design が tell とする cream/beige + terracotta と衝突していた。a11y の比不足も彩度を削って直す流れになっていた | hallmark site/css/tokens.css、skills/hallmark/references/color.md・custom-theme.md § B |
+
 ## 2026-10-21
 
 ### 再蒸留 (yomiyasu) から

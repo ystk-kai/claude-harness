@@ -12,7 +12,7 @@ review_interval_days: 180
 - **productive friction を置く** — 対象・audience・地域文化・その画面の単一目的を文章化し、対照的な複数 moodboard から方向を選んでから生成する。参照は Behance/Dribbble だけでなく書籍・映画・建築・material culture からも集める (distributional convergence への対抗)
 - **brand context と design tokens を先に渡す** — palette 4-6 色、display/body などの type role、spacing scale、radius と shadow の用途を明文化してから生成する。shadcn を使うなら color token・radius・shadow depth を改造し、非デフォルト variant を使う
 - **明示的なネガティブ制約** — 「Inter/Roboto/Arial 禁止」「白背景に紫グラデ禁止」「3 boxes with icons 禁止」のように、避けたいデフォルトを prompt に書く
-- **アクセシビリティを明示** — 「WCAG AA を満たせ」(通常文字 4.5:1、大文字 3:1) を指示に含める
+- **アクセシビリティを明示** — 「WCAG AA を満たせ」(通常文字 4.5:1、大文字 3:1) を指示に含める。比が足りない色は彩度を削らず明度で直す (色相別の上限は `ui-design` の `references/color-chroma.md`)
 - **plan → review の 2 パス** — 実装前に token 案 (色 4-6 個の hex・書体の役割・layout 案・原則) を書き、brief と突き合わせる。似た依頼でも同じ案になる部分は既定値なので直し、何をなぜ変えたかを書いてからコードに入る (Anthropic frontend-design 2026-09 改訂)
 
 ## 2. 設計中 — 判断を content に接続する

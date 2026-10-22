@@ -38,8 +38,8 @@
 - `## Contents` / `## まず押さえる` / `## 範囲外` は **100 行を超えるものだけ**に課す。
   50 行程度の資料に見出し階層を足しても索引にならない
 
-**現状**: `## 棚卸しの当たり先` を持つのは `japanese-web-typography.md` と
-`japanese-diagram-rendering.md`、`avoid-ai-slop-design` の `images.md` / `web-ui.md` の 4 本で、`avoid-ai-slop-*` の残り 8 本は未対応。新規に書くものには最初から課し、既存は次の棚卸し (REVIEW 発火時) で足す。
+**現状**: `## 棚卸しの当たり先` を持つのは `ui-design` の `japanese-web-typography.md` /
+`japanese-diagram-rendering.md` / `color-chroma.md`、`avoid-ai-slop-design` の `images.md` / `web-ui.md` の 5 本で、`avoid-ai-slop-*` の残り 8 本は未対応。新規に書くものには最初から課し、既存は次の棚卸し (REVIEW 発火時) で足す。
 構造を機械検査する仕組みは無いので、この移行状態はここに書いておくことでのみ追跡される。
 
 ## 更新手順 (STALE のとき)

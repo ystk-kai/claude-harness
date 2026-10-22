@@ -69,7 +69,7 @@ Three kinds, three treatments:
 ## 10. 儀式化した保険・遠い話者
 
 - 各節末の「個人の見解ですが」を 1 記事 1〜2 回に。
-- ✗「現代社会では重要だ」→ ✓「最近気になる」/「この環境では効く」。
+- ✗「現代社会では重要だ」→ ✓「最近気になる」/「このチームでは困っている」。
 
 ## 11. 型としての構造 slop
 
@@ -94,5 +94,6 @@ Three kinds, three treatments:
 
 Signs: re-naming something already named, personification, word-for-word English, mismatched collocations, engineer slang, nominalized actions, metaphors whose content can't be seen.
 - Test by translating back to English, or by rewriting as a plain verb sentence; if the meaning won't come through, replace with ordinary words.
+- **分野の呼び名からずれた 1 語** (technical and business docs): name things the way the reader writes them in their own field, even if longer — don't put an English concept into one short Japanese word (公開エンドポイントを「入口」、リクエストを「要求」). For verbs like 「効く」「拾う」「響く」, write what happens (「失効が効く」→「次のリクエストから通らなくなる」). Keep accurate descriptive phrases (「トークンを発行するエンドポイント」). Watch diagram boxes and table headers — short slots invite this. The writer can't see these on rereading (it reads them with its own intent), so check with a fresh reader — see SKILL.md step 6.
 - **成り立たない比喩**: a metaphor that reads smoothly but falls apart when you extract just subject and predicate (「眠気が定規になる」), or whose verb doesn't fit the subject (「嵐がそっと耳打ちした」). In technical and business docs, write what actually happens. In essays, keep a metaphor if a reader can guess what it means, or if the next sentence explains it. If your fix comes out as 「〜がただ黙って〜していた」, keep the original instead.
 - If you can't narrow it to one reading, don't guess — list the candidate readings and ask the writer.
