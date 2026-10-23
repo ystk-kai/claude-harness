@@ -26,12 +26,12 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 各リポジトリの出所 URL は、蒸留版 frontmatter の `source` を唯一の正とする。
 
 7 本のうち 4 本は原典 clone を持つ。「何を作るか」を決めるのが雛形、「どう書くか」を決めるのが形式仕様とトークン仕様、「どう外すか」を決めるのが規律。
-残る 3 本は clone を持たない自作の知識ベースで、`japanese-web-typography.md` / `japanese-diagram-rendering.md` は他の 4 本が英語圏前提であることを、`color-chroma.md` は hallmark の配色規則が低彩度・暖色クリームに寄ることを補正する。
+残る 3 本は clone を持たない自作の知識ベースで、`japanese-web-typography.md` / `japanese-diagram-rendering.md` は他の 4 本が英語圏前提であることを、`color-chroma.md` は hallmark のテーマ集の地色が暖色クリームに寄ることと、コントラスト修正で彩度を削りがちなことを補正する。
 
 | カテゴリ | 原典 | 蒸留版 | 使いどころ |
 |---|---|---|---|
 | 雛形カタログ | `awesome-design-md/` | [references/awesome-design-md.md](references/awesome-design-md.md) | 実在サイトのデザイン言語を抽出した DESIGN.md 集 (74 件)。作りたい雰囲気から系統を選び、プロジェクトルートに置いて生成の制約にする |
-| 生成規律 | `hallmark/` | [references/hallmark.md](references/hallmark.md) | 生成物が既定値 (AI slop) に落ちるのを防ぐルールセット。テーマ選択・構造選択・出力前のゲート検査。既存 UI の audit / redesign / study にも使う |
+| 生成規律 | `hallmark/` | [references/hallmark.md](references/hallmark.md) | 生成物が既定値 (AI slop) に落ちるのを防ぐルールセット。テーマ選択・構造選択・出力前のゲート検査。既存 UI には、名指しされたときの redesign (内容と配線を保った全面改修) と audit (報告) だけに使い、それ以外の既存デザインの変更には使わない |
 | 標準仕様 | `community-group/` (DTCG) | [references/community-group.md](references/community-group.md) | デザイントークンの標準語彙と形式 (`$value` / `$type` / alias / composite type)。トークンファイルや theme 定義を書くときの典拠 |
 | 形式仕様 | `design.md/` (Google Labs) | [references/design.md.md](references/design.md.md) | DESIGN.md 形式そのものの規範 (Apache-2.0)。YAML トークン (先頭 front matter と各セクション内の ```yaml ブロック。併用時は 1 つのトークン木に merge され、top-level キーの重複はエラー) の schema・8 セクションの固定順序・component プロパティ・未知内容の扱い。`PHILOSOPHY.md` が「具体的な参照物は形容詞の列挙に勝る」「否定制約は具体性から自動で付く」を規定。CLI に `lint` (WCAG contrast を含む 11 ルール) / `diff` / `export --format dtcg` / `spec` |
 | 配色の彩度 | (なし: 自作の知識ベース) | [references/color-chroma.md](references/color-chroma.md) | ライト地色がベージュに、accent が中彩度に、a11y 修正がくすみに寄るのを補正する。地色の既定、鮮やかさの決め方、比を彩度でなく明度で満たす手順、色相別に白地 4.5:1 / 3:1 で取れる最大彩度の表。`scripts/chroma-check.py` が比と、彩度を保って通す候補を出す |
@@ -53,8 +53,8 @@ UI の見た目を決める判断は、Web 検索より先にこの資料集を�
 - DESIGN.md の**形式**の可否 (キー名・セクション順・component プロパティ・未知内容の扱い) は **`design.md/` 仕様**を正とする。機械検査は `npx @google/design.md lint <file>` (error があれば exit 1)
 - トークンの**型・形式・命名**の可否は **DTCG 仕様** (`community-group/`) を正とする。ツール固有の書式 (Tailwind の config、CSS custom property) と DESIGN.md の YAML トークン (front matter / セクション内の yaml ブロック) はその写像として扱う (`design.md` 仕様は DTCG から typed token group と `{path.to.token}` 参照構文だけを採った関係なので、両者は同一ではない。相互変換は `export --format dtcg`)
 - 生成時に「やっていいこと / いけないこと」が割れたら **`hallmark/`** を優先する (生成規律が本業)。DESIGN.md 側の Do's and Don'ts はそのサイト固有の制約として上乗せする。
-  **例外は 2 点** — (1) gate 38a が許す「本文中の italic 強調」は日本語では合成斜体になるので、日本語本文に限り使わない (`japanese-web-typography.md` 参照)。
-  (2) 配色の地色・彩度・accent の使用量と、コントラスト不足の直し方は [references/color-chroma.md](references/color-chroma.md) を正とする。上書きするのは hallmark の `color.md`、`custom-theme.md` § B、gate 7 (`#fff` 地)・22 (彩度 0 のグレー)・23 (accent 5%)、genre ファイルの accent 彩度上限。これらの gate で落ちても color-chroma に従った結果なら直さず、stamp に `gates: 7,23 waived (color-chroma)` のように残す。hallmark の既定どおりだとライト地色の約半数が暖色クリーム、accent が中彩度になり、題材を問わず cream/beige + terracotta (`avoid-ai-slop-design` の tell) に寄る
+  **例外は 2 点** — (1) editorial genre が許す「本文中の italic」(`genres/editorial.md` § Allowed here の "italic inside running body copy"。見出しの 1 語 italic は gate 38i (Floor)、色・太さで 1 語を立てるのは 38iii (Reflex) で、どちらも禁止のまま) は日本語では合成斜体になるので、日本語本文に限り使わない (`japanese-web-typography.md` 参照)。
+  (2) 配色の地色・彩度・accent の使用量と、コントラスト不足の直し方は [references/color-chroma.md](references/color-chroma.md) を正とする。上書きするのは hallmark の `craft.md` § 2 の地・accent の彩度の帯、テーマから配られた暖色クリームの地、`genres/playful.md` の低彩度の既定。gate は上書きしない — Floor (7a の token 外の `#fff`/`#000`、40・41 のコントラスト) は waive できないので color-chroma の方針でも満たし、Reflex の 7b (純白の地)・22 (彩度 0 のグレー) を外すときだけ gates.md § 2 の書式 (`/* Hallmark · waive 7b · <guard> · <このページの理由> */`、1 gate 1 行、定型の理由は却下) で残す。accent を面に広げるときは gate 23 を waive せず、`craft.md` § 2 の posture (Committed / Full palette / Drenched) を stamp で宣言する。custom では hallmark 自身が cream 地 + serif + clay を gate 65 と `direction.md` § Spent で止めるが、テーマ集ではライト地色 30 個中 17 個が暖色クリームのまま (`ROADMAP.md` § Now で扱い未決定)
 - DESIGN.md を**書く**とき (既存のものを引くのではなく新規に起こすとき) は `design.md/` の `PHILOSOPHY.md` を先に読む。曖昧な形容詞の列挙に落ちると生成結果が既定値の中心に寄る。長い don't リストは、参照物の記述が曖昧すぎる兆候として扱う
 - 雛形はあくまで出発点。`awesome-design-md/` の DESIGN.md をそのまま使うと元サイトの模倣になるので、ブランド固有の制約 (色数・書体・角丸・密度) を必ず上書きする
 - 抽出元はマーケティングサイト / LP が中心。ダッシュボードや業務 UI にそのまま適用しない

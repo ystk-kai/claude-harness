@@ -27,6 +27,48 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-23
+
+### 再蒸留 (hallmark) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-23: ui-design/SKILL.md の例外 (2) を gate ではなく craft.md § 2 の帯・テーマの地・playful の既定の上書きに絞り、Floor は満たし Reflex だけ v2 書式で waive する形に) | BREAKING | skill | `ui-design/SKILL.md` の hallmark 優先の例外 (2) が v2 で壊れた。上書き対象の `color.md`・`custom-theme.md` § B は削除、gate 7 は 7a (Floor、waive 不可) と 7b (Reflex) に分割、accent の彩度上限は genre ファイルでなく `craft.md` § 2、stamp 例 `gates: 7,23 waived (color-chroma)` は v2 の waiver 書式 (1 gate 1 行・根拠と理由つき。Floor は waive 不可) に合わない | skills/hallmark/references/gates.md § 1・2・4、craft.md § 2 (`7ec8682`) |
+| 対応済 (2026-10-23: ui-design/SKILL.md の例外 (1) と japanese-web-typography.md の根拠を genres/editorial.md § Allowed here と 38i / 38iii に付け替え) | BREAKING | skill | `ui-design/SKILL.md` の例外 (1)「gate 38a が許す本文中の italic 強調」: 38a は 38i (Floor) / 38iii (Reflex) に付け替わり、本文中の italic は gate でなく `genres/editorial.md` の "Allowed here" へ移った | gates.md § 4 Type、genres/editorial.md |
+| 対応済 (2026-10-23: ui-design/SKILL.md の hallmark 行から study を削除し、名指し時の redesign / audit に限定) | BREAKING | skill | `ui-design/SKILL.md` の hallmark 行「既存 UI の audit / redesign / study にも使う」: study verb は廃止。v2 の verb は redesign と audit だけで、既存デザインには名指ししない限り使わない | skills/hallmark/SKILL.md frontmatter・§ Flow、references/study.md の削除 |
+| 対応済 (2026-10-23: color-chroma.md の [原典] 主張を themes/*.md の :root の数え直し (ライト地色 30 個中暖色クリーム 17 個) と gate 65・direction.md § Spent・craft.md § 2 で書き直し、accent 中彩度の前提を撤回) | BREAKING | skill | `ui-design/references/color-chroma.md` の [原典] 主張が削除済みファイル (`site/css/tokens.css`・`color.md`・`custom-theme.md`・`slop-test.md`) と旧集計 (ライト地色 17 個中 8 個が暖色クリーム) に立っている。v2 ではテーマの正は `themes/*.md` の `:root`、gate 65 (cream 地 + serif + terracotta の named look) と direction.md の "Spent" が hallmark 自身の規則になった。比率を数え直して前提を見直す | gates.md gate 65、references/direction.md § Spent、ROADMAP.md § Now、themes/ |
+| 対応済 (2026-10-23: japanese-web-typography.md の参照を v2 のファイルと 38i・49a / 49b に直し、引用を genres/editorial.md から取り直し、scaffold の font-synthesis: none の注意を追加) | BREAKING | skill | `ui-design/references/japanese-web-typography.md` が `slop-test.md` (削除済み) と gate 38a・49 (49a Floor / 49b Reflex に分割) を指している。引用 "emphasis inside running paragraphs" の出所を v2 で取り直す | gates.md § 1 (退役番号)・§ 4 |
+| 却下 (このハーネスは原典 clone のスクリプトを実行しない運用で、hook を入れる予定も無い) | FYI | hook | `scripts/install-hook.mjs` は `.claude/settings.json` (`--global` なら user settings) に PostToolUse hook (lint-hook.mjs) を書き込む。ROADMAP は plugin で既定有効にする方向 | scripts/install-hook.mjs、ROADMAP.md § Next |
+| 却下 (harness-design の evaluator-optimizer の索引で足り、直す箇所が無い) | FYI | subagent | ビルダーを最も弱いレビュアーとみなし、fresh context の subagent にパスだけ渡してレビューさせ、返答の最初の語で分岐、採点は 1 ラウンドまで | gates.md § 6 |
+
+### 再蒸留 (natural-japanese) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-23: avoid-ai-slop-ja/SKILL.md 手順 6 を、候補の洗い出しと書き手自身が当てる 2 つの問い (分野の呼び名か / 動詞だけで何が起きるか) に置き換え) | RECOMMENDED | skill | `avoid-ai-slop-ja/SKILL.md` 手順 6 の「別コンテキストの読み手に A/B 2 種だけ挙げさせる」は v1.6.1 で原典から外れた (書く時間が約 2 倍、§2 の原則と calques.py で直せない語を拾えたのは 1 語)。出所は旧 SHA だけになっている | commit 10bea80、旧 references/reader-check.md (`a708403`) |
+| 対応済 (2026-10-23: ja-writing/MAPPING.md の履歴と出所欄を更新し、reader-check.md は 10bea80 で削除済みと明記) | RECOMMENDED | skill | `ja-writing/MAPPING.md` の履歴と出所欄が削除済みの reader-check.md を出所に挙げている。上の行の扱いに合わせて直す | commit 10bea80 |
+| 対応済 (2026-10-23: syntax-patterns.md §13 を「短い 1 語のたとえや言い換えで済ませない」に改め、作業用の名前・文書内の造語の項を追加) | RECOMMENDED | skill | `avoid-ai-slop-ja/references/syntax-patterns.md` §13 の「英語の概念を短い 1 語に置かない」は原典が撤回した「英語の直訳」という捉え方のまま (原典は「思いついた短い 1 語のたとえや言い換えで済ませない」に改めた)。原則 4 に足された、素材の作業用の名前 (条件名・ブランチ名・集計区分名) を出さない・文書の中で呼び名を作らない (作るなら名前で中身が分かるもの) も §13 に無い | commit 717d8e0・ee007f5、skills/natural-japanese/SKILL.md §2 原則 4 |
+| 却下 (手順を足すときの判断の型で、直す箇所が無い。比較の道具は蒸留版の索引から引ける) | FYI | 運用 | 手順 1 つを、所要時間と伏せた判定による効果で比べて外す。道具は dev/release-eval/ | commit 10bea80・21d0da1 |
+
+### 再蒸留 (yomiyasu) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-23: syntax-patterns.md §13 に直訳語との線引きを追加。「要求」は分野の呼び名の問いで見つかる例として残す) | RECOMMENDED | skill | `avoid-ai-slop-ja/references/syntax-patterns.md` §13 が「リクエストを『要求』」を直す例に挙げるが、yomiyasu v2.2.0 の calques.md は辞書の訳語を当てた名詞 (要求・承認・事実・影響) と定着した言い方 (テストが通る・キャッシュが効く) を直訳語の型から外す。残す線引きと 2 つの問い (分野の人が自分で書く呼び名か / 英語に戻すと一語ずつ対応するか) が §13 に無い | skills/yomiyasu/references/calques.md § 2・3 (`a34d94f`) |
+| 対応済 (2026-10-23: banlist.md Tier 1 に追加。引用・会話・カギ括弧の中と判断の文は残す) | RECOMMENDED | skill | `avoid-ai-slop-ja/references/banlist.md` に「〜と言えるでしょう」が無い。直し方は「と言える」だけを外して推量の「でしょう」は残す | skills/yomiyasu/references/slop-catalog.md § 6 |
+| 対応済 (2026-10-23: banlist.md Tier 2 に意味の薄いカタカナ語、syntax-patterns.md §2 に比喩ラベルの見出し、§8 にコピー調の読点と他動詞の並び、§12 に評価の言い直しを追加) | RECOMMENDED | skill | `avoid-ai-slop-ja` に無い型 4 つ: 評価を言い直すだけの文、意味の薄いカタカナ語 (分野で定着した使い方は残す)、本文に出てこない一語の比喩の見出し、キャッチコピーの読点と主語・目的語の無い他動詞の並び。原典はどれも「印は直す合図ではない」とするので、常時禁止でなく文脈で判断する側に置く | slop-catalog.md § 5・9、SKILL.md § 案内用の見出し・§ コピー調の抑制 |
+| 却下 (avoid-ai-slop-ja は語の一覧で網羅しない方針。プロジェクト固有の語の例外が要る事例がまだ無い) | FYI | 運用 | プロジェクトごとの語の一覧 `.yomiyasu-words/` (allow.txt・flag.txt) | CHANGELOG.md § 2.2.0 |
+| 却下 (avoid-ai-slop-ja に同じ型は無く、足さないことの確認にとどまる) | FYI | skill | 「〜できる仕組み。」で終える文の規則は 3 回測って直せず、残すべき文を書き換えたので見送られた。同じ型を足さない | CHANGELOG.md § 2.2.0 |
+
+### 再蒸留 (claude-code-best-practice / awesome-harness-engineering / smarthr-design-system) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (このハーネスの SKILL.md は `allowed-tools` を使っていない) | FYI | skill | skill frontmatter の `allowed-tools` は文字列でも YAML の list でも書ける。原典の skills 表が `string` だけだったのは誤りで訂正済み | commit 5164759、best-practice/claude-skills.md |
+
+awesome-harness-engineering (Harness Handbook の 1 行追加) と smarthr-design-system (`.node-version` のみ) は取り込み候補なし。
+
+---
 ## 2026-10-22
 
 ### 再蒸留 (natural-japanese) から

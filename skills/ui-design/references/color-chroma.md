@@ -1,13 +1,13 @@
 ---
 tracking: review
-reviewed_at: 2026-10-22
+reviewed_at: 2026-10-23
 review_interval_days: 90
 ---
 # 配色の彩度補正 — くすみ・ベージュへの偏りを外す
 
-このスキルの生成規律 (`hallmark`) をそのまま当てると、ライトテーマの地色はクリーム・ベージュに、
-アクセントは中彩度に寄る。a11y 検査で比が足りないときも、彩度を削って通す方向に流れやすい。
-配色を決めるとき・コントラストを直すときは、hallmark の color 規則と色の gate より**先に**この文書を当てる。
+このスキルの生成規律 (`hallmark`) のテーマ集から配ると、ライトテーマの地色は過半数がクリーム・ベージュになる。
+a11y 検査で比が足りないときも、彩度を削って通す方向に流れやすい。
+配色を決めるとき・コントラストを直すときは、hallmark の `craft.md` § 2 とテーマの配色より**先に**この文書を当てる。
 
 確度: **[原典]** hallmark clone (`distilled_commit` は `hallmark.md` の frontmatter) で確認 /
 **[計算]** OKLab→sRGB 変換 (Ottosson の式) と WCAG 2.x の相対輝度で算出。`scripts/chroma-check.py` で再現できる /
@@ -15,26 +15,29 @@ review_interval_days: 90
 
 ## 偏りの出どころ
 
-- **[原典] ライト地色の約半数が暖色クリーム**。`site/css/tokens.css` のライト地色 17 個 (Lumen の day を含む) のうち 8 個が H 30〜95・C 0.010 以上 (Specimen, Garden, Newsprint, Riso, Bloom, Editorial, Carnival, Hum)。シグナルが無いときの既定ジャンル editorial (`references/genres/editorial.md` の 12 テーマ、うちライト 11) では 6 個
-- **[原典] 見本と導出規則が暖色に偏る**。`references/color.md` のライト例は warm-oat (H 80) の 1 本だけ。`references/custom-theme.md` § B.2 は bright/airy と archival/editorial の vibe に warm-tinted の地を割り当て、cool-tinted は technical/clinical だけ。§ G.1 の作例はクリーム地 + テラコッタ
-- **[原典] 彩度と使用量の上限**。custom の accent は C 0.12〜0.20 に clamp、ユーザー指定が無ければ 0.12〜0.16 ("mid-saturation; saturation comes from contrast against neutral, not from chroma"、§ B.1)。accent は viewport の 3% 以下 (`color.md` § Principles)、5% 超の塗りは gate 23 で落ちる。playful ジャンルは accent C 0.16 以下 (`genres/playful.md`、Hum だけ例外)。neutral は C 0.005〜0.015 (`color.md`。custom では地 0.020・グレー 0.018 まで)。結果として、画面のほぼ全面が低彩度になる
-- **[原典] 純白の禁止**。`color.md` § Bans と gate 7 は `#fff` の地を禁じ、地色を anchor の色相へ寄せる。anchor が暖色なら地はクリームになる。原典の中でも揺れがあり、gate 7・22 は modern-minimal だけ緩め (`genres/modern-minimal.md`)、§ B.2 は ink・accent・グレーが彩度を持てば `#fff` を許す
-- **[批評] 題材と無関係に同じ palette が選ばれることが tell**。cream/beige + serif + terracotta は「新世代の AI 既定値」として反復されている (`avoid-ai-slop-design/references/web-ui.md` § 色・グラデーション)。hallmark の既定に従うと、題材を問わずこの配色に寄る
+- **[原典] テーマ集のライト地色の過半数が暖色クリーム**。`skills/hallmark/references/themes/*.md` 48 個の `:root` の `--color-paper` (全て OKLCH) を数えると、`themes/index.json` の paper band が light のもの 30 個 (L 91.5〜99.5) のうち 17 個が H 30〜95・C 0.010 以上 (Atelier, Bloom, Broadside, Carnival, Dose, Furrow, Garden, Halftone, Hum, Loom, Newsprint, Overprint, Riso, Solstice, Specimen, Sticker, Vellum)。C 0.006 以下の白に近い地は 9 個 (Brutal, Cobalt, Coral, Grid, Ink, Piste, Sport, Studio, Wayfind)。シグナルが無いときの既定ジャンル editorial (`genres/editorial.md`、テーマ 20 個のうちライト 16) では 16 個中 10 個。テーマごとの colourway (例: Kiln の `bisque`) は数えていない。deal はプロンプトの keywords と log で 3 個に絞るので (SKILL.md Step 3)、この比はテーマ集の比で、配られる確率ではない
+- **[原典] hallmark 自身も cream を生成の既定値とみなし始めた**。gate 65 (Reflex) は custom とテーマ無しのビルドで「cream 地 (L 90 以上・H 55〜105) + high-contrast serif の display + terracotta / clay の accent (H 15〜55)」を named look として落とし、`references/direction.md` § Spent は custom で cream / off-white / beige 地 + high-contrast serif + clay accent を拒む。ただしテーマが持つ場合は keywords で呼ばれたときだけ配る扱いで gate 65 の対象外 (gates.md § 5 の 65)。`ROADMAP.md` § Now は「cream や off-white の地はそれだけで生成の見た目と読まれる。custom では spent 扱い済みで、catalog は keywords 限定の素材として残すか地を塗り替えるか未決定」とする
+- **[原典] 3 点揃いは減ったが、地だけの偏りは残る**。gate 65 の 3 条件を数えると、地 (L 90 以上・H 55〜105) を満たすテーマは 23 個、加えて accent H 15〜55 と serif 系の display を持つのは Halftone・Newsprint (slab-serif) と Solstice (high-contrast-serif) の 3 個で、high-contrast serif に限れば Solstice の 1 個 (本文は自ら "not a terracotta-on-cream template" とする)。暖色クリーム 17 個のうち accent が H 15〜55 なのは 6 個。つまり「cream + serif + terracotta に寄る」は custom では hallmark 自身の規則で止まり、テーマ集でも 3 点揃いは少ない。残るのは**テーマから配ったときに地がクリームになりやすい**偏りで、こちらは旧集計 (17 個中 8 個) より強くなった
+- **[原典] accent の彩度は中彩度に寄らなくなった**。`craft.md` § 2 は accent を C 0.12〜0.22、focus を 0.18〜0.22 とする。テーマ 48 個の `--color-accent` の C は中央値 0.1775 で、0.16 を超えるのが 28 個、0.12 未満が 9 個、0.22 を超えるのが 5 個 (Sticker, Manifesto, Riso, Piste, Ultraviolet)。playful は "soft and low-chroma by default" で、Full palette / Drenched の posture なら 0.24 まで上げる (`genres/playful.md`)。地は L 92〜98・C 0.005〜0.015、ink は C 0.005〜0.014、5〜9 段の neutral は C 0.005〜0.018 で、どちらも anchor の色相へ寄せる (`craft.md` § 2)
+- **[原典] 純白の扱い**。gate 7a (Floor、waive 不可) は token block の外に書いた `#000`・`#fff`・`oklch(0% …)`・`oklch(100% …)` を落とし、7b (Reflex) は surface token が純白・純黒に解決されるものを落とす (guard は stamp の `surface: absolute` と gate 40・41 の通過)。modern-minimal は `#fff` の地 (7b) と彩度 0 の neutral (22) を緩め (`genres/modern-minimal.md`)、editorial は純黒・純白の地と ink を拒む (`genres/editorial.md` § Refused here)。`craft.md` § 2 は "Never a pure absolute as a surface or an improvised value" とし、グレーを anchor へ寄せる。anchor が暖色なら地はクリームになる
+- **[批評] 題材と無関係に同じ palette が選ばれることが tell**。cream/beige + serif + terracotta は「新世代の AI 既定値」として反復されている (`avoid-ai-slop-design/references/web-ui.md` § 色・グラデーション)。hallmark も gate 65 と Spent で同じ判断に立った
 
 ## 地色の決め方 (ライトテーマ)
 
-- 既定は **C 0.006 以下の白** (`#fff` も可)。色相は anchor に寄せてよい。彩度は accent と面の色で持たせる
-- 暖色クリーム (H 30〜95 かつ C 0.010 以上) は、題材に紙・印刷物・食・工芸・老舗といった根拠があるときだけ使い、その根拠を hallmark の preview block (Theme 行) に 1 行で書く。根拠が書けなければ C 0.006 以下に戻す
-- 「ベージュ禁止」を別の固定既定に置き換えない。直近の生成と同じ配色なら hallmark の 3 軸 (paper band / display style / accent hue) のどれかを動かす
+- 既定は **C 0.006 以下の白**。色相は anchor に寄せてよい。彩度は accent と面の色で持たせる
+- hallmark の gate が落とすのは彩度 0 の neutral (22) と純白・純黒 (7a/7b) だけで、C 0.003 の Ink テーマも通る。白に寄せるなら地とグレーを **C 0.005〜0.006** にする。これは gate の閾値ではなく、7a の fix の文言と `craft.md` § 2 の帯の下限に合わせた値 (テーマ集の白に近い地 9 個のうち Ink を除く 8 個がこの帯)
+- `#fff` (C 0) の地を使うなら `--color-paper` などの token にだけ置き、stamp に `surface: absolute` を書いて 7b を waive する (modern-minimal は 7b が緩むので不要)。editorial (シグナルが無いときの既定 genre) は § Refused here で純白の地を拒むので、waive せず C 0.005〜0.006 の白にする。token の外に `#fff` を直書きするのは 7a (Floor) で waive できないので、必ず token を参照する
+- テーマを配られて地が暖色クリーム (H 30〜95 かつ C 0.010 以上) なら、題材に紙・印刷物・食・工芸・老舗といった根拠があるときだけそのまま使い、その根拠を hallmark の Picks block (Theme 行) に 1 行で書く。根拠が書けなければ別のテーマを選ぶか、地を C 0.006 以下に戻す。custom では gate 65 と direction.md § Spent が先に止める
+- 「ベージュ禁止」を別の固定既定に置き換えない。直近の生成と同じ配色なら hallmark の 3 軸 (paper / display / accent。`direction.md` § Mechanics の `axes`) のどれかを動かす
 
 ## 彩度の決め方
 
 - 配色の前に、brief から**鮮やかさ**を 1 語で決める: 抑制 / 標準 / 鮮明。抑制は brief に落ち着き・高級・業務の長時間利用などの明示があるときだけで、無指定なら標準
-- accent の C: 標準は「0.15 か、その L で sRGB が取れる最大 C の 7 割」の高い方以上。鮮明は最大 C の 9 割以上。hallmark の 0.12〜0.16 の帯や playful の 0.16 上限には縛られない (白地 4.5:1 の L で、0.16 は赤・紫・マゼンタの最大 C の 6〜7 割)
+- accent の C: 標準は「0.15 か、その L で sRGB が取れる最大 C の 7 割」の高い方以上。鮮明は最大 C の 9 割以上。hallmark の `craft.md` § 2 の 0.12〜0.22 の帯や playful の "soft and low-chroma by default" には縛られない (白地 4.5:1 の L で、紫・マゼンタの最大 C の 9 割は 0.22 を超える)。accent の彩度の上限は gate ではないので waiver も要らない
 - 色相は brief と anchor から選ぶ。文字色にできるかどうかで色相を選ばない (青・紫への寄りは別の既定値になる)
-- 主要 CTA 1 つを accent で塗るのは hallmark でも許されている (`custom-theme.md` § B.7)。鮮明ではさらにセクション帯・大きな面に accent を使ってよいが、これは gate 23 (5%) を意図的に外すことになる
+- 主要 CTA 1 つを accent で塗るのは hallmark でも許されている (`craft.md` § 2 は accent の役目に "the primary control" を挙げる)。鮮明でセクション帯・大きな面に色を使うときは、stamp で posture を Committed / Full palette / Drenched と宣言し、その色を `--color-field` などの surface token に置く。宣言した surface の色は accent の面積に数えない (`craft.md` § 2、gate 23) ので、gate 23 を waive する必要は無い。accent token のまま 5% を超えて塗らない
 - 標準以上なら、ライトテーマの画面に C 0.15 以上の色が少なくとも 1 役割 (accent か面) ある状態を確認する
-- hallmark の gate で落ちる箇所 (7 の `#fff`、22 の彩度 0 のグレー、23 の 5% 超、genre の彩度上限) は、この文書に従った結果なら直さず、stamp の gates 欄に `gates: 7,23 waived (color-chroma)` のように番号を残す
+- この文書に従って hallmark の Reflex gate (7b の純白の地、22 の彩度 0 のグレー) を外すときは、gates.md § 2 の書式で 1 gate 1 行の waiver を stamp に残す。例: `/* Hallmark · waive 7b · surface: absolute, 40 and 41 pass · 病院の予約票と同じ白で、受付で渡す紙と画面の見た目を揃える */`。理由はそのページの語を含む 24 文字以上で、`color-chroma に従う` のような定型や他の waiver の使い回しは却下される。Floor gate (7a、40、41 など) は waive できないので、この文書の方針でも満たす。同じ gate を 3 回続けて waive するならハウススタイルなので `design.md` に書く
 
 ## a11y を彩度でなく明度で満たす
 
@@ -63,7 +66,7 @@ review_interval_days: 90
 python3 ~/.claude/skills/ui-design/scripts/chroma-check.py "58 0.16 35" "#ffffff"
 # ratio 4.61:1 ... fg C 0.160 / sRGB 最大 0.204
 # 同じ H で比を満たし C が最大の候補: oklch(59.0% 0.207 35) #dd3800
-# → hallmark 作例のテラコッタ (C 0.16) は同じ比のまま C 0.207 まで上げられる
+# → C 0.16 のテラコッタは同じ比のまま C 0.207 まで上げられる
 ```
 
 第 1 引数は L を動かして探す色、第 2 引数は固定する色。面の色を決めるときは面を第 1 引数、ink を第 2 引数にする。
@@ -71,12 +74,12 @@ python3 ~/.claude/skills/ui-design/scripts/chroma-check.py "58 0.16 35" "#ffffff
 ## 範囲外
 
 - チャートの系列色・連続/発散パレット → built-in の `dataviz`
-- APCA の Lc 値 → hallmark `references/slop-test.md` の Contrast gate。この文書は WCAG 2.x の比だけで計算している
+- APCA の Lc 値 → hallmark `references/gates.md` の gate 40 (本文 4.5:1 か Lc 60、大きい文字・アイコン・focus ring・入力欄の枠 3:1 か Lc 45) と `craft.md` § 2 の Contrast。この文書は WCAG 2.x の比だけで計算している
 - Display P3 など sRGB より広い色域の最大彩度。表と script は sRGB に限る
 
 ## 棚卸しの当たり先
 
-- hallmark のテーマ集計と色の規則 → hallmark の再蒸留時に `site/css/tokens.css`、`references/color.md`、`custom-theme.md` § B、`slop-test.md` gate 7・22・23、`genres/*.md` の彩度規則を見直す (テーマ追加で比率が変わる)
+- hallmark のテーマ集計と色の規則 → hallmark の再蒸留時に `skills/hallmark/references/themes/*.md` の `:root` の `--color-paper`・`--color-accent` (light / mid / dark の band は `themes/index.json`) を数え直し、`craft.md` § 2、`gates.md` の gate 7a・7b・22・23・65、`direction.md` § Spent、`genres/*.md` の Allowed here / Refused here、`ROADMAP.md` § Now の cream の扱いを見直す (テーマ追加や塗り替えで比率が変わる)。2026-10-23 の集計は `7ec8682` 時点
 - cream/beige が tell とされている状況 → `avoid-ai-slop-design/references/web-ui.md` の出典
 - WCAG のコントラスト定義 → https://www.w3.org/TR/WCAG22/#contrast-minimum , https://www.w3.org/TR/WCAG22/#non-text-contrast
 - OKLab の変換式 → https://bottosson.github.io/posts/oklab/

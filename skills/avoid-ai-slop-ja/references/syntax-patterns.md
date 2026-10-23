@@ -1,6 +1,6 @@
 ---
 tracking: review
-reviewed_at: 2026-10-19
+reviewed_at: 2026-10-23
 review_interval_days: 180
 ---
 # Syntax patterns — detect & fix
@@ -23,6 +23,7 @@ Each heading carries a thesis → reads like a string of tiny TED talks.
 - New writing: conclusion headings are fine — but don't give every heading the same shape, and never make a heading more confident than its body.
 - Revising: rewrite at most 2–3 headings. A pile-up of identical thesis headings is the target, not thesis headings as such. Guides and references prefer short names (名詞句).
 - ✗「○○もまた同じ方向を指している」→ ✓「○○の話」/「○○の分界」
+- **比喩ラベルの見出し**: a heading or first line that is a one-word metaphor the body never uses (「〜の横」「〜係」「〜番」) → read what the section covers and build the heading from the body's words; don't swap the metaphor for another single word. If the body doesn't settle the topic, keep it. Never change the document title. Catch copy in promo headlines is out of scope.
 
 ## 3. 打ち消し・偽の対句（Not X. It's Y. / 「XではなくY」）
 
@@ -61,6 +62,7 @@ Three kinds, three treatments:
 - Vary through sentence length and construction, not by inserting 体言止め or questions as a device. No questions in technical docs.
 - When revising, sentence endings alone are not a reason to edit a sentence that reads naturally.
 - Don't string together sentences under ~10 characters. Evaluation-only fragments (「速い。軽い。安い。」) are ad copy — fix them.
+- Other copy-style shapes in body text: a comma between modifier and a short closing noun (「丁寧な、人。」) → drop the comma and write the predicate the context settles; if none, drop just the comma (a one-off in an ad or heading stays). Transitive verbs chained with commas and no subject or object (「切るか、続けるか、決める。」) → supply them if the text states them; otherwise turn the action into a noun subject as in §12 目的語の抜け, or keep. The verb chain is not a target in essays, promo copy, scripts, or slides.
 
 ## 9. 一文圧縮（Wikipedia 調）
 
@@ -89,11 +91,15 @@ Three kinds, three treatments:
 - **主題の掛かる範囲**: a topic 「〜は」「〜では」 reads as reaching to the end of the sentence. When the topic names a component or process (class, function, screen) and a later clause after 「〜ため、」「〜て、」 acts on a different named thing (setting, macro, file, library), check whether that clause still belongs to the topic (「ParserではJSONの深さを10までに抑えるため、MAX_DEPTHを定義して再帰を打ち切ります」— inside Parser, or a build setting?). If the material says it's another actor, put that actor at the head of the later clause. Leave sentences whose later clause already has its own subject, or that continue the topic's properties or state. If you can't confirm, leave the sentence as is — don't add a subject or location — and ask which topic it belongs to (when revising). Ask only in this shape; widening it adds precautionary questions to other documents.
 - **前置きのない「〜のは、A、B、C。」**: a cleft that ends on a noun list without a predicate (「今回の改修で増えたのは、画面、帳票、通知。」). With no premise in the previous sentence or heading, move the verb back to the predicate without adding words (「今回の改修では、画面、帳票、通知が増えた」). 「重要なのは、」-type lead-ins are a banlist matter, not this one. Keep it after a set-up, in headings, closings, and slide bullets where the emphasis is chosen.
 - **段落内の言い換え反復**: restating the same point, or re-summarizing right after describing → cut only the repeats that add no information. If unsure, keep.
+- **評価を言い直すだけの文**: the predicate restates the evaluation the noun already carries (「書き心地がなめらかです」). If the same document gives what backs it (material, dimensions, numbers), fold the evaluation into that fact sentence; if not, don't invent it — keep the sentence and ask. Delete it only when the same evaluation appears again in the same paragraph.
 
 ## 13. 読み手が取れない言い回し
 
 Signs: re-naming something already named, personification, word-for-word English, mismatched collocations, engineer slang, nominalized actions, metaphors whose content can't be seen.
 - Test by translating back to English, or by rewriting as a plain verb sentence; if the meaning won't come through, replace with ordinary words.
-- **分野の呼び名からずれた 1 語** (technical and business docs): name things the way the reader writes them in their own field, even if longer — don't put an English concept into one short Japanese word (公開エンドポイントを「入口」、リクエストを「要求」). For verbs like 「効く」「拾う」「響く」, write what happens (「失効が効く」→「次のリクエストから通らなくなる」). Keep accurate descriptive phrases (「トークンを発行するエンドポイント」). Watch diagram boxes and table headers — short slots invite this. The writer can't see these on rereading (it reads them with its own intent), so check with a fresh reader — see SKILL.md step 6.
+- **分野の呼び名からずれた 1 語** (technical and business docs): name things the way the reader writes them in their own field, even if longer — don't settle for a short metaphor or paraphrase the writer came up with (公開エンドポイントを「入口」 is a metaphor, not a translation of "entry point"; リクエストを「要求」). For verbs like 「効く」「拾う」「響く」, write what happens (「失効が効く」→「次のリクエストから通らなくなる」). Keep accurate descriptive phrases (「トークンを発行するエンドポイント」). Watch diagram boxes and table headers — short slots invite this. The writer can't see these on rereading (it reads them with its own intent) — run the candidate scan and questions in SKILL.md step 6.
+  - Two different checks: **word-for-word English** (「足すものがない」= add value, 「失効が効く」= take effect) is caught by translating back. Dictionary-equivalent nouns (要求・承認・事実・影響) and set phrases (テストが通る・キャッシュが効く・駅の入口) are not word-for-word copies — keep them, unless the reader's field writes a different name for the thing. 「要求」 is wrong only where the reader writes 「リクエスト」; neither back-translation nor a word-shape scan finds this, only the field-name question does.
+  - Fix by the relation, not the word: check who does what to what from the sentence and its neighbors (the content is often in the very next sentence) and write that. Swapping in another single word (a katakana word, 「〜ごと」) doesn't fix it. If the material lacks the real name or action, keep the text and ask.
+- **作業用の名前・文書内の造語**: names that exist only in the material (experiment condition names, branch names, category labels from a tally) mean nothing to the reader — write what they refer to. Don't coin a name for readers to memorize (「以下『高』と呼ぶ」); if plain words do, use them, and if you must coin one, make the name tell its content (住所と支払いを 1 画面にまとめた案 →「1画面案」).
 - **成り立たない比喩**: a metaphor that reads smoothly but falls apart when you extract just subject and predicate (「眠気が定規になる」), or whose verb doesn't fit the subject (「嵐がそっと耳打ちした」). In technical and business docs, write what actually happens. In essays, keep a metaphor if a reader can guess what it means, or if the next sentence explains it. If your fix comes out as 「〜がただ黙って〜していた」, keep the original instead.
 - If you can't narrow it to one reading, don't guess — list the candidate readings and ask the writer.

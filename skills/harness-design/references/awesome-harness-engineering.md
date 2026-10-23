@@ -1,7 +1,7 @@
 ---
 source: https://github.com/ai-boost/awesome-harness-engineering
-distilled_commit: c586328ce4a286305b91d6629806fcb655452628
-distilled_at: 2026-10-22
+distilled_commit: dfc24cdee5a578761d8756a0f7230d7ec033e69f
+distilled_at: 2026-10-23
 ---
 
 # awesome-harness-engineering 蒸留版
@@ -225,7 +225,7 @@ AI エージェントハーネス構築のパターン・テンプレート・�
 ## 蒸留の範囲外
 
 - **各エントリの詳細な注記**: README の各エントリには 1–2 文の opinionated note が付いており、本蒸留はその大半 (外部リンクエントリ 505 のうち索引に載せたのは 137 件) を割愛した。特定の問題領域を深掘りするときは `README.md` の該当セクションを直接 Grep/Read する (セクション見出しは `## ` / `### `、エントリは `- [Title](URL) — note` 形式で機械的に抽出できる)。
-- **Generators & Meta-Harnesses と研究系エントリの個別評価**: 自己改善ハーネス (meta-harness / harness-evolver 系) や 2026 年の arXiv 論文群は数が多く玉石混交のため、代表 9 件 (`ruvnet/metaharness`、`exoharness/exo`、`affaan-m/ECC`、`ModelEngine-Group/nexent`、`SalesforceAIResearch/Beagle`、Harness-R1 (arXiv 2608.02276)、MemoHarness (arXiv 2607.14159)、Harness-Zero (arXiv 2609.24974)、HarnessDev (arXiv 2609.01437)) 以外は個別に挙げていない (SBCO (arXiv 2608.10157) や Causal Improvement Graph (arXiv 2610.05039) 等もここで見る)。関心があれば `README.md` の `### Generators & Meta-Harnesses` と各カテゴリ末尾の arXiv エントリを見る。
+- **Generators & Meta-Harnesses と研究系エントリの個別評価**: 自己改善ハーネス (meta-harness / harness-evolver 系) や 2026 年の arXiv 論文群は数が多く玉石混交のため、代表 9 件 (`ruvnet/metaharness`、`exoharness/exo`、`affaan-m/ECC`、`ModelEngine-Group/nexent`、`SalesforceAIResearch/Beagle`、Harness-R1 (arXiv 2608.02276)、MemoHarness (arXiv 2607.14159)、Harness-Zero (arXiv 2609.24974)、HarnessDev (arXiv 2609.01437)) 以外は個別に挙げていない (SBCO (arXiv 2608.10157)、Causal Improvement Graph (arXiv 2610.05039)、ハーネスの振る舞いとソースを結ぶ索引を自動合成して編集箇所の特定を助ける Harness Handbook (arXiv 2607.13285) 等もここで見る)。関心があれば `README.md` の `### Generators & Meta-Harnesses` と各カテゴリ末尾の arXiv エントリを見る。
 - **templates/ の全文**: 各テンプレートは短い (40–80 行) ので、使うときは原典の `templates/*.md` をそのままコピーして使う。コメントが本体なので、`AGENTS.md` (repo 運用規約) の指示どおりコメント構造を保つ。
 - **音声・realtime な対話面**: 既存 CLI agent を realtime voice shell で包む系 (`Demo Harnesses` の `QwenAudio/qwen-audio-agent`、`Pipecat` 等) は、ハーネス設計の判断材料ではなく対話面の実装なので索引に載せていない。必要なら該当セクションを直接見る。
 - **URL の生死確認**: 本蒸留では実施していない。必要なら原典で `python verify_urls.py` を実行する (要 `aiohttp`)。

@@ -1,26 +1,32 @@
 ---
 tracking: review
-reviewed_at: 2026-08-30
+reviewed_at: 2026-10-23
 review_interval_days: 90
 ---
 # 日本語 Web タイポグラフィ — 英語圏デザインを持ち込むときの補正
 
 このスキルが索引する原典 4 本 (`awesome-design-md` / `hallmark` / `community-group` / `design.md`) は
 すべて英語圏の成果物で、日本語組版を前提にしていない (原典 clone 全文を `japan|CJK|明朝|日本語` で
-grep した実測。hallmark の 1 件が縦書きを装飾として挙げるのみで、組版規則の記述はゼロ)。
+grep した実測。hallmark で当たるのは写真ライブラリの題 1 件だけで、組版規則の記述は無い。gate 66 が回転した縦書きを装飾として挙げるのみ)。
 そのまま日本語 UI に適用すると、本文が明朝になる・強調が合成斜体で崩れる、といった
 日本語圏でしか出ない事故を起こす。
 日本語を含む UI を生成・改修するときは、雛形や生成規律より**先に**この文書を当てる。
 
 `hallmark` との関係 (原典 clone で確認済み):
 
-- **衝突は 1 点だけ: gate 38a の italic 許容範囲**。原文は "Italic is allowed *only* as body-copy
-  emphasis inside running paragraphs" (`skills/hallmark/references/slop-test.md`) で、**本文中の italic
-  強調を明示的に許可している**。日本語ではこれが合成斜体になるので、**日本語本文ではこの許可を使わない**
-- **「2+1 rule / 3 書体が上限」は衝突しない** — 日本語書体を同一ロールのフォールバックとして重ねる限り、
-  hallmark が数える "distinct font family" は増えない。日本語専用の display 書体を立てるときだけ枠を消費する
-- **gate 48 locked tokens も衝突しない** — このスタックは `--font-body` 等の**トークン定義の中身**として書き、
-  利用側は `font-family: var(--font-body)` で参照すればよい
+- **衝突は 1 点だけ: editorial genre の italic 許容範囲**。`skills/hallmark/references/genres/editorial.md` の
+  § Allowed here が "italic inside running body copy" を挙げ、**本文中の italic を明示的に許可している**
+  (見出しの 1 語だけ italic は gate 38i で Floor、1 語を色・太さで立てるのは 38iii で Reflex。どちらも禁止)。
+  日本語ではこれが合成斜体になるので、**日本語本文ではこの許可を使わない**
+- **合成を切る規則は同じ向き** — hallmark の `references/fonts.md` は "Never synthesise bold or italic:
+  `font-synthesis: none`" とする。italic 側はこの文書の対策と一致する。ただし一括の `none` は太字の合成も切るので、
+  日本語の Bold フェイスを配信しないなら強調が消える (→ 症状 3)。`theme.mjs scaffold` の base.css は `h1, h2, h3` に一括の
+  `font-synthesis: none` を書くので、scaffold を使うなら日本語見出しの 700 を配信するか、`:lang(ja)` で `font-synthesis-weight: auto` に戻す
+- **「2 書体 + outlier 1 / 3 書体が上限」は衝突しない** — `craft.md` § 1 は display と body の 2 family に
+  役目 1 つの outlier を足すまでとし、gate 37 は 4 family 以上を落とす。日本語書体を同一ロールの
+  フォールバックとして重ねる限り family の数は増えない。日本語専用の display 書体を立てるときだけ枠を消費する
+- **gate 48 (Floor。token block の外の色・`font-family` 直書きの禁止) も衝突しない** — このスタックは
+  `--font-body` 等の**トークン定義の中身**として書き、利用側は `font-family: var(--font-body)` で参照すればよい
 
 確度: **[仕様]** CSS 仕様・MDN / **[公的]** デジタル庁 DADS 等 / **[通説]** 複数の実務記事で一致。
 
@@ -74,7 +80,7 @@ grep した実測。hallmark の 1 件が縦書きを装飾として挙げるの
 - `font-style: italic` / `<em>` / `<i>` / Tailwind の `italic` クラス。日本語フォントに italic フェイスが
   無いため、ブラウザが平体を機械的に傾けた合成斜体を描く
 - 英語圏 LP の「見出しの 1 単語だけ serif italic」型をそのまま日本語に当てる
-  (`hallmark` gate 38a が指す最も強い AI tell とも重なる)
+  (`hallmark` gate 38i が Floor で禁じる型と重なる)
 
 **対策**
 
@@ -201,7 +207,7 @@ pre, code { text-autospace: no-autospace; }  /* 和欧間アキは既定で入�
 
 - [ ] スタックの末尾の総称 (`serif`/`sans-serif`/`monospace`) が、日本語で出したい書体と一致している
 - [ ] `italic` / `<em>` / `font-style` が日本語テキストに掛かっていない。掛かるなら `font-synthesis-style: none`
-- [ ] 700 を使う箇所で Bold フェイスが実際に配信されている (でなければ `font-synthesis-weight: none`)
+- [ ] 700 を使う箇所で Bold フェイスが実際に配信されている (でなければ色・サイズで強調する。`font-synthesis-weight: none` を単独で当てない)
 - [ ] 本文 16px 以上、行高 1.5 以上、1 行 30〜40 字前後
 - [ ] `line-break: strict` / `word-break: normal` / `overflow-wrap: anywhere` が本文コンテナに入っている
       (`line-break: normal` と `word-break: keep-all` を本文に書いていない)
@@ -210,7 +216,7 @@ pre, code { text-autospace: no-autospace; }  /* 和欧間アキは既定で入�
 - [ ] `<html lang="ja">` がある。フォーム要素に `font: inherit`、入力欄は 16px 以上
 - [ ] 日本語 Web フォントの総量を確認した (ウェイト数 × サブセット)。本文システムフォントの選択肢を検討した
 - [ ] 320〜1920px の範囲 (特に 320 / 375 / 414 / 768) で禁則・折り返しを確認した。
-      **ボタン・ナビ・CTA のラベルが 2 行に折れていない** (hallmark gate 34 / 49。日本語ラベルは英語の約 2 倍幅で最も折れやすい)
+      **ボタン・ナビ・CTA のラベルが 2 行に折れていない** (hallmark gate 49a はボタンと主ナビのラベルの折れを Floor、49b は footer のリンク・タブ・パンくずの折れを Reflex で落とす。横スクロールは gate 34。日本語ラベルは英語の約 2 倍幅で最も折れやすい)
 - [ ] コードブロックに `text-autospace: no-autospace` を当てた
 
 ## この文書の範囲外
