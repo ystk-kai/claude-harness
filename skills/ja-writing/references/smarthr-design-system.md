@@ -1,6 +1,6 @@
 ---
 source: https://github.com/kufu/smarthr-design-system
-distilled_commit: 5880be419e3a144db587806c5e88816a36ecf171
+distilled_commit: d831109f789daa8379a4a064e947c52c6f00e027
 distilled_at: 2026-10-23
 ---
 

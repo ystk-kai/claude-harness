@@ -29,6 +29,27 @@
 ---
 ## 2026-10-23
 
+### 再蒸留 (yomiyasu v2.2.1 / v2.2.2) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-23: syntax-patterns.md §13 の Fix by the relation に意味の広い語への差し替え禁止と「全店舗に響く」の例を追加、MAPPING.md 更新) | RECOMMENDED | skill | `avoid-ai-slop-ja/references/syntax-patterns.md` §13 は「カタカナ語や『〜ごと』に替えるだけでは直らない」までで、何が起きるかを言わない広い語 (影響する・及ぶ・支障が出る・関わる・左右する) に替えることと、広い語の句を中身の文と並べて残すことを止めていない | skills/yomiyasu/references/calques.md § 4・5 (`91964cd`) |
+| 対応済 (2026-10-23: 同じ項目の「keep the text and ask」に、動作をする人が材料に無いときと呼び名がそろわないときを追加) | RECOMMENDED | skill | §13 の尋ねる条件が名前と動作だけで、動作をする人が材料に無いとき、印の語と前後の文で呼び名がそろわず同じものを指すか分からないときが無い | calques.md § 4、CHANGELOG.md § 2.2.1 |
+| 対応済 (2026-10-23: syntax-patterns.md §2 比喩ラベルの見出しに追記) | RECOMMENDED | skill | §2 比喩ラベルの見出しは「本文の語で見出しを作る」だけで、元の見出しが言っていた目的を項目名に残し、本文の題目を並べただけの名前にしない規則が無い | calques.md § 4 |
+| 却下 (手順 6 が「響く」「入口」を手作業の洗い出しで拾っており範囲は足りる。残す例を増やすと §13 が長くなるだけ) | FYI | skill | lint の印の範囲が広がり、印をつけない例 (駐車場の入口・サーバールーム・「全社員に響く言葉」・安全性の「全」) が足された。§13 の残す例は「駅の入口」だけ | CHANGELOG.md § 2.2.1 |
+| 却下 (既に入っている: SKILL.md 手順 0 の leave it and ask) | FYI | 運用 | 印の語を残すとき、尋ねずに理由だけ書いて済ませてよいのは定着した言い方か文字どおりの意味のときだけ (check の `kept_marks`) | SKILL.md Step 5、review-points.md § 2 |
+
+v2.2.2 (`488dd37`、diff の高速化で出力は不変) は候補なし。
+
+### 再蒸留 (claude-code-best-practice / awesome-harness-engineering / smarthr-design-system、2 回目) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (該当なし: `/config help` の記載は蒸留版の訂正記述だけ。skills/・claude-md/・~/.claude/ の CLAUDE.md・agents・hooks を grep 済) | FYI | 運用 | 設定可能キーの一覧は `/config --help`。原典の `/config help` 表記は誤りで v2.1.309 に訂正された | ccbp: `bde3002`、`best-practice/claude-commands.md` #9 |
+| 却下 (いま要らない: 登録済みの hook は PreToolUse(Bash) の検査型 2 本で、止めて理由を返すだけ。イベントの書き換え・代答は要らない。README の注記ベースで docs 本文は未読) | FYI | hook | Claude Code の mods (2026-10) は TypeScript 関数でイベント (tool call / prompt / turn / UI 描画) を観測・書き換え・遮断・代答でき、settings の hooks にできないループ内の拡張になる。副作用は `$` API に集約され `claude plugin validate` で到達範囲を事前に列挙できる | ahe: `a63c03a`、`README.md` の `Skills & MCP` |
+
+smarthr-design-system (`d831109`、18 commits はすべて renovate の依存更新 (react・astro・pnpm・styled-components 等) とその merge で、ライティングガイドラインの MDX に触れるものは無い) は候補なし。蒸留版は内容への影響なしとして SHA だけを進めた。
+
 ### 再蒸留 (hallmark) から
 
 | 状態 | 深刻度 | 対象 | 内容 | 根拠 |
