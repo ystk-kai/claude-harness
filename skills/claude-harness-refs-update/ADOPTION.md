@@ -27,6 +27,34 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-25
+
+### 再蒸留 (natural-japanese v1.6.2) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-25: avoid-ai-slop-ja/SKILL.md 手順 0 に好みの言い換えをしない・読み手が取れない言い回しは banlist に無くても直すの 1 項目を追加、MAPPING.md 更新) | RECOMMENDED | skill | `avoid-ai-slop-ja/SKILL.md` 手順 0 (修正時の制約) は不増補と確度だけで、意味の取れる言葉を好みで言い換える直し (「気軽に試せます」→「簡単に試せます」、「お知らせいたします」→「お知らせします」) を止めていなかった。原典は v1.6.2 で、直す・直さないの線引きを lint の指摘の有無から「好みか、読み手が取れないか」に改めた | skills/natural-japanese/SKILL.md §3 (`9d3fd3b`) |
+| 対応済 (2026-10-25: syntax-patterns.md §13 の直訳語との線引きに 1 文追加) | FYI | skill | §13 の「定着した言い方は残す」に判定基準が無い。原典は、技術の言い方が定着しているかを仕様書・リファレンスのような書き言葉で使うかで決め、エンジニアの会話でよく使うだけでは定着と見ない | skills/natural-japanese/SKILL.md §3「読み手が何のことか取れない言い回し」末尾 (`a88b8e9` で確認) |
+
+`91a56e8` (リリースノートを release-notes/ へ移動)・`359e0b0`・`1796f15` (リポジトリ内文書の日本語の直し)・`cfe396e` (版番号) は候補なし。
+
+### 再蒸留 (yomiyasu v2.3.0) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-25: syntax-patterns.md §12 に「和語の連用形 1 語の名詞 +『の』」を追加、MAPPING.md 更新) | RECOMMENDED | skill | 他動詞の連用形を 1 語だけ名詞にして「の」で目的語につなぐ形 (「結果の確かめ」) は、漢語を避けて和語にひらく直しで出やすい。§12 の名詞化は漢語の動作名詞 (「〜の実施を行う」) しか扱っていなかった。動詞の文か定着した漢語の名詞に直し、複合語・複合動詞由来・「お」付き・別義で定着した語は残す。漢語の名詞にするのは §13 の 1 語差し替えに当たらない。原典は通常の AI の下書きでは出現が少なく効き目は小さいと書く | skills/yomiyasu/SKILL.md § 主語と目的語の明確化、CHANGELOG.md § 2.3.0、references/lists/renyo-nouns.txt (`15244a1`) |
+| 却下 (Claude Code で本体を読み込める環境だけで使っている。字数上限のある環境で日本語推敲を使う予定が出たら引く) | FYI | 運用 | SKILL.md の字数に上限がある環境やスキルを読み込めない環境向けに、yomiyasu-mini (18,000 字以下) と yomiyasu-pocket (400〜500 字の指示文) が別リポジトリで出ている。本体を読み込める環境では本体を勧める | README.md § 本体を入れられない環境では (`5dd154e`) |
+
+### 再蒸留 (claude-code-best-practice / awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (該当なし: 環境の settings に cloud provider 経由の設定は無く、autoMode は手書きで `/auto-mode-setup` を前提にした手順も ~/.claude/CLAUDE.md に無い。二次資料の記述が 10-21 → 10-24 で反転しており確定情報として扱わない) | FYI | 運用 | `/auto-mode-setup` の要求版が Pro/Max/Team は v2.1.228+ (native Windows は v2.1.233+)、Enterprise と Console API key は v2.1.283+ に分けて書かれ、10-21 に入った「Bedrock/Vertex/Foundry/gateway でも使える」の一文は公式から消えたとして削除された | ccbp: `best-practice/claude-commands.md` row 7、`changelog/best-practice/claude-commands/changelog.md` 2026-10-24 (`490f151`・`fcc23e2`) |
+| 却下 (既に回している: 2026-10-21 の Hashimoto の行と同じく、失敗の再発防止は CLAUDE.md・auto-memory・環境側 hook で行っている。README の注記ベースで論文本文は未読) | FYI | 運用 | HarnessFix (arXiv 2606.06324): 失敗軌跡からどのハーネス部品 (指示文・tool・hook・context 供給) が原因かを先に特定し、範囲を限った修正を退行検証つきで当てる診断先行の修復が、人手設計・self-evolution の baseline を 6.3–18.4% 上回る | ahe: `ca0a32b`、`README.md` の `Debugging & Developer Experience` |
+
+claude-code-best-practice の残り (subagents 4 件・skills 4 件・CONCEPTS の ON HOLD 継続、Code Review の beta バッジ削除、★ 数とワークフロー表の日次更新) は候補なし。
+
+---
 ## 2026-10-23
 
 ### 再蒸留 (yomiyasu v2.2.1 / v2.2.2) から
