@@ -27,6 +27,30 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-25 (2 回目)
+
+### 再蒸留 (yomiyasu v2.4.0) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-25: syntax-patterns.md §13 に漢字 1 字の名詞の小項目を追加、banlist Tier 2「英語直訳」から参照、MAPPING.md 更新) | RECOMMENDED | skill | banlist Tier 2「英語直訳」は version →「版」の例だけで、head →「頭」・mark →「印」と直し方 (分野の呼び名「先頭」「冒頭」「指摘」「目印」、前後の文の呼び名に合わせる、決まらなければ尋ねる) が無かった。原典はこの置き換えを「1 語の差し替え」の禁止に入れず、第 2 版・×印・頭が痛いのような文字どおりの使い方は残す | yomiyasu: `skills/yomiyasu/references/calques.md` § 1 型 4・§ 3・§ 4・§ 5、CHANGELOG.md § 2.4.0 (`ae258d7`) |
+| 対応済 (2026-10-25: avoid-ai-slop-ja/SKILL.md 手順 7 に 1 文追加、MAPPING.md 更新) | RECOMMENDED | skill | 手順 7 の意味検算は数値・範囲・因果を見るが、原文に無い人や担当 (担当者・管理者、部署・チーム、「〜さん」、人称) を主語や知らせる・頼む相手に足す書き直しを点検していなかった。手順 0 の不増補で原則は押さえているが、原典の測定で意味が変わった箇所の多くがこの形だった | yomiyasu: `skills/yomiyasu/references/review-points.md`「原文にない人や担当を足した文」、CHANGELOG.md § 2.4.0 (`ae258d7`) |
+| 却下 (avoid-ai-slop-ja はスライドを扱わず、視覚物は avoid-ai-slop-design の担当。スライドの日本語を推敲する場面が出たら引く) | FYI | skill | スライドの見出しと 1 行の箇条では、地の文なら残す読点 (文頭のつなぎ語・決まった「〜ば」・長い時の句・短い主題・「を」のあと) も外す。逆接・条件・理由・名詞の並び・掛かり先が変わる所の読点は残す | yomiyasu: `skills/yomiyasu/references/doc-types/slides.md`、CHANGELOG.md § 2.4.0 (`ae258d7`) |
+
+`552c12c` (README の版ごとの節を外して CHANGELOG へ案内) は候補なし。
+
+### 再蒸留 (claude-code-best-practice / claude-cookbooks / awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (該当なし: この repo の skills/*/SKILL.md は allowed-tools・disallowed-tools・model・hooks を使っていない (grep 済)) | FYI | skill | 10-25 に同期された commands 表では、skill frontmatter の `allowed-tools` / `disallowed-tools` は次のメッセージで解除され、`model` はそのターンだけ有効、`hooks` は skill 起動時に登録されてセッションの残りずっと動く。skills 表 (同日 no drift) は `hooks` を「scoped to this skill」のまま書き、原典の中で食い違う | ccbp: `best-practice/claude-commands.md` Frontmatter Fields 表、`changelog/best-practice/claude-commands/changelog.md` 2026-10-25 (`d4f0a99`) |
+| 却下 (該当なし: `disable-model-invocation: true` は claude-harness-refs-update だけで、定時実行は SKILL.md を Read させる形で preload にも scheduled task の起動にも頼っていない。`paths` は未使用) | FYI | skill | `disable-model-invocation: true` は subagent の `skills:` preload と session-scoped scheduled task からの起動も止める。`paths` は cwd 相対で cwd の外にマッチしない | ccbp: `best-practice/claude-commands.md` Frontmatter Fields 表 (`d4f0a99`) |
+| 却下 (該当なし: repo と ~/.claude/settings.json にモデル ID の直書きは蒸留版・台帳の引用以外に無い (grep 済)) | FYI | 運用 | 既定が `claude-opus-5-5` / `claude-sonnet-5-5` / `claude-fable-5-1` に上がり、バリデータの `SUPERSEDED_MODELS` (warning) と `RETIRED_MODELS` (error。`claude-sonnet-4-5` は 2026-11-30 retire) が旧 ID の置換表になる | cookbooks: `bfe50e5`、`CLAUDE.md`、`scripts/validate_all_notebooks.py` |
+| 却下 (自作の tool / MCP サーバを持たず、think 系の tool も無い (grep 済)。README の注記ベースで論文本文は未読) | FYI | 運用 | "The Devil Is in the Interface" (arXiv 2608.11386): 能力集合を固定して tool の束ね方だけを変えると挙動が大きく変わり、構造化した低レベル interface と CodeAct 型が効く。テキストだけの think tool 系は挙動をほとんど動かさない | ahe: `8534467`、`README.md` の `Tool Design` |
+
+claude-code-best-practice の残り (subagents 4 件・skills 4 件・`/autocompact` 等の ON HOLD 継続、Settings reference リンクの NEW ON HOLD、★ 数とコレクション表の日次更新) は候補なし。
+
+---
 ## 2026-10-25
 
 ### 再蒸留 (natural-japanese v1.6.2) から
