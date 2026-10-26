@@ -27,6 +27,11 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-27
+
+再蒸留 4 件 (claude-code-best-practice / natural-japanese / smarthr-design-system / yomiyasu) はすべて候補なし。ccbp は badge と drift ログの追記だけ (`/autocompact` の ON HOLD が commands 表から静かに消えたのは既存の注意の追加例)、natural-japanese は Cursor 向け `plugin.json` とロゴ、smarthr は components/ の FormControl 実装手順・角丸トークン・依存更新、yomiyasu は README の Grok Build の入れ方で、ハーネスの書き方を変える記述はない。
+
+---
 ## 2026-10-25 (2 回目)
 
 ### 再蒸留 (yomiyasu v2.4.0) から

@@ -1,7 +1,7 @@
 ---
 source: https://github.com/nanaism/yomiyasu
-distilled_commit: 552c12c472ddfb79e2ee7a15219847782686a945
-distilled_at: 2026-10-25
+distilled_commit: 41e5aec228f080fe24e5f795efee2ac3fda61839
+distilled_at: 2026-10-27
 ---
 
 # yomiyasu 蒸留版
@@ -158,7 +158,7 @@ v2 で文書の種類 (`--doc-type`) が加わり、v2.2.0 で script が足さ�
 - **yomiyasu-mini / yomiyasu-pocket の中身**: 別リポジトリで clone していない。README.md § 本体を入れられない環境では の案内だけを索引した。
 - **v2.1.3 の Windows の不具合直しの細部** (ロックの待ち直しの締切、改行の扱い、CI の試験の分け方): CHANGELOG.md § 2.1.3。
 - **JSON に足した値** (`meaning_risks[].kind` の subkind と detail、`LOGIC_MARKERS`、`FAIL_ON_KINDS` の並び): CHANGELOG.md § 2.1.0・2.1.1 の「足した JSON の値」。
-- **インストール手順とスキル名の違い** (npx skills / gh / openskills / プラグインの `yomiyasu:yomiyasu` / Codex の `.agents/skills/`。v2.0.2 で skills/yomiyasu/.claude-plugin/ を消し、Codex 用の名前は skills/yomiyasu/.codex-plugin/plugin.json に移った。v2.4.0 で Codex 向けの入れ方は前のフォルダを消さずに `.agents/yomiyasu.bak-日付-時刻/` へ移してから置き換え、取り出しに失敗したら止まる手順になり、§ スキルのフォルダの中を書き換えたとき (更新で書き換えが残らないので、プロジェクトの決まりは `.yomiyasu-words/`・CLAUDE.md・AGENTS.md に書く) が加わった): README.md § インストール, docs/usage.md § スキルの名前。
+- **インストール手順とスキル名の違い** (npx skills (41e5aec で Grok Build 向けの `-a grok` を追記。`-g` でユーザーの `~/.grok/skills/yomiyasu/` (`GROK_HOME` 設定時はその下の `skills/`)、付けなければリポジトリの `.grok/skills/yomiyasu/` に入る) / gh / openskills / プラグインの `yomiyasu:yomiyasu` / Codex の `.agents/skills/`。v2.0.2 で skills/yomiyasu/.claude-plugin/ を消し、Codex 用の名前は skills/yomiyasu/.codex-plugin/plugin.json に移った。v2.4.0 で Codex 向けの入れ方は前のフォルダを消さずに `.agents/yomiyasu.bak-日付-時刻/` へ移してから置き換え、取り出しに失敗したら止まる手順になり、§ スキルのフォルダの中を書き換えたとき (更新で書き換えが残らないので、プロジェクトの決まりは `.yomiyasu-words/`・CLAUDE.md・AGENTS.md に書く) が加わった): README.md § インストール, docs/usage.md § スキルの名前。
 - **重複の扱い**: リポジトリ直下の references/ と scripts/ は skills/yomiyasu/ 以下と同じ内容 (以前の蒸留時点で references/ の `diff -r` は空。今回は未確認だが CI が直下と skills/yomiyasu/ の一致を確かめる。直下の scripts/ にはコーパス作成用スクリプトが別にある)。
 - **蒸留時点の注意**:
   - README の「7 つの変換原則」と gemini-syntax.md の「原則 1〜14」は番号が対応しない。番号で参照するときは gemini-syntax.md を正とする。

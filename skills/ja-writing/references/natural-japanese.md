@@ -1,7 +1,7 @@
 ---
 source: https://github.com/coji/natural-japanese
-distilled_commit: a88b8e92d38cf5b339950752faba1da5ec1f49f4
-distilled_at: 2026-10-25
+distilled_commit: 7d23ad10af4b850b8dfeb6ef19b24335ad37922b
+distilled_at: 2026-10-27
 ---
 
 # natural-japanese 蒸留版
@@ -151,5 +151,5 @@ distilled_at: 2026-10-25
 - **doctypes の雛形と直し例の本文**: 各ファイル末尾。そのまま転記しない。
 - **corpus/reports/archive/** (deep-analysis.md, sweep_low_burstiness.md 等): 非コミットで clone に無い。lint.py のコメントに要旨だけ残る。
 - **skill-eval-findings.md**: 旧ファイル名 (writing-constitution.md) を原因に挙げる 5 件の評価で、現行構成と対応しない。参考程度。
-- **配布・導入・リリースノート** (.claude-plugin/, AGENTS.md, .github/workflows/, release-notes/ (v1.5.0.html は v1.6.2 の commit 91a56e8 でルート直下から移動。v1.6.1 の比較ページと build-docs.py も同じ場所), PRODUCT.md (リリースノートの読み手・方針)): スキルの規則ではない。
+- **配布・導入・リリースノート** (.claude-plugin/, plugin.json (Cursor Marketplace 向けの Agent Plugin マニフェスト。v1.6.2 時点で審査待ちで、README.md「ほかの入れ方」にローカルで試す手順がある) と assets/logo.png, AGENTS.md, .github/workflows/, release-notes/ (v1.5.0.html は v1.6.2 の commit 91a56e8 でルート直下から移動。v1.6.1 の比較ページと build-docs.py も同じ場所), PRODUCT.md (リリースノートの読み手・方針)): スキルの規則ではない。
 - **原典内の食い違い** (蒸留時点の実測): business-calibration.md は `high_bold_density` を business で無効化と書くが、lint.py は既定有効・無効化しない。lint.py の `GENRE_PROFILES["business"]` 直上コメントも 4 カテゴリと書くが実データは 3 カテゴリ。burstiness の閾値はコメント内に旧値 (−0.62 / −0.24) の説明が残るが、実効値は `BURSTINESS_THRESHOLD = -0.30`。いずれもコードを正とする。
