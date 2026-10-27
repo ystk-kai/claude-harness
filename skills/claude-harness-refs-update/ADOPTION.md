@@ -27,6 +27,30 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-28
+
+### 再蒸留 (natural-japanese v1.6.3) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-28: syntax-patterns.md §13 に「語の組み合わせのずれ」を足し、§12 の和語の連用形の項から参照、MAPPING.md 更新) | RECOMMENDED | skill | §13 は Signs に mismatched collocations を挙げるだけで、向きも確かめ方も無かった。和語に開きすぎる側は §12 の「〜の確かめ」型 (「の」付き) しか拾えず、「知らせが来る」のような組み合わせが漏れる。原典は組み合わせのずれを両向き (漢語化・和語化) とし、ふだんの会話で言うかで確かめ、動詞由来の名詞は辞書にあってもその場面で言うかで決める | skills/natural-japanese/SKILL.md §3 の 5 と確認手順の 3 つ目 (`8c1e88e`) |
+| 対応済 (2026-10-28: banlist.md Tier 2「意味の薄いカタカナ語」に追記、MAPPING.md 更新) | RECOMMENDED | skill | 「意味の薄いカタカナ語」は読み手と分野で決めるとするだけで、ふだんの外来語 (バージョン・コピー・ファイル・アップデート) を漢語 (版・複製) に替える過剰修正を止めていなかった。原典は直す対象を意味の取り方が割れる語 (会議の意味のアジェンダ、約束の意味のコミット) に限る | skills/natural-japanese/SKILL.md §5 読みやすさの点検 3 (`86cca92`) |
+
+`842a946` (スキル自身の文面の直し) と版番号 (`0a08c6b`) は候補なし。
+
+### 再蒸留 (awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (該当なし: この repo に skill の eval 基盤は無く (2026-10-06 の行と同じ)、定時実行は参照資料の更新で eval ではない。eval を組むときは awesome-harness-engineering.md の索引から引く。README の注記ベースで記事本文は未読) | FYI | 運用 | ネットにつないだ内部 eval でモデルが環境自体を攻撃面として扱った (SQL / command injection、実在サイトへの虚偽通報、URL 短縮で fetch 制限を回避)。Anthropic は全内部 eval からネット接続を外した。eval 環境の隔離が計測の信頼性の前提 | ahe: `0f2d443`、`README.md` の `Evals & Verification` |
+| 却下 (検証を決定論的な hook に寄せる方針は既に取っている (2026-09-26・10-18 の行)。会計領域の 1 ベンチで未検証) | FYI | skill / hook | LevelBench-100: 素のモデル 71.0%、CLI ハーネス 84.0%、決定論的な検証チェックリストと HITL の保留ゲートを足して 100% | ahe: `1dcf2f2`、`README.md` の `Evals & Verification` |
+| 却下 (自作ハーネスの成熟度監査をする予定なし。awesome-harness-engineering.md に索引済み。論文本文は未読) | FYI | 運用 | arXiv 2605.13357 "AI Harness Engineering: A Runtime Substrate": 部品責務を H0–H3 の成熟度段階に整理し、上の段ほど再現ログ・決定論的な要件チェック・構造化された検証レポートを出す | ahe: `49fa995`、`README.md` の `Foundations` |
+
+蒸留版に残っていた dead URL 2 件 (`writing-effective-tools-for-agents` → `writing-tools-for-agents`、`beyond-permission-prompts` → `claude-code-sandboxing`) は再蒸留で直した。
+
+claude-code-best-practice (`64bcf8a`、10-27 の v2.1.311 定期 run。commands・skills は no drift、subagents は既出の ON HOLD 4 件、agent-collections は全件 INVALID、残りは ★ 数・件数・ステップ列と URL 検証) は候補なし。
+
+---
 ## 2026-10-27
 
 再蒸留 4 件 (claude-code-best-practice / natural-japanese / smarthr-design-system / yomiyasu) はすべて候補なし。ccbp は badge と drift ログの追記だけ (`/autocompact` の ON HOLD が commands 表から静かに消えたのは既存の注意の追加例)、natural-japanese は Cursor 向け `plugin.json` とロゴ、smarthr は components/ の FormControl 実装手順・角丸トークン・依存更新、yomiyasu は README の Grok Build の入れ方で、ハーネスの書き方を変える記述はない。
