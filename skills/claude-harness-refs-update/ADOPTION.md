@@ -27,6 +27,33 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-29
+
+### 再蒸留 (natural-japanese v1.6.4) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-29: syntax-patterns.md §12 に「中身を詰め込んだ括弧」を足し、MAPPING.md 更新) | RECOMMENDED | skill | avoid-ai-slop-ja に括弧の詰め込みを扱う規則が無かった (§9 一文圧縮は年代・人名・評価を 1 文に詰める話で別物)。原典は文・話の中身の列挙・呼び名の取り決めが入った括弧を直す対象とし、まず前の文に入れ、入らないときだけ同じ主語の続きの一文にする。受け直すだけの文や関係を決める言葉は足さない。短い括弧・数値や出典の括弧・エッセイの余談の括弧は残す | skills/natural-japanese/SKILL.md §3「いつでも直すもの」・§2 文の整え方 (`56b8b53`・`8d5a5be`・`94f8d16`・`5e3fe13`) |
+| 対応済 (2026-10-29: banlist.md Tier 1「全角ダッシュ」に条件と §12 への参照を追記、MAPPING.md 更新) | RECOMMENDED | skill | Tier 1「全角ダッシュ」は置き換え先に無条件で「括弧」を挙げており、ダッシュで挟んだ文や列挙をそのまま括弧へ移すと上の新規則に当たる形を作っていた。括弧に移すのは読点も句点もない短い補足だけに限った | skills/natural-japanese/SKILL.md §2 文の整え方 |
+| 却下 (avoid-ai-slop-ja は lint.py を使わず、natural-japanese プラグインは settings.json で無効。必要時は natural-japanese.md の読解負荷レーンから引ける) | FYI | skill | `lint.py --reading-load` が括弧内の文を `sentence_in_paren` として示す。人の文章でも 1 割前後の文書に出るので AI らしさの判定には使わず、読みにくさの指摘として扱う | skills/natural-japanese/scripts/lint.py (`699ba6f`) |
+
+### 再蒸留 (hallmark) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 対応済 (2026-10-29: color-chroma.md の集計と ui-design SKILL.md の「30 個中 17 個」を数え直し) | RECOMMENDED | skill | テーマが 48 → 50 個 (Refract atmospheric・light、Vantage modern-minimal・dark) になり、ライト地色は 31 個。Refract の地 `oklch(98.2% 0.006 95)` は C 0.006 で白側なので暖色クリームは 17 個のまま、白に近い地は 10 個、gate 65 の地の条件を満たすのは 24 個、accent C 0.16 超は 29 個。ROADMAP § Now の cream の扱いは未決定のまま | skills/hallmark/references/themes/refract.md・vantage.md・index.json (`2a1240f`)、ROADMAP.md § Now |
+| 却下 (web-ui.md に時刻表の tell は無いが、web-ui.md は計測・批評の出典付きカタログで、hallmark の生成規律は hallmark.md「まず押さえる」9 から引ける。次の web-ui.md 棚卸しで一次記事が見つかれば足す) | FYI | skill | Schedule (時刻表) は訪問者が選ぶ・予定に組む時刻にだけ使い、工程・1 日の業務・配送を時刻で語るのは既定値への落ち込みとする。Steps・Figures・Schedule は生成ページの大半に出るが、作られたページでは選ぶもの | skills/hallmark/references/layout.md § 5 の 16・§ 7 (`87e0df9`) |
+
+### 再蒸留 (awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (user settings に自前の MCP サーバ定義は無く `enableAllProjectMcpServers: false`。導入時は awesome-harness-engineering.md の索引から引く。README の注記ベースで記事本文は未読) | FYI | MCP | MCP Security Testing Checklist: 導入前に OAuth/token の scope、tool schema・description の poisoning、動的 discovery の固定、引数の SSRF / path traversal、tenant 分離、応答中の secret の redaction を確かめる (8 段階) | ahe: `80c484d`・`6d4db43`、`README.md` の `Security, Sandbox & Permissions` |
+| 却下 (安全上重要な規則を compaction に頼らない場所に置く方針は既存 (蒸留版「まず押さえる」15)。学習による手法でハーネス設定の対象ではない。論文本文は未読) | FYI | CLAUDE.md / hook | AutoCompact (arXiv 2610.02163): 固定の token 閾値での compaction を暫定策とし、発火時点を学習した agent の行動にする (SWE-bench Verified +9.2%) | ahe: `6d4db43`、`README.md` の `Context Delivery & Compaction` |
+
+claude-code-best-practice (`77862da`、10-28 の v2.1.312 定期 run。commands 8 件の説明文同期、skills は no drift、subagents・CONCEPTS は既存 ON HOLD の継続、残りは ★ 数) は候補なし。`/config thinking=false` の例が加わったが、Opus/Sonnet/Haiku 5.5 と Fable で思考を切れない件 (蒸留版項目 9) との関係は原典に無いので候補にしない。smarthr-design-system (`f94d727`) は eslint-plugin-mdx の依存更新だけで、蒸留版の本文への影響なし (SHA のみ更新)。
+
+---
 ## 2026-10-28
 
 ### 再蒸留 (natural-japanese v1.6.3) から
