@@ -1,7 +1,7 @@
 ---
 source: https://github.com/anthropics/skills
-distilled_commit: dbd4588f9e1033efb41dad4bef2f7947c8993d44
-distilled_at: 2026-10-13
+distilled_commit: ca45fc496a3436251f191354091d557da31c15b5
+distilled_at: 2026-10-30
 ---
 
 # anthropics/skills 蒸留版
@@ -215,7 +215,7 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
 | 手順書型 reference の書き方 (BREAKS/DECIDE マーカー) | `skills/claude-api/python/claude-api/sdk-upgrade.md` | 壊れる項目と user が決める項目を 2 値マーカーで分離、Checklist/Report で再掲、grep Signal 表を検証に再利用 |
 | 監査を呼ぶ側の契約 | `skills/claude-api/SKILL.md` の Subcommands / Language Detection | `migrate` / `prompt-audit` / `upgrade` / `cost-optimize` / `build-eval` / `preserved-thinking-migration` / `hillclimb` の 7 行 (+ Managed Agents の `managed-agents-onboard` 3 形)。「ガイドを要約せず実行しろ」「対話するか否か」「承認を取ってから課金」を subcommand ごとに規定 |
 | document skill (tool 型模範) | `skills/pdf/` | SKILL.md + scripts/*.py 8 本 + reference.md + forms.md。本文から reference を明示誘導 |
-| tool 型の他の実例 | `skills/{docx,pptx,xlsx,mcp-builder,webapp-testing}/` | Office 系は SKILL.md + 共有 `scripts/office/` + 固有 script、mcp-builder は reference/ + scripts/、webapp-testing は examples/ + scripts/ |
+| tool 型の他の実例 | `skills/{docx,pptx,xlsx,mcp-builder,webapp-testing}/` | Office 系は SKILL.md + 共有 `scripts/office/` + 固有 script、mcp-builder は reference/ + scripts/ (2026-10 に TS SDK の v2 / v1 ガイドを並置し、SKILL.md で着手前に版を選ばせる)、webapp-testing は examples/ + scripts/ |
 | **guidance 型 (SKILL.md 1 枚) の模範とその更新実例** | `skills/{frontend-design,brand-guidelines}/` | scripts なし・本文のみ。frontend-design は 2026-09 に「今の AI っぽさ」5 クラスタ + template chrome + typography 既定禁止を差し替え、プロセス節は簡素化 |
 | Creative / Enterprise 実例 | `skills/{algorithmic-art,canvas-design,theme-factory,web-artifacts-builder,internal-comms,doc-coauthoring,slack-gif-creator}/` | 生成アート・テーマ適用・複雑 artifact・社内文書・共同執筆。examples/ 同梱例あり |
 | repo 同梱 skill の配置・発見規約 | `skills/claude-api/shared/managed-agents-tools.md` | ルート `.claude/skills/<name>/` を 1 階層走査 (セッション開始時 1 回・cloud sandbox 限定・agent あたり最大 20)、発見されない配置、信頼境界の警告 |
@@ -228,7 +228,7 @@ Anthropic 公式の Agent Skills リポジトリ。skill 定義 (SKILL.md) の�
   <https://agentskills.io/specification> を直接引く。項目 17 の予約語・字数上限も根拠文書
   (agent skills best-practices) はリポジトリ外なので、upload 前提の設計時はそちらを見る。
 - **各模範 skill の本文の中身 (ノウハウそのもの)** — pdf の pypdf レシピ、docx の OOXML 操作、mcp-builder の
-  MCP 設計指針、frontend-design のデザイン論そのもの (ui-design スキル側の担当) など。各ドメインの実装知は
+  MCP 設計指針と TS SDK v1→v2 対応表 (`reference/node_mcp_server_v2.md`)、frontend-design のデザイン論そのもの (ui-design スキル側の担当) など。各ドメインの実装知は
   該当 `skills/<name>/` を直接読む。特に `claude-api` のモデル ID・価格・Managed Agents API 仕様は上流で
   頻繁に更新されるため必ず原典を読む (2026-10 時点で既定は `claude-opus-5-5`、現行 Sonnet は `claude-sonnet-5-5`、現行 Haiku は `claude-haiku-5-5`)。本蒸留が claude-api から取るのは description の書きぶり・分割構造・
   repo 同梱 skill の配置規約・`prompt-audit` の監査フレーム・`cost-optimization.md` のうちハーネス構造に

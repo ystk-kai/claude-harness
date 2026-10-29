@@ -27,6 +27,18 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-30
+
+### 再蒸留 (claude-cookbooks / awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (該当なし: この repo で `claude-haiku-4-5` を含むのは蒸留版・台帳の引用だけ (`git log -S` で追加は `32d76c3` の 1 件)、~/.claude/settings.json にモデル指定なし。Grep ツールが使えず ~/.claude/agents/ は未照合) | FYI | subagent / hook | Haiku の既定が `claude-haiku-5-5` になり、`claude-haiku-4-5` (と `-20251001`) は `SUPERSEDED_MODELS` (warning、retire ではない) に入った。assistant prefill を受け付けるのは Haiku 4.5 だけなので、prefill に頼る呼び出しは一律に置き換えない (原典も 2 本を 4.5 に固定) | cookbooks: `c43f56d`、`CLAUDE.md`、`scripts/validate_all_notebooks.py` (`SUPERSEDED_MODELS`・`PINNED_LEGACY_NOTEBOOKS`) |
+| 却下 (ハーネスの自動改善ループを持たない。失敗の再発防止は人手で CLAUDE.md・hook に入れている (2026-10-25 の HarnessFix の行と同じ)。README の注記ベースで論文本文は未読) | FYI | 運用 | Harness Evolution Hits a Ceiling (arXiv 2610.11655): 自己進化ループは process 失敗 (block・ループ・step 予算切れ) は直せるが content 失敗で頭打ちになる。失敗を 2 種に分けて診断し、content 側はハーネス編集以外 (LoRA) で当てる | ahe: `03e5733`、`README.md` の `Generators & Meta-Harnesses` |
+
+claude-code-best-practice (`c0e47f1`、10-29 の v2.1.312 run。commands 表に `/design consent`・`/design revoke` が入り 95 個、`/focus` のシグネチャ修正、subagents の ON HOLD 継続、skills・CONCEPTS は no drift) は候補なし。`/design consent` は 10-22・10-25 に INVALID だった判定の 1 run での反転なので昇格させない。skills (`ca45fc4`、mcp-builder を MCP TypeScript SDK v2 に)・awesome-design-md (`fcc7028` ほか、README のバナー差し替え)・smarthr-design-system (`4538b70`、色トークンページ・Base 非推奨化・依存更新で contents/ に変更なし) は候補なし。
+
+---
 ## 2026-10-29
 
 ### 再蒸留 (natural-japanese v1.6.4) から
