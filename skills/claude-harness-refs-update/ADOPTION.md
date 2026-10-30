@@ -27,6 +27,32 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-10-31
+
+### 再蒸留 (yomiyasu v2.5.0) から
+
+banlist.md と syntax-patterns.md は全文を Read して照合した (Grep ツールが無い環境)。avoid-ai-slop-ja の他の references は未照合。
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 未対応 | RECOMMENDED | skill | avoid-ai-slop-ja に、AI の文章によく出る言い回し 7 形 (「〜という見立てです」「〜に潜むリスク」「〜が招く＋名詞」「今や〜に欠かせない存在」「〜という挙動を排除」「なんよ」「〜して、〜を＋漢語の名詞。」) が無い。原典は禁止語ではなく「何が足りない文か」と確かめる問いの組で持ち、材料が無ければ残して尋ねる。人のニュース記事にも出るので、入れるなら banlist の置き換え式ではなく syntax-patterns に問いの形で | skills/yomiyasu/references/slop-catalog.md § 10、CHANGELOG.md § 2.5.0 |
+| 未対応 | RECOMMENDED | skill | syntax-patterns.md §13 (英語の直訳) に型 3 の 3 句が無い: 「そこで効くのは / ここで効いてくるのが」、「プロジェクト / 組織レベルの〜」、案が主語の「テーブルの上にある」。文字どおりの「効く」・OS の層の「レベル」・表の「テーブル」は除外 | slop-catalog.md § 10、CHANGELOG.md § 2.5.0 |
+| 未対応 | RECOMMENDED | skill | syntax-patterns.md §12 (間を作るだけの読点) は外す規則だけで、「推敲で読点を足さない」「短い区切りが続く文は文頭の接続語のあと以外を外す」が無い。AI と人の差は読点の数でなく位置 (短い主題・主語のあと約 1.7 倍、短い目的語の「を、」のあと約 3.4 倍) という測定も書ける | SKILL.md § 文長と読点の調整、slop-catalog.md § 9、CHANGELOG.md § 2.5.0 |
+| 未対応 | RECOMMENDED | skill | syntax-patterns.md に推敲手順 4 つが無い: コードを説明する文の擬人化 (「知っている」「門番」等は動作が分かるときだけ書き直し、「責務を持つ」「委譲する」は残す)、否定で終わる定義文、漢語の名詞だけで動作を省いた文 (「申請と承認を分離する」)、依頼で指定された見出しの形を保つこと | SKILL.md § 擬人化の解消・§ セルフラベリングと否定対比の整理・§ 案内用の見出し |
+| 却下 (§13 は定着した言い方を語の形で決めていないので当たらない) | FYI | skill | lint の型 1 が「テストがまだ通らない」のように副詞が挟まった定着した言い方に誤って指摘を出していたのを、挟まってよい副詞 20 語の一覧で直した | CHANGELOG.md § 2.5.0 lint |
+| 却下 (このハーネスの skill はスクリプト実行を allowed-tools で配る形を取っておらず、原典の確認範囲も macOS の `claude -p` だけ) | FYI | skill / settings | SKILL.md の `allowed-tools` を付属スクリプトの呼び出しに絞った 6 ルールにし、`claude -p --permission-mode dontAsk` でも検査が動く。許可は呼んだターンだけ有効 | skills/yomiyasu/SKILL.md frontmatter、CHANGELOG.md § 2.5.0 |
+
+### 再蒸留 (claude-code-best-practice / awesome-harness-engineering) から
+
+| 状態 | 深刻度 | 対象 | 内容 | 根拠 |
+|---|---|---|---|---|
+| 却下 (この環境は WSL で対象外。~/.claude の設定は Grep ツールが無く未照合) | FYI | 運用 | `/restart` (alias `/update`、v2.1.288+) はインストール済みの更新を適用してセッションを再開する。Pro/Max かつ macOS/Linux の native install が要件で、WSL は対象外 | ccbp: `2cb4da5`、`best-practice/claude-commands.md` #91 |
+| 却下 (このハーネスは `--settings` で skill の可視性を配っていない。未照合) | FYI | skill | `/skills` 画面で可視性を切り替えられない skill に、`--settings` フラグ指定の skill が加わった (plugin skill・`disable-model-invocation: true`・managed の `skillOverrides` と同じ扱い) | ccbp: `2cb4da5`、`best-practice/claude-commands.md` #53 |
+| 未対応 | FYI | skill | AgentCraft の同一 brief 試験で、インストール数上位のデザイン skill 8 個のうち no-skill の control から見た目を動かしたのは 2 個だけだった。自作の ui-design / avoid-ai-slop-design を同じ型 (同一 brief・control run) で確かめていない | ahe: `2a035cb`、`README.md` の `Skills & MCP` (README の注記ベース、記事本文は未検証) |
+
+hallmark (`4f6a46c`、theme.mjs が CRLF の frontmatter を受け付ける修正と、sloplint が symlink の循環ディレクトリを重ねて走査しない修正) と smarthr-design-system (`1881998`、lint-staged の設定だけ) は規則・文書に変更が無く、候補なし。
+
+---
 ## 2026-10-30
 
 ### 再蒸留 (claude-cookbooks / awesome-harness-engineering) から

@@ -1,7 +1,7 @@
 ---
 source: https://github.com/Nutlope/hallmark
-distilled_commit: 8f6969f8922caabde9de1784959eae11ddf68073
-distilled_at: 2026-10-29
+distilled_commit: 4f6a46c6dc325d40ab268c93e25c7b96676ebccd
+distilled_at: 2026-10-31
 ---
 
 # hallmark 蒸留版
