@@ -27,6 +27,13 @@
   必要になったら、それは台帳ではなく環境側に書くべき項目
 
 ---
+## 2026-11-01
+
+### 再蒸留 (claude-code-best-practice) から
+
+今回は取り込み候補なし。`4f5224c` までの 13 commit は commands 表の Ultra プラン追記 (`/privacy-settings`・`/usage`・`/restart`・`/auto-mode-setup`) と 4 件の説明補足、skills・subagents・concepts のバッジと drift ログ、ワークフロー / コレクション表の数値更新だけ。`/restart` の WSL 対象外は 2026-10-31 に却下済みで変化なし。concepts run が v2.1.316 の変更として名前だけ挙げた `CLAUDE_CODE_DISABLE_ULTRATHINK`・`managed.policy_mode: layered` は settings 表に無く未検証なので載せない。
+
+---
 ## 2026-10-31
 
 ### 再蒸留 (yomiyasu v2.5.0) から
